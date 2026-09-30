@@ -161,7 +161,7 @@
     steps: [
       'Choose the mineralized zone with a ring-shaped contact aureole. Set 0 hidden layers and press Train. A straight boundary cannot follow a ring.',
       'Raise the neurons and layers and train again.',
-      'Watch the training and test accuracy. Compare them after 1000 epochs for the small and the large network.',
+      'Move the cursor over the map and watch which neurons light up in the network diagram. Watch the training and test accuracy. Compare them after 1000 epochs for the small and the large network.',
       'Switch to the lithology data and repeat.'
     ],
     html: () => `
@@ -172,6 +172,8 @@
       <div class="ctlrow">
         <div class="ctl"><label for="n-data">Data</label><select id="n-data"><option value="ring">Map: mineralized ring around an intrusion</option><option value="lith">Logs: three lithologies</option></select></div>
       </div>
+      <h4>The network, lit up by the point under the cursor on the map</h4>
+      ${H.cv('n-d', 0.36)}
       <div class="ctlrow">${H.S('n-h', 'Hidden layers', 0, 3, 1, 1)}${H.S('n-u', 'Neurons per layer', 1, 8, 1, 3)}</div>
       <div class="ctlrow">${H.btn('n-go', 'Train')}${H.btn('n-stop', 'Pause')}${H.btn('n-reset', 'Reset')}</div>
       <div class="readout" id="n-out"></div>`,
@@ -187,6 +189,9 @@
       };
       const pa = H.plot(root, 'n-a', { xr: [0, 10], yr: [0, 10], nx: 5, ny: 5 });
       const pb = H.plot(root, 'n-b', { xr: [0, 1000], yr: [0, 1], xl: 'Epoch', yl: 'Loss', nx: 4, ny: 5 });
+      const pd = H.plot(root, 'n-d', { xr: [0, 1], yr: [0, 1], noAxes: true, aspect: 0.36, m: { l: 10, r: 60, t: 12, b: 22 } });
+      let probe = null, dq = 0;
+      const mix = (v) => { const t = Math.min(1, Math.abs(v)), b = v >= 0 ? [132, 22, 23] : [92, 102, 112]; return `rgb(${[255, 255, 255].map((w, i) => Math.round(w + (b[i] - w) * t)).join(',')})`; };
       let data, tr, te, net, hist, running = false, raf = 0, epoch = 0, gridCache = null, frame = 0;
       const sel = H.q(root, 'n-data');
       const build = () => {
@@ -195,7 +200,7 @@
         const s = ML.shuffle(data.X.length, ML.rng(3)), cut = Math.round(0.7 * s.length); tr = s.slice(0, cut); te = s.slice(cut);
         pa.o.xr = data.xr; pa.o.yr = data.yr; pa.o.xl = data.xl; pa.o.yl = data.yl;
         const sizes = [2]; for (let l = 0; l < hh.get(); l++) sizes.push(uu.get()); sizes.push(data.nc);
-        net = new ML.MLP(sizes, ML.rng(2)); hist = []; epoch = 0; gridCache = null; pa.draw(); pb.draw();
+        net = new ML.MLP(sizes, ML.rng(2)); hist = []; epoch = 0; gridCache = null; pa.draw(); pb.draw(); pd.draw();
       };
       const hh = H.bind(root, 'n-h', build, v => v), uu = H.bind(root, 'n-u', build, v => v);
       sel.addEventListener('change', build);
@@ -203,7 +208,7 @@
       const loop = () => {
         if (!running) return;
         for (let s = 0; s < 8 && epoch < 1000; s++) { hist.push(net.step(tr.map(i => data.X[i]), tr.map(i => data.y[i]), 0.03)); epoch++; }
-        if (++frame % 2 === 0 || epoch >= 1000) { gridCache = null; pa.draw(); pb.draw(); }
+        if (++frame % 2 === 0 || epoch >= 1000) { gridCache = null; pa.draw(); pb.draw(); pd.draw(); }
         if (epoch >= 1000) { running = false; return; }
         raf = requestAnimationFrame(loop);
       };
@@ -222,6 +227,23 @@
         pl.axes(); if (hist.length > 1) pl.line(hist.map((v, i) => [i + 1, Math.min(v, 1)]), C.RED, 2);
         H.q(root, 'n-out').innerHTML = `Epoch <b>${epoch}</b>. Loss <b>${hist.length ? hist[hist.length - 1].toFixed(3) : '-'}</b>. Training accuracy <b>${H.pct(acc(tr))}</b>, test accuracy <b>${H.pct(acc(te))}</b>. Network: ${net.s.join(' → ')} (${net.s.slice(1, -1).reduce((a, b) => a + b, 0)} hidden neurons). Filled dots are training samples and hollow dots are test samples.`;
       };
+      pd.onDraw = pl => {
+        const sz = net.s, L = sz.length, c = pl.ctx, pt = probe || [(data.xr[0] + data.xr[1]) / 2, (data.yr[0] + data.yr[1]) / 2];
+        const f = net.forward(data.toIn(pt[0], pt[1])), pos = (l, i) => [(l + 0.5) / L, 1 - (i + 0.5) / sz[l]];
+        for (let l = 0; l < L - 1; l++) for (let j = 0; j < sz[l + 1]; j++) for (let i = 0; i < sz[l]; i++) {
+          const w = net.W[l][j][i], a = Math.min(1, Math.abs(w) / 2.2), p0 = pos(l, i), p1 = pos(l + 1, j);
+          pl.line([p0, p1], w > 0 ? `rgba(132,22,23,${0.12 + 0.75 * a})` : `rgba(92,102,112,${0.12 + 0.75 * a})`, 0.6 + 2.6 * a);
+        }
+        for (let l = 0; l < L; l++) for (let i = 0; i < sz[l]; i++) {
+          const p = pos(l, i), out = l === L - 1, v = out ? f.p[i] : f.a[l][i];
+          const fill = out ? Plot.hex2rgba(data.cols[i], 0.25 + 0.75 * f.p[i]) : mix(l === 0 ? Math.max(-1, Math.min(1, v / 1.5)) : v);
+          c.beginPath(); c.arc(pl.x(p[0]), pl.y(p[1]), out ? 4 + 9 * f.p[i] : 9, 0, 6.2832); c.fillStyle = fill; c.fill(); c.strokeStyle = C.INK; c.lineWidth = 1.2; c.stroke();
+          if (out) pl.ptext(data.names[i] + ' ' + Math.round(f.p[i] * 100) + '%', pl.x(p[0]) + 16, pl.y(p[1]), { font: '12px system-ui' });
+        }
+        const lab = sz.map((_, l) => (l === 0 ? 'inputs' : l === L - 1 ? 'outputs' : 'hidden ' + l));
+        lab.forEach((t, l) => pl.ptext(t, pl.x((l + 0.5) / L), pl.H - 8, { align: 'center', font: '12px system-ui', color: C.SLATE }));
+      };
+      pa.c.addEventListener('mousemove', e => { const r = pa.c.getBoundingClientRect(); probe = [pa.ix(e.clientX - r.left), pa.iy(e.clientY - r.top)]; if (!dq) dq = requestAnimationFrame(() => { dq = 0; pd.draw(); }); });
       build();
     }
   });
@@ -231,20 +253,19 @@
     id: 'llm', part: 1, title: 'Large language models in research',
     lede: 'A language model writes the continuation that is likely given its training text. The slider shows what that looks like for a number, and the game shows what it looks like for a reference.',
     steps: [
-      'Set the temperature low and press Sample 20 times. Raise the temperature and sample again.',
       'Go through the eight references and mark each one real or made up. Four are real and four were written for this page.',
-      'Open each card under strengths and limits.'
+      'If there is time, set the temperature low and press Sample 20 answers. Raise the temperature and sample again.'
     ],
     html: () => `
-      <h4>The next token after "The Cretaceous–Paleogene boundary is dated at about ___ million years ago"</h4>
+      <h4>Real or made up?</h4>
+      <div id="l-game"></div>
+      <h4>If there is time: how a language model picks its next word</h4>
+      <p class="note">The next token after "The Cretaceous–Paleogene boundary is dated at about ___ million years ago"</p>
       <p class="note">These probabilities are a toy distribution written for this page. They show the mechanism and are not output from a real model.</p>
       ${H.cv('l-a', 0.5)}
       <div class="ctlrow">${H.S('l-t', 'Temperature', 0.1, 2, 0.05, 0.5)}${H.btn('l-go', 'Sample 20 answers')}</div>
       <div class="readout" id="l-out"></div>
-      <h4>Real or made up?</h4>
-      <div id="l-game"></div>
-      <h4>Strengths and limits in research</h4>
-      <div id="l-cards" class="cards"></div>`,
+`,
     init(root) {
       const toks = ['66', '65', '67', '64', '70', '56'], logit = [4.0, 3.0, 2.4, 1.6, 1.0, 0.8];
       const pl = H.plot(root, 'l-a', { xr: [0.5, 6.5], yr: [0, 1], xl: 'Next token (million years)', yl: 'Probability', nx: 6, ny: 5, fmtx: v => (Number.isInteger(v) ? toks[v - 1] : '') });
@@ -285,15 +306,6 @@
         box.querySelector('.res').textContent = (ok ? 'Correct. ' : 'Not quite. ') + (r.real ? 'This reference is real.' : 'This reference was written for this page and does not correspond to a real paper.');
         H.q(root, 'l-score').innerHTML = `Answered ${done} of 8, ${score} correct. ${done === 8 ? 'Every reference here is formatted the same way, so the format alone did not separate the two groups. A reference from an assistant is checked against the journal or a database before it is cited.' : ''}`;
       });
-      const cards = [
-        ['Drafting and editing code', 'Models write working scripts for reading files, plotting, and cleaning tables. The output runs, and it still needs to be tested on a known case because a script can run and be wrong.'],
-        ['Summaries and explanations', 'Models summarize a paper or explain an unfamiliar method in plain terms. Numbers, names, and claims in the summary are checked against the paper.'],
-        ['References and numerical values', 'Models produce references and values that read correctly and may not exist. Each reference is looked up, and each value is taken from a source.'],
-        ['Unpublished data', 'Text typed into a hosted model is sent to the provider. Unpublished data, student work, and data under agreement follow the rules of the owner and the institution.'],
-        ['Reproducibility', 'The same prompt can return different text, and models are updated. Methods sections record the model name, version, date, and what it was used for.'],
-        ['Knowledge cutoff', 'A model has no knowledge of papers and data released after its training. A search tool adds recent material, and the results are read and checked.']
-      ];
-      H.q(root, 'l-cards').innerHTML = cards.map(c => `<details><summary>${c[0]}</summary><p>${c[1]}</p></details>`).join('');
     }
   });
 })(window);

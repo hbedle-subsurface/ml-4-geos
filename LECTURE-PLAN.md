@@ -1,38 +1,52 @@
 # Lecture plan, 40 minutes
 
-Students open the site on their own laptops. The instructor projects the same page and drives from the top.
+Students open the site on their own laptops and the instructor projects the same page. Every tab has two bands: the **Talk** band at the top (what to say) and the **Try it** band below (a one to two minute activity). Talk through the top, let the class do the activity, then press *Next* (or the right arrow) to move on. All tabs are open.
 
-| Minutes | Section | What to do in the room |
-|---|---|---|
-| 0–2 | Opening figure | Talk for two minutes. Press *Group the samples* to show k-means running, then *Show the rock types*. |
-| 2–4 | Vocabulary | Click the four rings. Move the training-samples slider. |
-| 4–7 | Dimension reduction | Turn the angle slider through 180°, press *Go to PC1*, then step through components kept. |
-| 7–10 | Unsupervised | k from 1 to 8, *New start*, then the lithology check. |
-| 10–14 | Supervised | Hand-placed line, *Fit by machine*, then k = 1 versus a large k on the train/test curves. This contrast carries the most weight in Part 1. |
-| 14–16 | Semi-supervised | One label per lithology, then more. |
-| 16–19 | Neural networks | Ring data, 0 hidden layers, train. Then more neurons and layers. |
-| 19–22 | LLMs | Temperature and *Sample 20 answers*. Then the citation game (students vote out loud), then the cards. |
-| 22–23 | Geophysics 1, seismic | Move the line across the channel and follow it on the section. Lower the wavelet frequency to show the thin edges losing detail. |
-| 23–25 | Geophysics 2, attributes | Change the window length, compare the four maps, open the RMS card, then the crossplot with true facies on. |
-| 25–27 | Geophysics 3, SOM | 4 × 4 neurons and 3 facies, then 2 × 2 and 8 × 8. Turn on the true facies to compare. |
-| 27–29 | Geophysics 4, what matters | Shuffle each attribute. Then the refit chart: removing one attribute can raise the agreement. |
-| 29–30 | Geophysics 5, wells | Start with 6 wells and note the facies they never cut. Raise the count until the channel appears. |
-| 30–33 | Sedimentology | Gamma ray alone, then add density, sonic, and neutron porosity. Shorten the core, then move where it starts. Read the confusion matrix. |
-| 33–36 | Geochemistry and critical minerals | Raw ppm, standardized, log10. Then the prospectivity map with 5 and then 30 known deposits. |
-| 36–37 | Paleontology | Optional. One slider for the range of growth stages. Students with the background can open it on their own. |
-| 37–40 | Pitfalls and next steps | Small sample, spatial split, rare targets, then the tools list. |
+| Tab | Talk | Try it | Running |
+|---|---|---|---|
+| Start | 1 | | 1 |
+| Vocabulary | 2 | 1 | 4 |
+| When ML fits | 1 | 1 | 6 |
+| Dimensions | 2 | 1 | 9 |
+| Unsupervised | 2 | 1 | 12 |
+| Supervised | 2 | 2 | 16 |
+| Semi-supervised | 1 | 1 | 18 |
+| Neural networks | 2 | 1 | 21 |
+| LLMs | 2 | 2 | 25 |
+| Geophysics | 2 | 4 | 31 |
+| Other fields | 1 | 2 | 34 |
+| Pitfalls | 1 | 2 | 37 |
+| Next steps | 1 | | 38 |
 
-If time runs short: cut the neural network to the ring demo only, drop the semi-supervised module to one minute, and skip the crossplot in geophysics step 2. Keep unsupervised versus supervised at full length.
+That leaves about two minutes of slack for questions. Minutes are also printed in each band.
+
+## What happens on each tab
+
+* **Start.** Press *Group the samples* to show k-means running, then *Show the rock types*.
+* **Vocabulary.** Click the four rings from the outside in while talking. Activity: slide the number of training samples and watch the learned threshold settle while the expert rule stays put.
+* **When ML fits.** Talk from the good-fit and poor-fit columns. Activity: six situations to sort. Several have arguments both ways, so the reasons are the point.
+* **Dimensions.** The three-variable cloud turns by itself. Activity: slide *Flatten* to bring it down onto PC1 and PC2. The angle slider and the four-variable panel are below it for anyone who finishes early.
+* **Unsupervised.** Activity: *Watch it run* (centers move, samples change color), then raise k and find the bend in the elbow curve.
+* **Supervised.** Activity: place the line by hand, *Fit by machine*, then k = 1 versus a large k on the train and test curves. This contrast carries the most weight in Part 1.
+* **Semi-supervised.** One label per lithology, then more. Cut this to the talk band alone if time is short.
+* **Neural networks.** Ring data, 0 hidden layers, *Train*, then add neurons. Moving the cursor over the map lights up the network diagram.
+* **LLMs.** Talk from the strengths and limits columns. Activity: the real-or-made-up game (vote out loud). The temperature demo is below it for spare time.
+* **Geophysics.** The deep one. Five steps in about 50 seconds each: *Play the line across the map*, change the window and compare attributes, *Watch the map train*, shuffle an attribute and read the refit chart, then add wells until the channel appears.
+* **Other fields.** Sedimentology (gamma ray alone, then more curves), geochemistry (raw, standardized, log10), prospectivity (5 and then 30 deposits), paleontology if time allows. Students can stay on the tab for their own discipline.
+* **Pitfalls.** Small sample, spatial split, rare targets.
+* **Next steps.** The tools list and a first project.
+
+If time runs short: drop *Semi-supervised* to its talk band, keep the neural network to the ring demo only, and skip the crossplot in geophysics step 2. Keep unsupervised versus supervised at full length.
 
 ## Pop-out windows
 
-Each module has *Pop out the exercises* and *Pop out this panel*. Pop-ups may need to be allowed for the site in the browser.
+Each tab has *Pop out these steps* and *Pop out this panel*. Pop-ups may need to be allowed for the site in the browser.
 
 ## Things to know before presenting
 
 * The eight citations in the game: four are real and four were written for the exercise. The answer is shown after each click.
 * The temperature demo uses a toy distribution written for the page and is not output from a real model.
-* Deposit, well, seismic, and shell data are all synthetic.
+* Deposit, well, seismic, shell, and geochemistry data are all synthetic.
 * In the seismic model the channel sand attenuates the wavelet by construction, so mean frequency is lower in the channel. This is stated in the mean-frequency card on the page.
 * In the geochemistry tab the raw-ppm PCA is dominated by the elements with the largest numbers (potassium, magnesium), and points outside the fixed axes are clipped. The log-transformed result still mixes a felsic signal with the pegmatite signal, which is intended.
 * The well order is fixed (seed 8): the first well in the channel is the 11th, so the supervised map has no channel until then.

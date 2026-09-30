@@ -32,16 +32,11 @@
     id: 'vocab', part: 1, title: 'AI, machine learning, deep learning, LLM',
     lede: 'The four terms nest inside each other. We click through the rings, then compare a hand-written rule with a rule the data can adjust.',
     steps: [
-      'Click each ring, from the outside in, and read the example.',
       'Move the training samples slider from 2 up to 100. The learned threshold moves and the hand-written one stays where it was.',
-      'At what number of samples does the learned threshold stop moving much?'
+      'Find the number of samples where the learned threshold stops moving much.'
     ],
     html: () => `
-      <div class="split">
-        <svg id="v-rings" viewBox="0 0 400 400" role="group" aria-label="Nested circles: AI, machine learning, deep learning, LLM"></svg>
-        <div id="v-info" class="info" aria-live="polite"></div>
-      </div>
-      <h4>Gamma ray of 300 synthetic samples, shale and not shale</h4>
+      <h4>A hand-written rule and a learned threshold, gamma ray of 300 synthetic samples</h4>
       ${H.cv('v-c', 0.42)}
       ${H.S('v-n', 'Training samples used', 2, 100, 1, 6)}
       <div class="readout" id="v-out"></div>`,
@@ -102,17 +97,60 @@
     }
   });
 
+
+  /* ---------- 1b. when machine learning fits ---------- */
+  M.push({
+    id: 'fit', part: 1, title: 'When machine learning fits',
+    lede: '',
+    steps: [
+      'Read each situation and choose Good fit, Depends, or Poor fit. The reason appears after each choice.',
+      'Finish all six and read the score.'
+    ],
+    html: () => `<div id="f-list"></div><div class="readout" id="f-out">Answered 0 of 6.</div>`,
+    init(root) {
+      const items = [
+        { t: 'Picking faults on 3,000 line-km of seismic when a few hundred line-km are already interpreted.', a: 'good', r: 'Many samples and a set of known answers to learn from. This is a common use of deep learning.' },
+        { t: 'Predicting lithology in a new well from its logs, with core and logs from ten nearby wells.', a: 'good', r: 'Labeled examples from the same area and the same measurements. Facies prediction from logs is a standard case.' },
+        { t: 'Dating one ash bed from a single sample.', a: 'poor', r: 'One sample gives nothing to learn from, and radiometric dating already has a physical equation.' },
+        { t: 'Calculating travel time through a layered model with known velocities and thicknesses.', a: 'poor', r: 'The physics gives the exact answer. A learned model would approximate an equation that is already known.' },
+        { t: 'Grouping 50,000 stream-sediment samples by geochemical signature with no classes defined yet.', a: 'good', r: 'Many samples and no labels. Clustering and dimension reduction suit this case, and the groups then need a geological interpretation.' },
+        { t: 'Predicting where a deposit type occurs in a region with four known deposits.', a: 'depends', r: 'Four examples are very few. The result can still guide a search, and the uncertainty is large.' }
+      ];
+      const list = H.q(root, 'f-list'), lab = { good: 'Good fit', depends: 'Depends', poor: 'Poor fit' };
+      list.innerHTML = items.map((it, i) => `<div class="ref" data-i="${i}"><p>${it.t}</p><div class="ref-b">${['good', 'depends', 'poor'].map(k => `<button type="button" class="btn sm" data-a="${k}">${lab[k]}</button>`).join('')}<span class="res"></span></div></div>`).join('');
+      let done = 0, score = 0;
+      list.addEventListener('click', e => {
+        const b = e.target.closest('button[data-a]'); if (!b) return;
+        const box = b.closest('.ref'), it = items[+box.dataset.i]; if (box.classList.contains('done')) return;
+        const ok = b.dataset.a === it.a; box.classList.add('done', ok ? 'right' : 'wrong'); done++; if (ok) score++;
+        box.querySelector('.res').textContent = (ok ? 'Agreed. ' : 'Most people would say ' + lab[it.a].toLowerCase() + '. ') + it.r;
+        H.q(root, 'f-out').innerHTML = `Answered ${done} of 6, ${score} matching. Several of these have reasonable arguments on both sides, and the reasons matter more than the label.`;
+      });
+    }
+  });
+
   /* ---------- 2. dimension reduction ---------- */
   M.push({
     id: 'pca', part: 1, title: 'Dimension reduction',
     lede: 'Four log curves are hard to look at together. PCA finds the direction with the most spread and the next one at right angles to it.',
     steps: [
+      'Turn the three-variable cloud, then move the flatten slider to bring it down onto the first two components.',
       'Choose a pair of variables. Turn the angle slider through 180°. Each sample projects onto the line, and the curve shows the variance along it.',
       'Press Go to PC1. The line moves to the angle with the most variance.',
       'In the four-variable panel, keep 1 component and then 2, 3, 4. The variance readout shows how much of the total each choice keeps.',
       'Turn on the lithology colors and compare them with the PC1 axis.'
     ],
     html: () => `
+      <h4>Three variables as a cloud of samples</h4>
+      <div class="row-3d">
+        <div>${H.cv('p-3', 0.76)}</div>
+        <div>
+          ${H.S('p-rot', 'Turn the cloud', 0, 360, 1, 30)}
+          ${H.S('p-flat', 'Flatten onto PC1 and PC2', 0, 100, 1, 0)}
+          <div class="ctlrow">${H.chk('p-auto', 'Keep turning', true)}${H.chk('p-col3', 'Color by lithology', false)}</div>
+          <div class="readout" id="p-out0"></div>
+        </div>
+      </div>
       <div class="row2">
         <div>
           <h4>Two variables, standardized</h4>
@@ -135,6 +173,46 @@
       ${H.legend(D.LITH, D.LCOL)}
       <div class="readout" id="p-out2"></div>`,
     init(root) {
+      /* three-variable cloud: turn it, then flatten it onto the first two components */
+      (function () {
+        const Z3 = R.Z.map(z => [z[0], z[1], z[2]]), P3 = ML.pca(Z3), nm = ['GR', 'Density', 'Sonic'];
+        const p3 = H.plot(root, 'p-3', { xr: [-4.5, 4.5], yr: [-3.4, 3.4], noAxes: true, aspect: 0.76, m: { l: 6, r: 6, t: 6, b: 6 } });
+        const col3 = H.q(root, 'p-col3'), auto = H.q(root, 'p-auto');
+        const rot = H.bind(root, 'p-rot', () => p3.draw(), v => v + '°'), flat = H.bind(root, 'p-flat', () => p3.draw(), v => v + '%');
+        col3.addEventListener('change', () => p3.draw());
+        const tilt = 0.4;
+        const proj = (p, a) => { const x1 = p[0] * Math.cos(a) + p[2] * Math.sin(a), z1 = -p[0] * Math.sin(a) + p[2] * Math.cos(a); return [x1, p[1] * Math.cos(tilt) - z1 * Math.sin(tilt), z1]; };
+        p3.onDraw = pl => {
+          const a = rot.get() * Math.PI / 180, t = flat.get() / 100, c = pl.ctx;
+          // frame
+          pl.rect(-4.5, -3.4, 4.5, 3.4, '#FBFCFC', C.GRID);
+          const pts = Z3.map((p, i) => { const q = proj(p, a), s = P3.scores[i]; return { x: (1 - t) * q[0] + t * s[0], y: (1 - t) * q[1] + t * s[1], z: (1 - t) * q[2], i }; });
+          pts.sort((u, v) => u.z - v.z);
+          // variable axes (fade out as the cloud flattens)
+          [[3.0, 0, 0], [0, 3.0, 0], [0, 0, 3.0]].forEach((e, k) => {
+            const q = proj(e, a), o = proj([0, 0, 0], a); c.save(); c.globalAlpha = 1 - t; c.strokeStyle = C.SLATE; c.lineWidth = 1.6; c.setLineDash([5, 4]);
+            c.beginPath(); c.moveTo(pl.x(o[0]), pl.y(o[1])); c.lineTo(pl.x(q[0]), pl.y(q[1])); c.stroke(); c.restore();
+            c.save(); c.globalAlpha = 1 - t; pl.ptext(nm[k], pl.x(q[0]) + 4, pl.y(q[1]) - 6, { color: C.SLATE, font: 'bold 13px system-ui' }); c.restore();
+          });
+          pts.forEach(p => {
+            const depth = 0.55 + 0.45 * (p.z + 3) / 6, r = 3 + 1.6 * (1 - t) * (p.z + 3) / 6;
+            pl.dot(p.x, p.y, r, col3.checked ? Plot.hex2rgba(D.LCOL[R.y[p.i]], depth) : `rgba(92,102,112,${depth * 0.8})`);
+          });
+          // principal component arrows (appear as the cloud flattens)
+          [0, 1].forEach(k => {
+            const v = P3.vecs[k].map(x => x * 2.9), q = proj(v, a), end = k === 0 ? [2.9, 0] : [0, 2.9];
+            const X = (1 - t) * q[0] + t * end[0], Y = (1 - t) * q[1] + t * end[1];
+            c.save(); c.globalAlpha = 0.25 + 0.75 * t; c.strokeStyle = C.RED; c.lineWidth = 2.6;
+            c.beginPath(); c.moveTo(pl.x(0), pl.y(0)); c.lineTo(pl.x(X), pl.y(Y)); c.stroke(); c.restore();
+            pl.ptext('PC' + (k + 1), pl.x(X) + 5, pl.y(Y) - 7, { color: C.RED, font: 'bold 14px system-ui' });
+          });
+          H.q(root, 'p-out0').innerHTML = t < 0.02 ? `Each dot is one sample, placed by gamma ray, density, and sonic slowness. The red lines are the first two principal components.` : `Flattened ${Math.round(t * 100)}%. The first two components keep <b>${Math.round((P3.frac[0] + P3.frac[1]) * 100)}%</b> of the variance of these three variables.`;
+        };
+        p3.draw();
+        const spin = () => { if (auto.checked && p3.c.isConnected && p3.c.clientWidth) rot.set((rot.get() + 0.5) % 361); requestAnimationFrame(spin); };
+        requestAnimationFrame(spin);
+      })();
+
       const names = D.SHORT, pairs = [[0, 1], [0, 2], [0, 3], [1, 2], [1, 3], [2, 3]];
       const sel = H.q(root, 'p-pair');
       pairs.forEach((pr, i) => sel.insertAdjacentHTML('beforeend', `<option value="${i}">${names[pr[0]]} and ${names[pr[1]]}</option>`));
@@ -201,6 +279,7 @@
     id: 'unsup', part: 1, title: 'Unsupervised learning',
     lede: 'The samples arrive without lithology labels. k-means groups them by how close they are in gamma ray and density.',
     steps: [
+      'Press Watch it run. Each round the samples join the nearest center, then each center moves to the middle of its samples.',
       'Set k to 1 and raise it one step at a time. Watch where the boundaries between clusters fall.',
       'Press New start a few times at k = 4. The clusters can change with the starting positions.',
       'The elbow curve shows the total distance from each sample to its cluster center. Find the k where the curve bends.',
@@ -211,7 +290,7 @@
         <div>${H.cv('u-a', 0.85)}</div>
         <div>${H.cv('u-b', 0.85)}</div>
       </div>
-      <div class="ctlrow">${H.S('u-k', 'Number of clusters, k', 1, 8, 1, 2)}${H.btn('u-new', 'New start')}${H.chk('u-lith', 'Show lithology (normally unknown)', false)}</div>
+      <div class="ctlrow">${H.S('u-k', 'Number of clusters, k', 1, 8, 1, 3)}${H.btn('u-run', 'Watch it run')}${H.btn('u-new', 'New start')}${H.chk('u-lith', 'Show lithology (normally unknown)', false)}</div>
       ${H.legend(D.LITH, D.LCOL)}
       <div class="readout" id="u-out"></div>`,
     init(root) {
@@ -219,26 +298,50 @@
       const pa = H.plot(root, 'u-a', { xr: [0, 150], yr: [2.0, 2.9], xl: D.VARS[0], yl: D.VARS[1], nx: 6, ny: 6 });
       const pb = H.plot(root, 'u-b', { xr: [0.5, 8.5], yr: [0, 600], xl: 'Number of clusters, k', yl: 'Total squared distance', nx: 8, ny: 6, fmtx: v => (Number.isInteger(v) ? v : '') });
       const rr = ML.rng(12), elbow = []; for (let k = 1; k <= 8; k++) elbow.push(ML.kmeansBest(Z, k, rr, 6).inertia);
-      let seed = 31, model = null;
-      const fit = () => { model = ML.kmeans(Z, kk.get(), ML.rng(seed)); };
+      let seed = 31, model = null, view = null, raf = 0, note = '';
       const toRaw = c => [c[0] * R.sd[0] + R.mean[0], c[1] * R.sd[1] + R.mean[1]];
-      const kk = H.bind(root, 'u-k', () => { fit(); pa.draw(); pb.draw(); }, v => v);
+      const inertiaOf = (lab, cen) => lab ? Z.reduce((s, x, i) => s + ML.d2(x, cen[lab[i]]), 0) : null;
+      const fit = () => { model = ML.kmeans(Z, kk.get(), ML.rng(seed)); view = { lab: model.labels, cen: model.centers }; note = ''; };
+      const stop = () => { if (raf) { cancelAnimationFrame(raf); raf = 0; } };
+      const kk = H.bind(root, 'u-k', () => { stop(); fit(); pa.draw(); pb.draw(); }, v => v);
       const lith = H.q(root, 'u-lith'); lith.addEventListener('change', () => { pa.draw(); pb.draw(); });
-      H.on(root, 'u-new', 'click', () => { seed += 17; fit(); pa.draw(); pb.draw(); });
+      H.on(root, 'u-new', 'click', () => { stop(); seed += 17; fit(); pa.draw(); pb.draw(); });
+      H.on(root, 'u-run', 'click', () => {
+        stop(); const r = ML.rng(seed + 5), k = kk.get(); let cen = ML.kppInit(Z, k, r), lab = null, phase = 'assign', t0 = performance.now(), from = null, to = null, round = 0;
+        view = { lab: null, cen }; note = 'Starting positions chosen. No sample belongs to a cluster yet.'; pa.draw(); pb.draw();
+        const step = now => {
+          if (!root.isConnected) return;
+          if (phase === 'assign' && now - t0 > 900) {
+            const nl = ML.assign(Z, cen);
+            if (lab && nl.every((v, i) => v === lab[i])) { note = `Round ${round}: no sample changed cluster, so k-means has converged.`; view = { lab: nl, cen }; raf = 0; pa.draw(); pb.draw(); return; }
+            lab = nl; round++; view = { lab, cen }; note = `Round ${round}: each sample joins the nearest center.`;
+            from = cen; to = ML.update(Z, lab, k, r); phase = 'move'; t0 = now; pa.draw(); pb.draw();
+          } else if (phase === 'move' && now - t0 > 700) {
+            const p = Math.min(1, (now - t0 - 700) / 700), e = p * p * (3 - 2 * p);
+            view = { lab, cen: from.map((c, j) => c.map((v, d) => v + (to[j][d] - v) * e)) };
+            note = `Round ${round}: each center moves to the mean of its samples.`;
+            if (p >= 1) { cen = to; phase = 'assign'; t0 = now; }
+            pa.draw(); pb.draw();
+          }
+          raf = requestAnimationFrame(step);
+        };
+        raf = requestAnimationFrame(step);
+      });
       fit();
       pa.onDraw = pl => {
         pl.axes();
         R.X.forEach((x, i) => {
-          const cc = Plot.CLUSTER[model.labels[i] % 8];
-          pl.dot(x[0], x[1], lith.checked ? 4.4 : 3.6, Plot.hex2rgba(cc, 0.85), lith.checked ? D.LCOL[R.y[i]] : null, 1.6);
+          const cc = view.lab ? Plot.CLUSTER[view.lab[i] % 8] : '#5C6670';
+          pl.dot(x[0], x[1], lith.checked ? 4.4 : 3.8, Plot.hex2rgba(cc, view.lab ? 0.85 : 0.5), lith.checked ? D.LCOL[R.y[i]] : null, 1.6);
         });
-        model.centers.forEach((c, j) => { const p = toRaw(c); pl.dot(p[0], p[1], 7, '#fff', C.INK, 2.2); pl.text('×', p[0], p[1] + 0.005, { align: 'center', font: 'bold 12px system-ui' }); });
+        view.cen.forEach(c => { const p = toRaw(c); pl.dot(p[0], p[1], 8, '#fff', C.INK, 2.4); pl.text('×', p[0], p[1] + 0.005, { align: 'center', font: 'bold 13px system-ui' }); });
       };
       pb.onDraw = pl => {
         pl.axes(); pl.line(elbow.map((v, i) => [i + 1, v]), C.SLATE, 2); elbow.forEach((v, i) => pl.dot(i + 1, v, 3, C.SLATE));
-        pl.dot(kk.get(), model.inertia, 6, C.RED);
-        H.q(root, 'u-out').innerHTML = `k = ${kk.get()}: total squared distance <b>${model.inertia.toFixed(0)}</b>.` +
-          (lith.checked ? ` Agreement between clusters and lithology: <b>${H.pct(ML.purity(model.labels, R.y, kk.get(), 3))}</b> of samples fall in a cluster whose most common rock type matches theirs.` : '');
+        const cur = view.lab ? inertiaOf(view.lab, view.cen) : null;
+        if (cur !== null) pl.dot(kk.get(), Math.min(cur, 600), 6.5, C.RED);
+        H.q(root, 'u-out').innerHTML = (note ? note + ' ' : '') + (cur !== null ? `Total squared distance now <b>${cur.toFixed(0)}</b>.` : '') +
+          (lith.checked && view.lab ? ` Agreement between clusters and lithology: <b>${H.pct(ML.purity(view.lab, R.y, kk.get(), 3))}</b> of samples fall in a cluster whose most common rock type matches theirs.` : '');
       };
       pa.draw(); pb.draw();
     }

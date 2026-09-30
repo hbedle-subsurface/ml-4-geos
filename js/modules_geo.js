@@ -32,6 +32,7 @@
           <div><h5>RMS amplitude map, line in red (click to move it)</h5>${H.cv('gs-b', 1)}</div>
         </div>
         <div class="ctlrow">${H.S('gs-f', 'Wavelet frequency', 10, 70, 1, 30)}${H.S('gs-n', 'Noise', 0, 40, 1, 10)}${H.S('gs-l', 'Line position', 0, 63, 1, 32)}</div>
+        <div class="ctlrow">${H.btn('gs-play', 'Play the line across the map')}</div>
       </div>
 
       <div class="track" data-s="2">
@@ -63,7 +64,7 @@
           <div><h5 id="g3-h">True facies</h5>${H.cv('g3-c', 1)}</div>
         </div>
         <div class="ctlrow">${H.S('g3-s', 'Neurons per side', 2, 8, 1, 4)}${H.S('g3-k', 'Facies (groups of neurons)', 2, 6, 1, 3)}</div>
-        <div class="ctlrow">${H.btn('g3-new', 'New start')}${H.chk('g3-t', 'Show the true facies', false)}</div>
+        <div class="ctlrow">${H.btn('g3-train', 'Watch the map train')}${H.btn('g3-new', 'New start')}${H.chk('g3-t', 'Show the true facies', false)}</div>
         <div class="readout" id="g3-out"></div>
       </div>
 
@@ -106,13 +107,19 @@
           Xz = ML.standardize(raw).Z;
           fillAttrSelect();
         }
+        P = S.som(Xz, st.side, st.seed); finishSom();
+      }
+      function classify() {
         const side = st.side, k = Math.min(st.k, side * side);
-        P = S.som(Xz, side, st.seed);
         const b = S.bmu(Xz, P), km = ML.kmeansBest(P, k, ML.rng(1), 4);
         const mean = new Array(k).fill(0), cnt = new Array(k).fill(0);
         P.forEach((p, i) => { mean[km.labels[i]] += p[0]; cnt[km.labels[i]]++; });
         const ord = mean.map((m, i) => [cnt[i] ? m / cnt[i] : 1e9, i]).sort((x, y) => x[0] - y[0]), rank = new Array(k); ord.forEach((o, r) => { rank[o[1]] = r; });
         protoCls = km.labels.map(l => rank[l]); bmuAll = b; cls = b.map(x => protoCls[x]);
+      }
+      function finishSom() {
+        classify();
+        const side = st.side, k = Math.min(st.k, side * side);
         full = ML.purity(cls, Array.from(S.fac), k, 3);
         loo = cols.length < 2 ? null : cols.map((_, q) => {
           const X2 = Xz.map(x => x.filter((_, i) => i !== q)), P2 = S.som(X2, side, st.seed), b2 = S.bmu(X2, P2), km2 = ML.kmeansBest(P2, k, ML.rng(1), 4);
@@ -190,9 +197,25 @@
         noteEl.innerHTML = `${cols.length} attribute${cols.length > 1 ? 's' : ''} in: ${cols.map(c => S.ANAMES[c]).join(', ')}. Each dot in the map is a neuron, sized by the number of traces that fall on it and colored by the facies group it belongs to.${st.side * st.side < st.k ? ' There are fewer neurons than facies, so the number of groups is capped.' : ''}`;
         H.q(root, 'g3-out').innerHTML = `${st.side * st.side} neurons in ${k} groups.` + (t3.checked ? ` Agreement with the true facies: <b>${H.pct(ML.purity(cls, Array.from(S.fac), k, 3))}</b> of traces fall in a group whose most common true facies matches theirs.` : ' The true facies are hidden.');
       };
-      H.bind(root, 'g3-s', v => { st.side = v; calcAll(3); drawStep(); }, v => v);
-      H.bind(root, 'g3-k', v => { st.k = v; calcAll(3); drawStep(); }, v => v);
-      H.on(root, 'g3-new', 'click', () => { st.seed += 11; calcAll(3); drawStep(); });
+      H.bind(root, 'g3-s', v => { stopTrain(); st.side = v; calcAll(3); drawStep(); }, v => v);
+      H.bind(root, 'g3-k', v => { stopTrain(); st.k = v; calcAll(3); drawStep(); }, v => v);
+      H.on(root, 'g3-new', 'click', () => { stopTrain(); st.seed += 11; calcAll(3); drawStep(); });
+      let trainRaf = 0;
+      const stopTrain = () => { if (trainRaf) { cancelAnimationFrame(trainRaf); trainRaf = 0; } };
+      H.on(root, 'g3-train', 'click', () => {
+        stopTrain(); const state = S.somInit(Xz, st.side, st.seed); let last = 0;
+        P = state.P; classify();
+        const tick = now => {
+          if (now - last > 80) {
+            last = now; const done = S.somAdvance(state, 60); classify();
+            if (st.step === 3) { p3a.draw(); p3b.draw(); }
+            if (done) { trainRaf = 0; finishSom(); if (st.step === 3) { p3a.draw(); p3b.draw(); readout3(); } return; }
+            H.q(root, 'g3-out').innerHTML = `Training: ${Math.round(state.t / state.T * 100)}% of the updates done. Each update pulls the closest neuron and its neighbors toward one trace.`;
+          }
+          trainRaf = requestAnimationFrame(tick);
+        };
+        trainRaf = requestAnimationFrame(tick);
+      });
 
       // step 4
       const p4a = mkStd('g4-a');
@@ -242,6 +265,17 @@
       H.bind(root, 'gs-f', v => { st.f = v; later(0); }, v => v + ' Hz');
       H.bind(root, 'gs-n', v => { st.noise = v; later(0); }, v => v + '%');
       const ln = H.bind(root, 'gs-l', v => { st.line = v; drawStep(); }, v => v);
+      let playing = false, playRaf = 0, lastPlay = 0;
+      const playBtn = H.q(root, 'gs-play');
+      const playTick = now => {
+        if (!playing) return;
+        if (root.isConnected && pA.c.clientWidth && now - lastPlay > 110) { lastPlay = now; ln.set((ln.get() + 1) % N); }
+        playRaf = requestAnimationFrame(playTick);
+      };
+      playBtn.addEventListener('click', () => {
+        playing = !playing; playBtn.textContent = playing ? 'Pause' : 'Play the line across the map';
+        if (playing) playRaf = requestAnimationFrame(playTick); else cancelAnimationFrame(playRaf);
+      });
 
       /* ---------- steps ---------- */
       const plots = { 1: [pA, pB], 2: pa.concat([pc]), 3: [p3a, p3b, p3c], 4: [p4a, p4b, p4c], 5: [p5a, p5b] };

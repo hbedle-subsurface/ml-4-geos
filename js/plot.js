@@ -6,7 +6,7 @@
   class Plot {
     constructor(canvas, o) {
       this.c = canvas;
-      this.o = Object.assign({ xr: [0, 1], yr: [0, 1], xl: '', yl: '', m: { l: 48, r: 12, t: 10, b: 38 }, aspect: 0.72, nx: 5, ny: 5, invY: false, fmtx: null, fmty: null, noAxes: false }, o || {});
+      this.o = Object.assign({ xr: [0, 1], yr: [0, 1], xl: '', yl: '', m: { l: 52, r: 12, t: 10, b: 42 }, aspect: 0.72, nx: 5, ny: 5, invY: false, fmtx: null, fmty: null, noAxes: false }, o || {});
       this.ctx = canvas.getContext('2d');
       this.onDraw = null;
       registry.push(this);
@@ -39,7 +39,7 @@
     fmt(v) { const a = Math.abs(v); return a >= 100 || Number.isInteger(v) ? String(Math.round(v * 100) / 100) : (+v.toFixed(2)).toString(); }
     axes() {
       const c = this.ctx, m = this.o.m;
-      c.save(); c.font = '11px system-ui, sans-serif'; c.lineWidth = 1;
+      c.save(); c.font = '12.5px system-ui, sans-serif'; c.lineWidth = 1;
       if (!this.o.noAxes) {
         c.strokeStyle = GRID; c.fillStyle = SLATE; c.textAlign = 'center'; c.textBaseline = 'top';
         for (const v of this.ticks(this.o.xr[0], this.o.xr[1], this.o.nx)) {
@@ -55,6 +55,7 @@
         }
         c.strokeStyle = SLATE; c.strokeRect(m.l + 0.5, m.t + 0.5, this.pw, this.ph);
         c.fillStyle = INK; c.textAlign = 'center'; c.textBaseline = 'bottom';
+        c.font = '13px system-ui, sans-serif';
         if (this.o.xl) c.fillText(this.o.xl, m.l + this.pw / 2, this.H - 2);
         if (this.o.yl) { c.save(); c.translate(11, m.t + this.ph / 2); c.rotate(-Math.PI / 2); c.textBaseline = 'top'; c.textAlign = 'center'; c.fillText(this.o.yl, 0, -4); c.restore(); }
       }

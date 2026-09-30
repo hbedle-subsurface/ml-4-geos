@@ -8,28 +8,30 @@
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<a class="skip" href="#modules">Skip to the lecture</a>
+<a class="skip" href="#modules">Skip to the lesson</a>
 
-<header id="hero">
-  <div class="hero-text">
-    <h1>Machine learning in the geosciences</h1>
-    <p class="sub">An interactive lecture for incoming graduate students, School of Geosciences, University of Oklahoma</p>
-    <p class="hero-note">Everything on this page runs in the browser on synthetic data. The sliders and buttons are the lecture.</p>
-    <div class="hero-btns">
-      <button type="button" class="btn primary" id="h-group">Group the samples</button>
-      <button type="button" class="btn" id="h-rocks">Show the rock types</button>
-      <a class="btn" href="#m-vocab">Start</a>
+<nav id="nav" aria-label="Lesson sections"></nav>
+
+<main id="modules">
+  <section class="lesson on" id="m-start">
+    <div id="hero">
+      <div class="hero-text">
+        <h1>Machine learning in the geosciences</h1>
+        <p class="sub">An interactive lecture for incoming graduate students, School of Geosciences, University of Oklahoma</p>
+        <p class="hero-note">Everything on this page runs in the browser on synthetic data. Each tab has the talking points at the top and a short activity below them.</p>
+        <div class="hero-btns">
+          <button type="button" class="btn primary" id="h-group">Group the samples</button>
+          <button type="button" class="btn" id="h-rocks">Show the rock types</button>
+        </div>
+      </div>
+      <div class="hero-plot">
+        <canvas id="hero-c" data-aspect="0.8" aria-label="300 rock samples plotted by gamma ray and density"></canvas>
+        <p class="cap" id="h-cap">300 rock samples, gamma ray against density, with no labels attached.</p>
+      </div>
     </div>
-  </div>
-  <div class="hero-plot">
-    <canvas id="hero-c" data-aspect="0.8" aria-label="300 rock samples plotted by gamma ray and density"></canvas>
-    <p class="cap" id="h-cap">300 rock samples, gamma ray against density, with no labels attached.</p>
-  </div>
-</header>
-
-<nav id="nav" aria-label="Lecture sections"></nav>
-
-<main id="modules"></main>
+    <div class="lesson-nav"><span></span><button type="button" class="btn primary" data-go="next">Next: Vocabulary</button></div>
+  </section>
+</main>
 
 <dialog id="gloss">
   <h3 id="g-t"></h3>
@@ -51,6 +53,7 @@
 <script src="js/seismic.js"></script>
 <script src="js/modules_geo.js"></script>
 <script src="js/modules3.js"></script>
+<script src="js/talk.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>
