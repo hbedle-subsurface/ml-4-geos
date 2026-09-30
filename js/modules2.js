@@ -188,7 +188,7 @@
         return { X, y, raw, nc: 3, cols: D.LCOL, names: D.LITH, xr: XR, yr: YR, xl: D.VARS[0], yl: D.VARS[1], toIn: toZ };
       };
       const pa = H.plot(root, 'n-a', { xr: [0, 10], yr: [0, 10], nx: 5, ny: 5 });
-      const pb = H.plot(root, 'n-b', { xr: [0, 1000], yr: [0, 1], xl: 'Epoch', yl: 'Loss', nx: 4, ny: 5 });
+      const pb = H.plot(root, 'n-b', { xr: [0, 1000], yr: [0, 1], xl: 'Epoch', yl: 'Loss (how far off)', nx: 4, ny: 5 });
       const pd = H.plot(root, 'n-d', { xr: [0, 1], yr: [0, 1], noAxes: true, aspect: 0.36, m: { l: 10, r: 60, t: 12, b: 22 } });
       let probe = null, dq = 0;
       const mix = (v) => { const t = Math.min(1, Math.abs(v)), b = v >= 0 ? [132, 22, 23] : [92, 102, 112]; return `rgb(${[255, 255, 255].map((w, i) => Math.round(w + (b[i] - w) * t)).join(',')})`; };
@@ -263,7 +263,7 @@
       <p class="note">The next token after "The Cretaceous–Paleogene boundary is dated at about ___ million years ago"</p>
       <p class="note">These probabilities are a toy distribution written for this page. They show the mechanism and are not output from a real model.</p>
       ${H.cv('l-a', 0.5)}
-      <div class="ctlrow">${H.S('l-t', 'Temperature', 0.1, 2, 0.05, 0.5)}${H.btn('l-go', 'Sample 20 answers')}</div>
+      <div class="ctlrow">${H.S('l-t', 'Randomness (temperature)', 0.1, 2, 0.05, 0.5)}${H.btn('l-go', 'Sample 20 answers')}</div>
       <div class="readout" id="l-out"></div>
 `,
     init(root) {

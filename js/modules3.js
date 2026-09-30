@@ -15,7 +15,7 @@
     lede: 'Each tab uses synthetic data shaped like a problem from one field, with sliders that change what the method can see.',
     steps: [
       'Sedimentology: with only gamma ray checked, find where sandstone and limestone are confused. Add density, then sonic and neutron porosity. Move the start of the core and see which facies the core has to contain.',
-      'Geochemistry: run PCA on raw ppm, then standardized, then log10 standardized. Follow the largest loading each time, then color the pegmatite-influenced catchments.',
+      'Geochemistry: run PCA on raw ppm, then rescaled ppm, then log10 rescaled. Follow the largest loading each time, then color the pegmatite-influenced catchments.',
       'Prospectivity: raise the number of known deposits and count how many of the others land in the top 10% of the map.',
       'Paleontology: raise the range of growth stages and watch which axis separates the species.'
     ],
@@ -47,7 +47,7 @@
         <h4>Geochemistry: the transform decides what PCA finds</h4>
         <p class="note">400 synthetic stream-sediment samples with eight elements in ppm. Some catchments drain lithium-cesium-tantalum pegmatites, which raise Li, Cs, Rb, Ta, and Sn together. Potassium and magnesium are present at percent levels.</p>
         <div class="row2"><div>${H.cv('gc-a', 0.9)}</div><div>${H.cv('gc-b', 0.9)}</div></div>
-        <div class="ctlrow"><div class="ctl"><label for="gc-t">Data used</label><select id="gc-t"><option value="raw">Raw ppm</option><option value="std">Standardized ppm</option><option value="log">Log10, then standardized</option></select></div>${H.S('gc-p', 'Catchments with pegmatite influence', 2, 40, 1, 12)}</div>
+        <div class="ctlrow"><div class="ctl"><label for="gc-t">Data used</label><select id="gc-t"><option value="raw">Raw ppm</option><option value="std">Rescaled ppm (each element on the same scale)</option><option value="log">Log10, then rescaled</option></select></div>${H.S('gc-p', 'Catchments with pegmatite influence', 2, 40, 1, 12)}</div>
         ${H.chk('gc-h', 'Color pegmatite-influenced catchments', false)}
         <div class="readout" id="gc-out"></div>
         <h4>Prospectivity: few known deposits</h4>
@@ -76,7 +76,7 @@
         calc();
         pa.onDraw = pl => {
           pl.axes(); P.scores.forEach((q, i) => pl.dot(q[0], q[1], 3.4, Plot.hex2rgba(Plot.CLUSTER[sp[i]], 0.8)));
-          H.q(root, 'p2-out').innerHTML = `PC1 carries <b>${(P.frac[0] * 100).toFixed(0)}%</b> of the variance and PC2 <b>${(P.frac[1] * 100).toFixed(0)}%</b>. PC1 loadings: ${P.vecs[0].map(v => v.toFixed(2)).join(', ')}.`;
+          H.q(root, 'p2-out').innerHTML = `PC1 carries <b>${(P.frac[0] * 100).toFixed(0)}%</b> of the spread and PC2 <b>${(P.frac[1] * 100).toFixed(0)}%</b>. PC1 loadings: ${P.vecs[0].map(v => v.toFixed(2)).join(', ')}.`;
         };
         pb.onDraw = pl => {
           pl.axes(); pl.hline(0, C.SLATE, 1);
@@ -199,7 +199,7 @@
           pl.axes(); pl.clipStart();
           P.scores.forEach((q, i) => pl.dot(q[0], q[1], 3, hi.checked ? (peg[i] ? C.RED : 'rgba(92,102,112,0.45)') : 'rgba(92,102,112,0.55)'));
           pl.clipEnd();
-          H.q(root, 'gc-out').innerHTML = `PC1 carries <b>${Math.round(P.frac[0] * 100)}%</b> of the variance and PC2 <b>${Math.round(P.frac[1] * 100)}%</b>. The largest PC1 loading is on <b>${EL[P.vecs[0].reduce((b, v, j, a) => (Math.abs(v) > Math.abs(a[b]) ? j : b), 0)]}</b>. Points outside the fixed axes are clipped.`;
+          H.q(root, 'gc-out').innerHTML = `PC1 carries <b>${Math.round(P.frac[0] * 100)}%</b> of the spread and PC2 <b>${Math.round(P.frac[1] * 100)}%</b>. The largest PC1 loading is on <b>${EL[P.vecs[0].reduce((b, v, j, a) => (Math.abs(v) > Math.abs(a[b]) ? j : b), 0)]}</b>. Points outside the fixed axes are clipped.`;
         };
         pb.onDraw = pl => {
           pl.axes(); pl.hline(0, C.SLATE, 1);
@@ -229,7 +229,7 @@
       <h4>Spatial autocorrelation</h4>
       <p class="note">300 samples on a map, three feature layers, and a label. The layers are unrelated to the label except through location. Any accuracy above 50% comes from neighbors resembling each other.</p>
       <div class="row2"><div>${H.cv('t-b', 0.95)}</div><div>${H.cv('t-c', 0.95)}</div></div>
-      <div class="ctlrow">${H.S('t-r', 'Correlation length of the layers', 0.03, 0.3, 0.01, 0.1)}${H.btn('t-new', 'New map')}</div>
+      <div class="ctlrow">${H.S('t-r', 'How far the pattern extends across the map', 0.03, 0.3, 0.01, 0.1)}${H.btn('t-new', 'New map')}</div>
       <div class="readout" id="t-out2"></div>
       <h4>Rare targets</h4>
       <div class="row2"><div>${H.cv('t-d', 0.95)}</div><div>${H.cv('t-e', 0.95)}</div></div>

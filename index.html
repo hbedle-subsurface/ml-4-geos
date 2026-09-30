@@ -12,47 +12,7 @@
 
 <nav id="nav" aria-label="Lesson sections"></nav>
 
-<main id="modules">
-  <section class="lesson on" id="m-start">
-    <div class="mh"><h3>Machine learning in the geosciences</h3><p class="sub">An interactive lecture for incoming graduate students, School of Geosciences, University of Oklahoma</p></div>
-    <div class="talk"><h4 class="band">Concept</h4>
-      <div class="tcards">
-        <div class="tc"><h5>What we will cover</h5><p>The vocabulary, the main types of machine learning, and then geophysics, sedimentology, geochemistry, minerals and paleontology, all on data where we can check the answer.</p></div>
-        <div class="tc"><h5>How each tab works</h5><p>The Concept band at the top is what we talk through. Try it Out! below it is yours to click, and a short quiz closes each tab.</p></div>
-        <div class="tc"><h5>k-means</h5><p>We choose k and place k centers. Every sample joins its nearest center, each center moves to the mean of its samples, and we repeat. The centers are just points in the data.</p></div>
-        <div class="tc"><h5>Self-organizing map</h5><p>A grid of neurons stretches over the samples. Each sample pulls its closest neuron, and that neuron's grid neighbors, toward it. Neighboring neurons end up describing similar samples.</p></div>
-        <div class="tc"><h5>The data</h5><p>Everything runs in the browser on 300 synthetic rock samples: sandstone, shale and limestone, each measured by gamma ray and density. The rock types are known, so we can check any method against them.</p></div>
-      </div>
-    </div>
-    <div class="try"><h4 class="band">Try it Out!</h4>
-      <p class="hook">Nobody told either method what a sandstone is. Group the same 300 samples with k-means and with a SOM, then turn on the true rock types and see how each one did.</p>
-      <div class="mod-grid">
-        <aside class="ex"><h4>What to do</h4><ol>
-          <li>Pick k-means and press Watch it run. Follow the centers.</li>
-          <li>Switch to the self-organizing map and press Watch it run. Look at the grid stretching over the samples.</li>
-          <li>Turn on the true rock types and compare the two methods. Then change k and the number of neurons.</li>
-          <li>Look at the panel on the right. What did each method build?</li>
-        </ol></aside>
-        <div class="panel">
-          <div class="row2">
-            <div><canvas id="st-a" data-aspect="0.85" aria-label="300 rock samples plotted by gamma ray and density"></canvas></div>
-            <div><h5 id="st-mh">What k-means built</h5><canvas id="st-m" data-aspect="0.85"></canvas></div>
-          </div>
-          <div class="ctlrow">
-            <div class="ctl"><label for="st-method">Method</label><select id="st-method"><option value="km">k-means</option><option value="som">Self-organizing map</option></select></div>
-            <div class="ctl"><label for="st-k">Groups, k</label><input type="range" id="st-k" min="2" max="6" step="1" value="3"><output id="st-k-o"></output></div>
-            <div class="ctl" id="st-siderow"><label for="st-side">Neurons per side</label><input type="range" id="st-side" min="2" max="6" step="1" value="4"><output id="st-side-o"></output></div>
-          </div>
-          <div class="ctlrow"><button type="button" class="btn primary" id="st-run">Watch it run</button><button type="button" class="btn" id="st-new">New start</button><label class="chk"><input type="checkbox" id="st-true"> Show the true rock type</label></div>
-          <div class="legend" id="st-legend"></div>
-          <div class="readout" id="st-out"></div>
-          <div class="readout" id="st-cmp" hidden></div>
-        </div>
-      </div>
-    </div>
-    <div class="lesson-nav"><span></span><button type="button" class="btn primary" data-go="next">Next: Vocabulary</button></div>
-  </section>
-</main>
+<main id="modules"></main>
 
 <dialog id="gloss">
   <h3 id="g-t"></h3>
@@ -68,6 +28,7 @@
 <script src="js/ml.js"></script>
 <script src="js/data.js"></script>
 <script src="js/plot.js"></script>
+<script src="js/art.js"></script>
 <script src="js/glossary.js"></script>
 <script src="js/modules1.js"></script>
 <script src="js/modules2.js"></script>

@@ -1,5 +1,7 @@
-/* talk.js - content around each activity: the talk band (what the instructor covers), the hook that
-   opens the try-it band, the steps, and a short check-yourself quiz. Written in first person plural. */
+/* talk.js - the words around each activity. Written for geology undergraduates who have not used machine
+   learning: every term is defined where it first appears, and steps come in the order we need them.
+   TALK: intro (one plain sentence), pre (html before the steps), steps (numbered, each with a drawing),
+   html (after the steps). TRY: the sentence that opens Try it Out!, and the steps. QUIZ: check yourself. */
 (function (g) {
   const { ML, DATA: D } = g;
   const INK = '#16191C', RED = '#841617', SL = '#5C6670', GR = '#C9CDD2';
@@ -71,26 +73,26 @@
   };
   const card = (key, name, tag, uses, algs) => `<button type="button" class="mcard" aria-expanded="false"><svg viewBox="0 0 120 84" aria-hidden="true">${icons[key]()}</svg><b>${name}</b><span class="mt">${tag}</span><span class="md"><i>In geoscience</i> ${uses}<br><i>Common methods</i> ${algs}</span></button>`;
   const mlmap = `<div class="mlmap">
-    <div class="mlgroup gs"><h5>Supervised<small>the answers are known for some samples</small></h5><div class="mcards">
-      ${card('classification', 'Classification', 'Sort samples into categories we already have names for.', 'Lithology from logs, fault or no fault, facies from attributes.', 'k-nearest neighbors, logistic regression, decision trees, support vector machines')}
-      ${card('regression', 'Regression', 'Predict a number from other numbers.', 'Porosity from density, permeability estimates, velocity from depth.', 'Linear and polynomial regression')}
+    <div class="mlgroup gs"><h5>Supervised<small>we know the answer for some samples</small></h5><div class="mcards">
+      ${card('classification', 'Classification', 'Put each sample into a category we already have a name for.', 'Calling a log interval sandstone, shale or limestone. Marking seismic samples as fault or not fault.', 'k-nearest neighbors, logistic regression, decision trees')}
+      ${card('regression', 'Regression', 'Predict a number from other numbers.', 'Porosity from density. Velocity from depth.', 'Linear and polynomial regression')}
     </div></div>
-    <div class="mlgroup gu"><h5>Unsupervised<small>no answers, only the measurements</small></h5><div class="mcards">
-      ${card('clustering', 'Clustering', 'Find groups that nobody named yet.', 'Seismic facies, geochemical populations.', 'k-means, self-organizing maps, DBSCAN')}
-      ${card('dimension', 'Dimension reduction', 'Fewer axes, same story.', 'Many logs or attributes shown on one page.', 'PCA, ICA, t-SNE')}
-      ${card('anomaly', 'Anomaly detection', 'Spot the sample that fits none of the groups.', 'Geochemical anomalies, unusual well behavior.', 'Distance to clusters, isolation forests')}
+    <div class="mlgroup gu"><h5>Unsupervised<small>no answers, only measurements</small></h5><div class="mcards">
+      ${card('clustering', 'Clustering', 'Find groups of similar samples when nobody has named the groups yet.', 'Seismic facies. Groups of stream-sediment chemistry.', 'k-means, self-organizing maps')}
+      ${card('dimension', 'Dimension reduction', 'Squeeze many measurements into two or three new ones that keep most of the pattern, so we can plot them.', 'Eight element concentrations on one plot.', 'PCA')}
+      ${card('anomaly', 'Anomaly detection', 'Find the sample that does not fit any group.', 'Odd geochemistry. A well that behaves differently from its neighbors.', 'Distance to the nearest group')}
     </div></div>
-    <div class="mlgroup gr"><h5>Reinforcement<small>learn by trial, reward, and error</small></h5><div class="mcards">
-      ${card('reinforcement', 'Reinforcement learning', 'An agent tries actions in an environment and keeps the ones that earn reward.', 'Steering wells in a simulator, planning inspection routes.', 'Q-learning, deep Q-networks')}
+    <div class="mlgroup gr"><h5>Reinforcement<small>learn by trying, with rewards and penalties</small></h5><div class="mcards">
+      ${card('reinforcement', 'Reinforcement learning', 'A program tries actions, gets a reward or a penalty for each, and keeps what works.', 'Steering a simulated drill bit toward a reservoir.', 'Q-learning')}
     </div></div>
-    <div class="mlgroup ge"><h5>Ensembles<small>a lot of simple models</small></h5><div class="mcards">
-      ${card('ensemble', 'Ensembles', 'Many small models vote, and the vote usually beats any one of them.', 'Facies prediction, prospectivity maps.', 'Random forest, gradient boosting')}
+    <div class="mlgroup ge"><h5>Ensembles<small>many small models that vote</small></h5><div class="mcards">
+      ${card('ensemble', 'Ensembles', 'Many simple models each give an answer, and the most common answer wins.', 'Facies from logs. Mineral prospectivity maps.', 'Random forest')}
     </div></div>
-    <div class="mlgroup gn"><h5>Neural networks<small>layers that learn their own features</small></h5><div class="mcards">
-      ${card('network', 'Deep learning', 'Layers of neurons learn what to look for.', 'Fault picking on seismic (convolutional), language models (transformers).', 'Convolutional networks, transformers')}
+    <div class="mlgroup gn"><h5>Neural networks<small>layers that learn what to look for</small></h5><div class="mcards">
+      ${card('network', 'Deep learning', 'Networks with many layers that learn which patterns matter in images or signals.', 'Picking faults on seismic sections. Reading thin sections.', 'Convolutional networks, transformers')}
     </div></div>
   </div>
-  <p class="hint">Click a card to open it. The outline follows Vas3k's <a href="https://vas3k.com/blog/machine_learning/" target="_blank" rel="noopener">Machine Learning for Everyone</a>, and it is a really nice read for anyone who wants more.</p>`;
+  <p class="hint">Click a card to open it. The outline follows Vas3k's <a href="https://vas3k.com/blog/machine_learning/" target="_blank" rel="noopener">Machine Learning for Everyone</a>, a friendly read for anyone who wants more.</p>`;
 
   const pair = (a, b) => `<div class="pc">
       <div class="pc-col good"><h5>${a.h}</h5><ul>${a.l.map(x => `<li>${x}</li>`).join('')}</ul></div>
@@ -98,212 +100,239 @@
     </div>`;
 
   g.TALK = {
+    start: {
+      intro: 'Today we teach a computer to sort rocks. First we set up the problem, then we try two ways of solving it.',
+      steps: [
+        { art: 'table', h: 'A table of samples', t: 'Every row is a rock sample, and the columns are what we measured: gamma ray, density, sonic slowness. A fourth column, the rock type, is hidden from the computer.' },
+        { art: 'bunches', h: 'Similar rocks bunch together', t: 'Plot the measurements and samples of the same rock type tend to land near each other. Grouping means finding those bunches without being told what they are.' },
+        { art: 'kmeans', h: 'Method 1: k-means', t: 'We pick a number, k. The computer drops k markers (called centers) into the data. Every sample joins its closest center, then each center moves to the middle of its samples. That repeats until nothing moves.' },
+        { art: 'som', h: 'Method 2: self-organizing map', t: 'A SOM spreads a grid of small units (neurons) over the data. Each sample pulls its closest neuron, and the neurons beside it, a little closer. The grid ends up stretched over the data like a net.' },
+        { art: 'check', h: 'Checking the answer', t: 'These 300 samples are made up, so we know each rock type and can check the groups. With real data we usually do not have that, so we check against core or wells.' }
+      ]
+    },
     vocab: {
-
-      html: `<div class="split">
+      intro: 'These four terms get mixed up a lot. Each one is a smaller part of the one before it.',
+      pre: `<div class="split">
           <svg id="v-rings" viewBox="0 0 400 400" role="group" aria-label="Nested circles: AI, machine learning, deep learning, LLM"></svg>
           <div id="v-info" class="info" aria-live="polite"></div>
         </div>
-        <p class="hint">Click the rings from the outside in.</p>`
+        <p class="hint">Click the rings from the outside in. Every LLM is deep learning, every deep-learning model is machine learning, and all of machine learning counts as AI.</p>`
     },
-    types: { html: mlmap },
+    types: {
+      intro: 'One word we need first is label. A label is an answer we already know for a sample, such as a rock type from core. Whether we have labels sorts most of machine learning into a few families.',
+      pre: `<div class="lab-demo"><div class="cs"><div class="fig">${'{{labels}}'}</div><h5>With labels</h5><p>Each sample comes with its rock type.</p></div><div class="cs"><div class="fig">${'{{fewdots}}'}</div><h5>Without labels</h5><p>The computer sees only the measurements.</p></div></div>`,
+      html: mlmap
+    },
     fit: {
-
+      intro: 'Machine learning is not the right tool for every problem. These two lists help us decide before we start.',
       html: pair(
-        { h: 'Often a good fit', l: ['A lot of examples, and some of them with known answers', 'Patterns that are hard to write down as rules', 'The same kind of measurement over and over, like logs, traces, images and samples'] },
-        { h: 'Often a poor fit', l: ['A handful of samples', 'The physics already gives us the answer', 'Predictions well outside the range of the training data', 'No independent way to check the result'] })
+        { h: 'Often a good fit', l: ['Hundreds or thousands of samples, some of them with known answers.', 'A pattern that is hard to write as a rule, like telling facies apart from six log curves.', 'The same kind of measurement repeated many times: logs, seismic traces, photos.'] },
+        { h: 'Often a poor fit', l: ['Only a handful of samples.', 'A known equation already gives the answer, like travel time through layers of known velocity.', 'The question is far outside the data we trained on.', 'No independent way to check the result, such as core or a well.'] })
     },
     pca: {
-
-      cards: [
-        { h: 'Lots of variables', t: 'Four log curves make every sample a point in four dimensions. We can\'t plot that, but we can still measure it.' },
-        { h: 'Directions of spread', t: 'PCA finds the direction with the most variance, and then the next direction at right angles to it.' },
-        { h: 'Keeping fewer components', t: 'Two components often hold most of the variance, so the samples fit on a page and we can really look at them.' },
-        { h: 'Reading a component', t: 'Each component is a weighted mix of the original variables, and the loadings show us the mix. What the mix means in the rocks comes afterward, when we compare with what we know.' }
+      intro: 'Logs give us several measurements at every depth. PCA is a way to show all of them on one flat plot.',
+      steps: [
+        { art: 'table', h: 'Many measurements per sample', t: 'Gamma ray, density, sonic and neutron porosity make four measurements. That puts each sample at a point in a four-dimensional space, which we cannot draw.' },
+        { art: 'spread', h: 'Find the direction of most spread', t: 'Principal component analysis (PCA) finds the line through the cloud of points along which the samples spread out the most. That line is the first principal component, PC1. PC2 is the next best direction, at right angles to PC1.' },
+        { art: 'flatten', h: 'Flatten the cloud', t: 'Plot every sample using only PC1 and PC2. The whole data set now fits on one page, and we keep as much of the spread as two directions allow.' },
+        { art: 'loadings', h: 'Read the components', t: 'A component is a mix of the original measurements, and the loadings say how much of each goes into the mix. What that mix means in the rock, such as clay content, is something we work out afterward by comparing with what we know.' }
       ]
     },
     unsup: {
- html: learnStrip('un'),
-      cards: [
-        { h: 'No labels', t: 'The method only sees the measurements.' },
-        { h: 'k-means', t: 'We place k centers, every sample joins its nearest one, each center moves to the middle of its samples, and we repeat until nothing changes.' },
-        { h: 'Choosing k', t: 'The bend in the total-distance curve is one guide, and what we know about the geology is another.' },
-        { h: 'Self-organizing maps', t: 'A grid of neurons that gets used a lot for seismic facies. We will see one at work in the geophysics tab.' }
+      intro: 'In unsupervised learning the computer gets no labels. It looks for structure on its own.',
+      pre: '{{strip:un}}',
+      steps: [
+        { art: 'bunches', h: 'Groups of similar samples', t: 'Samples with similar measurements land near each other. Finding those bunches is called clustering, and each bunch is a cluster.' },
+        { art: 'kmeans', h: 'k-means, one round at a time', t: 'We choose the number of groups, k. The computer drops k centers into the data, joins each sample to its closest center, and moves each center to the middle of its samples. It repeats until no sample changes group.' },
+        { art: 'elbow', h: 'Choosing k', t: 'More groups always brings the centers closer to the samples, so we look for the bend in the curve where extra groups stop helping much. What we know about the geology counts too.' },
+        { art: 'som', h: 'Other methods', t: 'A self-organizing map is another clustering method, built from a grid of neurons. We use one on seismic data in the Geophysics tab.' }
       ]
     },
     sup: {
- html: learnStrip('sup'),
-      cards: [
-        { h: 'Known labels', t: 'Some samples come with an answer, like a lithology from core.' },
-        { h: 'The model is a boundary', t: 'Training decides where the boundary between the classes goes.' },
-        { h: 'Training and test data', t: 'We keep some samples out of the fitting and use them only to check the predictions.' },
-        { h: 'Overfitting', t: 'A model can follow the training samples very closely and then predict new samples worse.' }
+      intro: 'In supervised learning some samples come with an answer, and the computer learns from them.',
+      pre: '{{strip:sup}}',
+      steps: [
+        { art: 'labels', h: 'Labeled samples', t: 'A label is an answer we already know, like a rock type from core. The computer studies the labeled samples to see which measurements go with which label.' },
+        { art: 'boundary', h: 'The model is a boundary', t: 'A model is the rule the computer builds. Here it is a boundary between the classes, so a new sample gets the label of the side it falls on.' },
+        { art: 'split', h: 'Training samples and test samples', t: 'We hide some labeled samples while the computer learns (training) and use them afterward as a fair check (testing). A model always looks good on the samples it learned from.' },
+        { art: 'overfit', h: 'Overfitting', t: 'If the boundary bends to catch every training sample, odd ones included, it usually does worse on new samples. That is overfitting.' }
       ]
     },
     semi: {
- html: learnStrip('semi'),
-      cards: [
-        { h: 'Few labels, many samples', t: 'A cored interval is short, and the logs run the whole well.' },
-        { h: 'Label propagation', t: 'Each sample links to its nearest neighbors, and the labels spread along the links.' },
-        { h: 'When it helps', t: 'Most when labels are scarce and the classes form separate clusters.' }
+      intro: 'Getting labels takes core description or lab work, while logs are recorded for every well. Semi-supervised learning uses both.',
+      pre: '{{strip:semi}}',
+      steps: [
+        { art: 'fewlabels', h: 'A few labels, lots of samples', t: 'A cored interval is short, and the logs run the whole well. Only a few samples have a known rock type.' },
+        { art: 'spreadlabels', h: 'Labels pass to neighbors', t: 'Samples connect to their closest neighbors, and the labels travel along the connections. This is called label propagation.' },
+        { art: 'check', h: 'When it helps', t: 'It helps most when labels are scarce and the rock types form separate bunches.' }
       ]
     },
     nn: {
-
-      cards: [
-        { h: 'Layers of neurons', t: 'Each neuron takes a weighted sum of its inputs and passes it through a nonlinear function.' },
-        { h: 'Training', t: 'We adjust the weights to make the loss smaller, one epoch at a time.' },
-        { h: 'Hidden layers', t: 'More neurons and more layers let the boundary bend, so it can wrap around a ring.' },
-        { h: 'Deep learning', t: 'Networks with many layers. Convolutional networks pick faults on seismic sections, and that is a really fun application.' }
+      intro: 'A neural network is a computer program loosely inspired by how brain cells connect. It is built from very simple pieces.',
+      steps: [
+        { art: 'neuron', h: 'A neuron is a small calculator', t: 'It multiplies each input by a weight, adds up the results, and passes the total through a simple curve. The weights decide how much each input matters.' },
+        { art: 'layers', h: 'Neurons come in layers', t: 'The outputs of one layer become the inputs of the next. Layers between the input and the output are called hidden layers.' },
+        { art: 'loss', h: 'Training adjusts the weights', t: 'The computer starts with random weights and nudges them over many passes through the data, called epochs. The loss is a number that says how far off the answers are, and training pushes it down.' },
+        { art: 'ring', h: 'Why hidden layers matter', t: 'With no hidden layer, a network can only draw a straight boundary. Hidden neurons let the boundary bend, for example around a ring-shaped mineralized zone.' }
       ]
     },
     cnn: {
-
-      html: `<div class="tcards">
-          <div class="tc"><h5>A filter slides over the image</h5><p>A small grid of weights moves across the picture and marks where it finds a match. The result is a feature map.</p></div>
-          <div class="tc"><h5>Layers build up</h5><p>Early layers respond to edges and spots, later layers to arrangements of them, and the last layers to whole objects.</p></div>
-          <div class="tc"><h5>Training picks the filters</h5><p>In a real network the weights are learned. Here we set two filters by hand so we can see exactly what they do.</p></div>
-          <div class="tc"><h5>Muffin or chihuahua?</h5><p>Two dark eyes and a nose look a lot like blueberries. The meme by @teenybiscuit made that point, and the <a href="https://www.bbc.com/bbcthree/article/2fa66196-ab28-4610-b494-88607becf5ee" target="_blank" rel="noopener">BBC Three article</a> tells the story.</p></div>
-        </div>
+      intro: 'A convolutional neural network (CNN) is a neural network designed for images. Fault picking on seismic and reading thin sections both use them.',
+      steps: [
+        { art: 'pixels', h: 'A picture is a grid of numbers', t: 'A pixel is one number, dark or light. The computer works with the numbers, not with what we see.' },
+        { art: 'kernel', h: 'A filter slides across the picture', t: 'A filter is a small grid of weights. It slides over the picture and gives a high value wherever the picture matches its pattern. The result is a new picture called a feature map.' },
+        { art: 'buildup', h: 'Layers build on each other', t: 'First-layer filters find simple things like edges and dark spots. The next layer looks for arrangements of those, like two spots above a third. Later layers pick out whole objects.' },
+        { art: 'magnify', h: 'Muffin or chihuahua?', t: 'Two dark eyes and a nose look a lot like blueberries in a muffin. In a trained network the computer learns the filters. Here we set two by hand so we can see what they do.' }
+      ],
+      html: `<p class="hint">The famous photo grid is by @teenybiscuit. The <a href="https://www.bbc.com/bbcthree/article/2fa66196-ab28-4610-b494-88607becf5ee" target="_blank" rel="noopener">BBC Three article</a> tells the story.</p>
         <figure class="meme"><img src="img/muffin-or-chihuahua.png" alt="A grid of sixteen photos: chihuahua faces and blueberry muffins that look alike" onerror="this.parentNode.remove()"><figcaption>Credit: @teenybiscuit. Shown for teaching.</figcaption></figure>`
     },
     sam: {
-
-      html: `<div class="tcards">
-          <div class="tc"><h5>Prompts in, masks out</h5><p>We click a point or draw a box, and the model returns an outline of the thing under it. That outline is a mask.</p></div>
-          <div class="tc"><h5>Three answers per click</h5><p>One click can mean a part, a whole object, or a group, so the model offers several masks and we pick.</p></div>
-          <div class="tc"><h5>Segment everything</h5><p>A grid of clicks gives masks for the whole image, which is useful for counting grains.</p></div>
-          <div class="tc"><h5>No names</h5><p>The masks carry no mineral names. Naming comes from a second step, like grouping colors and textures, or from us.</p></div>
-        </div>
-        <p class="hint">This page uses a synthetic thin section and a simple region-growing stand-in that behaves like the real model in these ways. The real Segment Anything Model comes from Meta AI: <a href="https://segment-anything.com/" target="_blank" rel="noopener">segment-anything.com</a> and <a href="https://github.com/facebookresearch/segment-anything" target="_blank" rel="noopener">the code on GitHub</a>. On real thin sections, the modal percentages still need a check against a point count.</p>`
+      intro: 'A thin section is a picture full of grains. Before we can count minerals, something has to outline each grain.',
+      steps: [
+        { art: 'mask', h: 'Segmentation outlines things', t: 'Segmentation splits a picture into regions. The outline of one region is called a mask.' },
+        { art: 'three', h: 'A click gives several masks', t: 'The Segment Anything Model (SAM) from Meta AI takes a prompt, such as a click on a grain. A click could mean a stripe inside the grain, the whole grain, or a group of touching grains, so SAM returns several masks and we pick.' },
+        { art: 'everything', h: 'Segment everything', t: 'A grid of clicks gives masks for the whole picture, which helps with counting grains.' },
+        { art: 'names', h: 'Masks have no names', t: 'SAM does not know which mineral is which. Naming the masks is a second step, done by color and texture or by us.' }
+      ],
+      html: `<p class="hint">This page uses a synthetic thin section and a simple stand-in that grows a region from each click. It behaves like the real model in the ways shown here, and it is not the real model. The real one is at <a href="https://segment-anything.com/" target="_blank" rel="noopener">segment-anything.com</a> and <a href="https://github.com/facebookresearch/segment-anything" target="_blank" rel="noopener">on GitHub</a>. On real thin sections, the mineral percentages should still be checked against a point count.</p>`
     },
     llm: {
-
+      intro: 'A large language model (LLM) is the kind of program behind chat assistants.',
+      steps: [
+        { art: 'llm', h: 'It predicts the next word', t: 'An LLM has read a huge amount of text. Given some words, it picks a likely next piece of text (a token), then the next, and so on. It writes what sounds likely. It does not look facts up.' }
+      ],
       html: pair(
-        { h: 'Strengths in research', l: ['Drafting and debugging code for reading files and making plots', 'Plain-language explanations of a method we haven\'t met yet', 'Rewording, translation and editing', 'Suggesting methods for us to look up'] },
-        { h: 'Limits in research', l: ['References and numbers that read correctly and may not exist', 'No knowledge of anything after the training cutoff', 'Anything we type is sent to the provider, unpublished data included', 'The same prompt can give different text, and the models change over time'] })
+        { h: 'Where it helps in research', l: ['Writing and fixing short scripts that read files and make plots.', 'Explaining a method we have not met yet, in plain words.', 'Rewording, editing and translating text.', 'Suggesting methods and terms to look up.'] },
+        { h: 'Where it can mislead', l: ['It can invent references and numbers that look real.', 'It knows nothing published after its training.', 'What we type goes to the company running it, unpublished data included.', 'The same question can get different answers, and the models change over time.'] })
     },
     geo: {
-
-      html: `<ol class="flow"><li>Seismic section</li><li>Attributes</li><li>Self-organizing map</li><li>Facies map</li><li>Wells</li></ol>
-             <p class="hint">A synthetic channel system with three facies: floodplain shale, channel sand, and levee. I like to show this example because we know the answer, so we can see exactly where each step helps.</p>`
-    },
-    tracks: {
-
-      cards: [
-        { h: 'Sedimentology', t: 'Facies from logs. Which curves we use and where the core is cut change the answer.' },
-        { h: 'Geochemistry', t: 'PCA on concentrations depends on how the data are scaled and transformed.' },
-        { h: 'Critical minerals', t: 'A few known deposits among a lot of barren cells.' },
-        { h: 'Paleontology', t: 'Size and shape can land on different axes.' }
+      intro: 'Here we build a fake channel system, so the right answer is known. The path goes from a seismic line to a map of rock types.',
+      steps: [
+        { art: 'seismic', h: 'Seismic section', t: 'A seismic line is a picture made from sound waves reflected off rock boundaries. Sand and shale reflect differently.' },
+        { art: 'attribute', h: 'Attributes', t: 'An attribute is a number measured from the seismic inside a window, such as how strong the reflections are. Every trace gets its own numbers.' },
+        { art: 'facies', h: 'Facies', t: 'A facies is a body of rock with its own character. In this made-up example: floodplain shale, channel sand and levee.' },
+        { art: 'som', h: 'Grouping with a SOM', t: 'A self-organizing map groups the traces by their attributes, without being told about facies. Then we check which attributes the groups depended on.' },
+        { art: 'wells', h: 'Wells give labels', t: 'A well tells us the facies at one spot. A few wells let a supervised method label the whole map, but only for the facies the wells cut.' }
       ]
     },
-    hw: {
-
-      cards: [
-        { h: 'Bring a table', t: 'Any .csv or Excel file with columns of numbers works: logs, geochemistry, counts, measurements. A label column, like a lithology or a yes/no, unlocks the prediction step.' },
-        { h: 'The same workflow', t: 'We look at the columns, run PCA, group with k-means, and check a nearest-neighbor classifier, the same steps we used in class.' },
-        { h: 'Your data stay put', t: 'The file is read inside your browser and goes nowhere. A few sample tables are here if you want to practice first.' },
-        { h: 'Want seismic?', t: 'Try <a href="https://hbedle-subsurface.github.io/analyze-2d/" target="_blank" rel="noopener">Analyze 2D</a>, where you load a 2D seismic line and run attributes, a SOM and SHAP, or the guided exercise in <a href="https://hbedle-subsurface.github.io/scan-lecture/" target="_blank" rel="noopener">scan-lecture</a>.' }
+    tracks: {
+      intro: 'The same tools work on other kinds of rock data. Each tab below uses made-up data shaped like a real problem.',
+      steps: [
+        { art: 'core', h: 'Sedimentology', t: 'Predict facies from well logs. The curves we use, and where the core was cut, change the answer.' },
+        { art: 'elements', h: 'Geochemistry', t: 'PCA on element concentrations depends on how the numbers are scaled first.' },
+        { art: 'depmap', h: 'Critical minerals', t: 'A few known deposits are scattered among a lot of empty map cells, and the model still has to rank the cells.' },
+        { art: 'shell', h: 'Paleontology', t: 'Shell size and shell shape can end up on different axes.' }
       ]
     },
     traps: {
-
-      cards: [
-        { h: 'Small samples', t: 'A test score from a few samples can land almost anywhere.' },
-        { h: 'Neighbors resemble each other', t: 'A random split of spatial data puts near-copies of each test sample in the training set.' },
-        { h: 'Rare targets', t: 'When positives are rare, accuracy can stay high while the target is missed.' }
+      intro: 'A high score does not always mean a good model. These three situations give scores that look better than they should.',
+      steps: [
+        { art: 'fewdots', h: 'Very few samples', t: 'With a small training set, the test score changes a lot from one random draw to the next.' },
+        { art: 'neighbors', h: 'Neighbors look alike', t: 'Samples close together on a map have similar values. A random split puts near-copies of each test sample in the training set, so the test is too easy.' },
+        { art: 'rare', h: 'A rare target', t: 'If only 2% of the samples are positive, a model that always answers no is 98% accurate and finds nothing.' }
+      ]
+    },
+    hw: {
+      intro: 'This last tab is for after class. It runs the same steps on a table of your own.',
+      steps: [
+        { art: 'file', h: 'Bring a table', t: 'Any .csv or Excel file with columns of numbers works: logs, geochemistry, counts, measurements. A label column, like a rock type or a yes/no, turns on the prediction step.' },
+        { art: 'magnify', h: 'Look, then reduce', t: 'First we look at each column, then run PCA to see the main patterns.' },
+        { art: 'kmeans', h: 'Group, then predict', t: 'Next we group the samples with k-means, and if there is a label column, we check how well nearest neighbors can predict it.' },
+        { art: 'tick', h: 'Your data stay put', t: 'The file is read inside the browser and goes nowhere. Sample tables are provided for practice. For seismic, try <a href="https://hbedle-subsurface.github.io/analyze-2d/" target="_blank" rel="noopener">Analyze 2D</a> or the guided exercise in <a href="https://hbedle-subsurface.github.io/scan-lecture/" target="_blank" rel="noopener">scan-lecture</a>.' }
       ]
     }
   };
 
-  /* ---------- the hook that opens each try-it band, and the steps ---------- */
+  /* ---------- the sentence that opens Try it Out!, and the steps ---------- */
   g.TRY = {
-    vocab: { hook: 'An expert wrote that rule for a different basin. Let\'s see whether a rule learned from our own samples does better.', steps: ['Slide the training samples from 2 up to 100 and watch the red line.', 'Find the number of samples where the learned threshold stops moving much.', 'Compare its accuracy with the expert rule.'] },
-    types: { hook: 'The first step is naming the kind of problem we have. Let\'s see how many of these we can name.', steps: ['Slide the curviness from 1 to 10 and watch the line follow the filled dots.', 'Keep an eye on the hollow test dots and the two error numbers.', 'Answer the six questions below.'] },
-    fit: { hook: 'Before we reach for a method, we ask whether machine learning fits the problem at all. Sort these six.', steps: ['Read each situation and pick Good fit, Depends or Poor fit.', 'Finish all six and read the score.'] },
-    pca: { hook: 'Four log curves have to fit on one page. Let\'s see how much of the variance two axes can keep.', steps: ['Turn the cloud, then slide Flatten to bring it down onto PC1 and PC2.', 'Turn on the lithology colors and see where the rocks land.', 'If you have time, use the angle slider to find the direction with the most variance, and then step through the components kept.'] },
-    unsup: { hook: 'There are no labels at all. We find groups anyway, and we choose how many to ask for.', steps: ['Press Watch it run and follow the centers.', 'Raise k one step at a time and find the bend in the curve.', 'Press New start a few times at k = 4 and see whether the groups change.', 'Turn on the lithology check and compare the groups with the rocks.'] },
-    sup: { hook: 'Now some samples have answers. We decide how closely the model should follow them.', steps: ['Move the angle and offset sliders until the line separates sandstone from shale.', 'Press Fit by machine and compare.', 'In the second panel set k to 1 and read the training and test accuracy.', 'Raise k and follow the two curves.'] },
-    semi: { hook: 'Labels are scarce and logs are everywhere. Let\'s see how far a handful of labels goes.', steps: ['Start with one label per lithology and compare the two maps.', 'Raise the number of labels one at a time.', 'Press New labels a few times and read the 30-draw average.'] },
-    nn: { hook: 'A straight boundary can\'t wrap around a mineralized zone, so we add neurons until it can.', steps: ['Choose the ring data, set 0 hidden layers and press Train.', 'Add neurons and layers and train again. Move the cursor over the map and watch the network light up.', 'Compare training and test accuracy after 1000 epochs.'] },
-    cnn: { hook: 'Two dark eyes and a nose look a lot like three blueberries. Play first, and then watch a small stack of filters make the call.', steps: ['Mark each of the eight pictures Muffin or Chihuahua.', 'Slide the resolution down, press New set of eight, and try again.', 'Click a picture and follow it through layer 1 and layer 2.', 'Slide the spot size, eye spacing and threshold and watch the dots for muffins and chihuahuas separate.'] },
-    sam: { hook: 'Point counting 300 grains by hand takes a while. Let\'s see how much of a modal analysis a grid of clicks can give us.', steps: ['Click a grain and slide the mask size from part to grain to look-alikes.', 'Segment everything and move the color sensitivity. Watch the counts against the real grains.', 'Group the masks, name each group, and compare your modal percentages with the true ones.'] },
-    llm: { hook: 'These eight references all look right, and only four exist. Pick out the four that do.', steps: ['Mark each of the eight references real or made up. Four are real.', 'If there is time, lower the temperature and press Sample 20 answers, then raise it and sample again.'] },
-    geo: { hook: 'We start with one seismic line and end with a facies map, and along the way we find out which attributes carried the answer.', steps: ['Press Play the line across the map and follow the channel on the section.', 'Change the window length and compare the four attribute maps.', 'Press Watch the map train and turn on the true facies.', 'Shuffle one attribute and read the refit chart.', 'Add wells and see which facies the first wells never cut.'] },
-    tracks: { hook: 'Same tools, different rocks. We see what changes when the data come from a core, a stream, or a shell.', steps: ['Sedimentology: check only gamma ray, then add curves, and move the start of the core.', 'Geochemistry: try raw, standardized and log10, and color the pegmatite catchments.', 'Prospectivity: raise the known deposits and count the hits in the top 10%.', 'Paleontology: raise the range of growth stages.'] },
-    hw: { hook: 'Your own data are the best test. Load a table and see whether the tools from class find something we should go and check.', steps: ['Load your file, or start with one of the sample tables.', 'Tick the numeric columns to use as features, and pick a label column if you have one.', 'Walk through Look, PCA, Clusters and Predict.', 'Open Results, download your summary, and answer the questions.'] },
-    traps: { hook: 'A high score is nice, and three things can make it misleading.', steps: ['Small samples: lower the training samples and read the spread of the dots.', 'Spatial: raise the correlation length and compare the two splits.', 'Rare targets: lower the share of positives, compare accuracy with recall, then weight the classes.'] }
+    start: { hook: 'Neither method is told what a sandstone is. Group the same 300 samples both ways, then reveal the true rock types and see how each did.', steps: ['Choose k-means and press Watch it run. Follow the big markers (the centers) as they move.', 'Change the number of groups, k, and watch the colors change.', 'Switch to the self-organizing map and press Watch it run. The grid stretches over the samples.', 'Turn on Reveal the true rock types. Compare the two plots and the scores.', 'Try a 2 by 2 map, then a 6 by 6 map. Then try merging the neurons into groups.'] },
+    vocab: { hook: 'An expert wrote a rule for another basin. Move the slider to see whether a rule learned from our own samples does better.', steps: ['Slide the training samples from 2 up to 100 and watch the red line.', 'Find the number of samples where the learned line stops moving much.', 'Compare its accuracy with the expert rule.'] },
+    types: { hook: 'Naming the kind of problem comes before choosing a method. Draw a line through the dots, then name six problems.', steps: ['Slide the curviness from 1 to 10 and watch the line follow the filled dots.', 'Watch the hollow test dots and the two error numbers.', 'Answer the six questions below.'] },
+    fit: { hook: 'Six situations, three answers each. Decide whether machine learning fits.', steps: ['Read each situation and pick Good fit, Depends or Poor fit.', 'Finish all six and read the score.'] },
+    pca: { hook: 'Four log curves have to fit on one page. Flatten the cloud and see how much of the spread two directions keep.', steps: ['Turn the cloud, then slide Flatten to bring it down onto PC1 and PC2.', 'Turn on the lithology colors and see where the rocks land.', 'If you have time, use the angle slider to find the direction with the most spread, and then step through the components kept.'] },
+    unsup: { hook: 'There are no labels here, and we choose how many groups to ask for. Try a few values and see what changes.', steps: ['Press Watch it run and follow the centers.', 'Raise k one step at a time and find the bend in the curve.', 'Press New start a few times at k = 4 and see whether the groups change.', 'Turn on the lithology check and compare the groups with the rocks.'] },
+    sup: { hook: 'Now some samples have answers. You decide how closely the model should follow them.', steps: ['Move the angle and offset sliders until the line separates sandstone from shale.', 'Press Fit by machine and compare.', 'In the second panel set k to 1 and read the training and test accuracy.', 'Raise k and follow the two curves.'] },
+    semi: { hook: 'Labels are scarce and logs are everywhere. Try one label per rock type, then add more.', steps: ['Start with one label per lithology and compare the two maps.', 'Raise the number of labels one at a time.', 'Press New labels a few times and read the 30-draw average.'] },
+    nn: { hook: 'A straight boundary cannot wrap around a mineralized zone. Add neurons until the network can.', steps: ['Choose the ring data, set 0 hidden layers and press Train.', 'Add neurons and layers and train again. Move the cursor over the map and watch the network light up.', 'Compare training and test accuracy after 1000 epochs.'] },
+    cnn: { hook: 'Two dark eyes and a nose look a lot like three blueberries. Play first, then watch two hand-made filters make the call.', steps: ['Mark each of the eight pictures Muffin or Chihuahua.', 'Slide the resolution down, press New set of eight, and try again.', 'Click a picture and follow it through layer 1 and layer 2.', 'Slide the spot size, eye spacing and threshold and watch the dots for muffins and chihuahuas separate.'] },
+    sam: { hook: 'Counting 300 grains by hand takes a while. See how far a grid of clicks gets us toward the mineral percentages.', steps: ['Click a grain and slide the mask size from part to grain to look-alikes.', 'Segment everything and move the color sensitivity. Compare the mask count with the real grain count.', 'Group the masks, name each group, and compare your mineral percentages with the true ones.'] },
+    llm: { hook: 'Eight references, all formatted the same way, and only four exist. Pick out the four that do.', steps: ['Mark each of the eight references real or made up.', 'If there is time, lower the randomness and press Sample 20 answers, then raise it and sample again.'] },
+    geo: { hook: 'Start from one seismic line and end with a map of rock types, then find out which attributes carried the answer.', steps: ['Press Play the line across the map and follow the channel on the section.', 'Change the window length and compare the four attribute maps.', 'Press Watch the map train and turn on the true facies.', 'Shuffle one attribute and read the refit chart.', 'Add wells and see which facies the first wells never cut.'] },
+    tracks: { hook: 'Same tools, different rocks. See what changes when the data come from a core, a stream, or a shell.', steps: ['Sedimentology: check only gamma ray, then add curves, and move the start of the core.', 'Geochemistry: try raw, standardized and log10, and color the pegmatite catchments.', 'Prospectivity: raise the known deposits and count the hits in the top 10%.', 'Paleontology: raise the range of growth stages.'] },
+    traps: { hook: 'Three ways a test score can look better than it should. Move each slider and watch the score.', steps: ['Small samples: lower the training samples and read the spread of the dots.', 'Spatial: raise how far the pattern extends and compare the two splits.', 'Rare targets: lower the share of positives, compare accuracy with recall, then weight the classes.'] },
+    hw: { hook: 'Your own data are the best test. Load a table and see what the tools from class find.', steps: ['Load your file, or start with one of the sample tables.', 'Tick the numeric columns to use as features, and pick a label column if you have one.', 'Walk through Look, PCA, Clusters and Predict.', 'Open Results, download your summary, and answer the questions.'] }
   };
 
-  /* ---------- check yourself: q, opts, a (index of the right option), why ---------- */
+  /* ---------- check yourself: q, o (options), a (index of the right one), why ---------- */
   const T6 = ['Classification', 'Regression', 'Clustering', 'Dimension reduction', 'Anomaly detection', 'Reinforcement learning'];
   g.QUIZ = {
     start: [
-      { q: 'In k-means, what defines a group?', o: ['The nearest of k centers', 'A neuron on a grid', 'The known rock type', 'A label from core'], a: 0, why: 'Every sample joins the nearest center, and the centers move until nothing changes.' },
-      { q: 'What does a self-organizing map add to grouping?', o: ['Neighboring neurons on the grid describe similar samples, so we get a map', 'It uses the rock labels', 'It always finds more groups', 'It needs no data'], a: 0, why: 'A sample pulls its closest neuron and that neuron\'s grid neighbors, so the grid folds over the data and keeps similar samples close together. So SOMs get used a lot for seismic facies maps.' },
-      { q: 'Why can we check both methods against the true rock type here?', o: ['The data are synthetic, so the answers are known', 'Both methods use the labels', 'Real data always come with labels', 'k-means guesses the labels'], a: 0, why: 'With real data the answer is usually not known, so we compare with wells, core, or geological judgment.' }
+      { q: 'In k-means, what decides which group a sample belongs to?', o: ['The closest of the k centers', 'A neuron on a grid', 'The rock type from core', 'The sample\'s depth'], a: 0, why: 'Every sample joins its nearest center, and the centers move until nothing changes.' },
+      { q: 'What does the self-organizing map add compared with k-means?', o: ['Neighboring neurons on the grid describe similar samples, so we get a map', 'It uses the rock labels', 'It always finds more groups', 'It needs no data'], a: 0, why: 'A sample pulls its closest neuron and that neuron\'s grid neighbors, so the grid folds over the data and keeps similar samples close together.' },
+      { q: 'Why can we check both methods against the true rock types here?', o: ['The data are made up, so the answers are known', 'Both methods use the labels', 'Real data always come with labels', 'k-means guesses the labels'], a: 0, why: 'With real data the answer is usually not known, so we compare with wells, core, or geological judgment.' }
     ],
     vocab: [
-      { q: 'A rule says: call it shale when gamma ray is above 90. Which term fits best?', o: ['Artificial intelligence', 'Machine learning', 'Deep learning', 'A large language model'], a: 0, why: 'A person wrote the rule, so it is AI in the broad sense. Nothing was learned from data.' },
-      { q: 'When we raised the number of training samples, what changed?', o: ['The expert rule moved', 'The learned threshold settled near the value that separates the samples best', 'Both stayed put', 'The rule turned into a neural network'], a: 1, why: 'The expert rule is fixed. The learned one is estimated from the samples, so more samples make it steadier.' }
+      { q: 'A rule says: call it shale when gamma ray is above 90. Which term fits best?', o: ['Artificial intelligence', 'Machine learning', 'Deep learning', 'A large language model'], a: 0, why: 'A person wrote the rule, so it counts as AI in the broad sense. Nothing was learned from data.' },
+      { q: 'When we raised the number of training samples, what changed?', o: ['The expert rule moved', 'The learned line settled near the value that separates the samples best', 'Both stayed put', 'The rule turned into a neural network'], a: 1, why: 'The expert rule is fixed. The learned one is estimated from the samples, so more samples make it steadier.' }
     ],
     types: [
-      { q: 'Predict porosity, a number, from bulk density.', o: T6, a: 1, why: 'A number on a continuous axis is regression.' },
+      { q: 'Predict porosity, a number, from bulk density.', o: T6, a: 1, why: 'A number on a continuous scale is regression.' },
       { q: 'Label every seismic sample as fault or not fault, using faults a person already picked.', o: T6, a: 0, why: 'Known categories and known examples make this classification.' },
-      { q: 'Group 50,000 stream-sediment samples when no classes exist yet.', o: T6, a: 2, why: 'No labels and no names for the groups. Clustering.' },
-      { q: 'Squeeze eight element concentrations onto two axes so we can plot them.', o: T6, a: 3, why: 'Fewer axes that keep the structure is dimension reduction, and PCA is the usual first choice.' },
+      { q: 'Group 50,000 stream-sediment samples when no classes exist yet.', o: T6, a: 2, why: 'No labels and no names for the groups: clustering.' },
+      { q: 'Squeeze eight element concentrations onto two axes so we can plot them.', o: T6, a: 3, why: 'Fewer axes that keep the pattern is dimension reduction. PCA is the usual first choice.' },
       { q: 'Flag the one sample that fits none of the known geochemical populations.', o: T6, a: 4, why: 'Finding what does not belong to any group is anomaly detection.' },
-      { q: 'Let a simulated drill bit try steering moves, and reward it for staying in the reservoir.', o: T6, a: 5, why: 'An agent, an environment, and a reward make this reinforcement learning.' }
+      { q: 'Let a simulated drill bit try steering moves, and reward it for staying in the reservoir.', o: T6, a: 5, why: 'A program, a set of actions, and a reward make this reinforcement learning.' }
     ],
     pca: [
-      { q: 'After we flatten the cloud onto PC1 and PC2, what have we kept?', o: ['All of the variance', 'Most of the variance of the three variables, in two axes', 'Only gamma ray', 'None of the structure'], a: 1, why: 'Two components hold most of the variance here, and the readout says how much.' },
-      { q: 'PC1 has similar positive loadings on several logs. What does that tell us?', o: ['PC1 is really just one log', 'PC1 is a mix in which those logs rise and fall together', 'PC1 measures lithology directly', 'PC1 is noise'], a: 1, why: 'The loadings are arithmetic. Calling that mix clay content or lithology is a geological reading we add afterward.' }
+      { q: 'After we flatten the cloud onto PC1 and PC2, what have we kept?', o: ['All of the spread', 'Most of the spread of the three measurements, in two axes', 'Only gamma ray', 'None of the pattern'], a: 1, why: 'Two components hold most of the spread here, and the readout says how much.' },
+      { q: 'PC1 has similar positive loadings on several logs. What does that tell us?', o: ['PC1 is really just one log', 'PC1 is a mix in which those logs rise and fall together', 'PC1 measures lithology directly', 'PC1 is noise'], a: 1, why: 'The loadings only describe the mix. Calling that mix clay content or lithology is a geological reading we add afterward.' }
     ],
     unsup: [
-      { q: 'In k-means, what happens after every sample has joined its nearest center?', o: ['Each center moves to the mean of its samples', 'The lithology labels are added', 'k changes', 'Nothing, and the method stops'], a: 0, why: 'Assign, move, and repeat until no sample changes group.' },
-      { q: 'The total distance keeps dropping as k rises. Why is a bigger k not always better?', o: ['Distance cannot drop below k = 3', 'With one group per sample the distance is zero, and the groups say nothing about the rocks', 'k-means fails above 5', 'Bigger k is always better'], a: 1, why: 'So we look for the bend in the curve and check the groups against the geology.' }
+      { q: 'In k-means, what happens after every sample has joined its closest center?', o: ['Each center moves to the middle of its samples', 'The rock types are added', 'k changes', 'The method stops'], a: 0, why: 'Join, move, and repeat until no sample changes group.' },
+      { q: 'The total distance keeps dropping as k rises. Why is a bigger k not always better?', o: ['Distance cannot drop below k = 3', 'With one group per sample the distance is zero, and the groups say nothing about the rocks', 'k-means fails above 5', 'A bigger k is always better'], a: 1, why: 'So we look for the bend in the curve and check the groups against the geology.' }
     ],
     sup: [
       { q: 'At k = 1 the training accuracy is 100%. What does a lower test accuracy tell us?', o: ['The model will be perfect on new samples', 'The model followed the training samples closely and does worse on new ones', 'The test samples are mislabeled', 'Nothing'], a: 1, why: 'That gap is overfitting.' },
-      { q: 'Why do we keep test samples out of the fitting?', o: ['It runs faster', 'They give an honest check on samples the model has not seen', 'The software requires it', 'They have no labels'], a: 1, why: 'A model always looks good on the samples it was fit to.' }
+      { q: 'Why do we keep test samples out of the training?', o: ['It runs faster', 'They give an honest check on samples the model has not seen', 'The software requires it', 'They have no labels'], a: 1, why: 'A model always looks good on the samples it was fit to.' }
     ],
     semi: [
-      { q: 'With one label per lithology, why can label propagation beat the supervised method?', o: ['It uses where the unlabeled samples fall among their neighbors', 'It has more labels', 'It ignores the labels', 'It always wins'], a: 0, why: 'The unlabeled samples show where the clusters are, and the labels spread through them.' },
-      { q: 'When would we expect it to struggle?', o: ['When the classes overlap so much that neighbors carry different labels', 'When there are many unlabeled samples', 'When the logs are clean', 'When labels are scarce'], a: 0, why: 'Labels spread along neighbor links, so overlapping classes spread the wrong labels.' }
+      { q: 'With one label per lithology, why can label propagation beat the supervised method?', o: ['It uses where the unlabeled samples fall among their neighbors', 'It has more labels', 'It ignores the labels', 'It always wins'], a: 0, why: 'The unlabeled samples show where the bunches are, and the labels spread through them.' },
+      { q: 'When would we expect it to struggle?', o: ['When the rock types overlap so much that neighbors carry different labels', 'When there are many unlabeled samples', 'When the logs are clean', 'When labels are scarce'], a: 0, why: 'Labels spread along neighbor links, so overlapping classes spread the wrong labels.' }
     ],
     nn: [
       { q: 'With 0 hidden layers, why could training not fit the ring?', o: ['Not enough epochs', 'A network with no hidden layer draws a straight boundary', 'The ring was too small', 'The loss was too low'], a: 1, why: 'A ring needs a boundary that bends, and the bending comes from the hidden neurons.' },
-      { q: 'A large network scores higher on training samples than on test samples. What word do we use?', o: ['Overfitting', 'Underfitting', 'Convergence', 'Normalization'], a: 0, why: 'The same idea we saw with k = 1.' }
+      { q: 'A large network scores higher on training samples than on test samples. What is this called?', o: ['Overfitting', 'Underfitting', 'Convergence', 'Normalization'], a: 0, why: 'The same thing we saw with k = 1.' }
     ],
     cnn: [
-      { q: 'What does a convolutional filter produce as it slides over an image?', o: ['A feature map showing where the pattern matches', 'A smaller copy of the image', 'A class label', 'The training data'], a: 0, why: 'High values mark where the filter found something like its pattern.' },
-      { q: 'Why did some muffins get called chihuahuas?', o: ['Their blueberries can line up like two eyes and a nose', 'The threshold was too high', 'Muffins are brown', 'The filters were learned'], a: 0, why: 'The layer 2 filter looks for two spots above a third, and blueberries sometimes make that arrangement by chance.' },
-      { q: 'In a trained CNN, who chooses the filter weights?', o: ['We do, by hand', 'Training does, by making the loss smaller', 'The image does', 'They never change'], a: 1, why: 'Here we set them by hand to see what they do. A real network learns them from the labeled pictures.' }
+      { q: 'What does a filter produce as it slides over an image?', o: ['A feature map showing where the pattern matches', 'A smaller copy of the image', 'A class label', 'The training data'], a: 0, why: 'High values mark where the filter found something like its pattern.' },
+      { q: 'Why did some muffins get called chihuahuas?', o: ['Their blueberries can line up like two eyes and a nose', 'The threshold was too high', 'Muffins are brown', 'The filters were learned'], a: 0, why: 'Layer 2 looks for two spots above a third, and blueberries sometimes land in that arrangement by chance.' },
+      { q: 'In a trained CNN, who chooses the filter weights?', o: ['We do, by hand', 'Training does, by making the loss smaller', 'The image does', 'They never change'], a: 1, why: 'Here we set them by hand to see what they do. A real network learns them from labeled pictures.' }
     ],
     sam: [
-      { q: 'One click returned three masks of different sizes. Why?', o: ['The click is ambiguous: a part, the whole grain, or a group', 'The model made a mistake', 'The image is too big', 'The masks are for three minerals'], a: 0, why: 'A stripe in plagioclase, the grain, and the grain with similar neighbors are all reasonable answers to one click.' },
+      { q: 'One click returned three masks of different sizes. Why?', o: ['A click is ambiguous: it could mean a part, the whole grain, or a group', 'The model made a mistake', 'The image is too big', 'Each mask is a different mineral'], a: 0, why: 'A stripe in plagioclase, the grain, and the grain with similar neighbors are all reasonable answers to one click.' },
       { q: 'After segmenting everything, why do we still need a second step?', o: ['The masks are too small', 'The masks carry no mineral names', 'The masks are always wrong', 'We do not'], a: 1, why: 'Segmentation finds the outlines. Naming the minerals takes color, texture, or our own judgment.' },
-      { q: 'Your modal percentages differ from the true ones. Which is a likely cause?', o: ['A mask that swallowed grains of two minerals', 'The image has too many pixels', 'The legend is wrong', 'Quartz is not a mineral'], a: 0, why: 'A mixed mask gets a single name, so part of the section is counted as the wrong mineral.' }
+      { q: 'Your mineral percentages differ from the true ones. Which is a likely cause?', o: ['A mask that swallowed grains of two minerals', 'The image has too many pixels', 'The legend is wrong', 'Quartz is not a mineral'], a: 0, why: 'A mixed mask gets a single name, so part of the section is counted as the wrong mineral.' }
     ],
     llm: [
       { q: 'A model gives a full citation with journal, volume and page numbers. What does that tell us about whether the paper exists?', o: ['It exists', 'It does not exist', 'Nothing on its own, so we look it up', 'It exists if it is recent'], a: 2, why: 'A citation can look complete and still be made up. We check the journal or a database.' },
-      { q: 'Which use needs the least worry?', o: ['An age for a stratigraphic boundary', 'A reference list for a paper', 'A plotting script that we then test on a case with a known answer', 'A summary of a paper we have not read'], a: 2, why: 'We can run and test a script. The other three need a source check.' }
+      { q: 'Which use needs the least worry?', o: ['An age for a stratigraphic boundary', 'A reference list for a paper', 'A plotting script that we then test on a case with a known answer', 'A summary of a paper we have not read'], a: 2, why: 'We can run and test a script. The other three need a check against a source.' }
     ],
     geo: [
-      { q: 'Why did mean frequency help separate the channel from the levee?', o: ['In this model the channel sand attenuates the wavelet, so its frequency is lower', 'Frequency always separates channels', 'The levee is thicker', 'It did not help'], a: 0, why: 'We built that into the synthetic data. With real data we would check whether the same tie holds.' },
-      { q: 'With six wells, the supervised map had no channel. Why?', o: ['The noise was too high', 'No well had cut the channel, so the classifier had never seen it', 'k was too small', 'The SOM was too big'], a: 1, why: 'A supervised method can only predict the classes in its wells.' }
+      { q: 'Why did mean frequency help separate the channel from the levee?', o: ['In this model the channel sand weakens the high frequencies, so its frequency is lower', 'Frequency always separates channels', 'The levee is thicker', 'It did not help'], a: 0, why: 'We built that into the made-up data. With real data we would check whether the same tie holds.' },
+      { q: 'With six wells, the supervised map had no channel. Why?', o: ['The noise was too high', 'No well had cut the channel, so the method had never seen it', 'k was too small', 'The SOM was too big'], a: 1, why: 'A supervised method can only predict the classes that its wells contain.' }
     ],
     tracks: [
       { q: 'Gamma ray alone confuses which two lithologies?', o: ['Sandstone and limestone, which both read low', 'Shale and sandstone', 'Shale and limestone', 'None of them'], a: 0, why: 'Density or sonic separates them.' },
-      { q: 'Why did PCA on raw ppm pick potassium?', o: ['Potassium matters most geologically', 'Its numbers are the largest, so it carries most of the variance', 'It marks the pegmatites', 'Chance'], a: 1, why: 'Standardizing or taking logs puts the elements on comparable footing.' }
-    ],
-    hw: [
-      { q: 'The PCA on raw values is led by one column with big numbers. What do we try?', o: ['Delete that column for good', 'Standardize the columns, or take logs first', 'Use fewer rows', 'Nothing, PC1 is always right'], a: 1, why: 'PCA follows variance, and big numbers carry a lot of variance. Standardizing or logging puts the columns on comparable footing.' },
-      { q: 'Random-split accuracy is 95% and blocked-split accuracy is 60%. What does that suggest?', o: ['The model is excellent everywhere', 'Nearby samples resemble each other, so the model may not carry to a new area', 'The blocked split has a bug', 'We need a bigger k'], a: 1, why: 'The random split lets near-copies of each test sample into the training set. The blocked split is closer to predicting somewhere new.' }
+      { q: 'Why did PCA on raw ppm pick potassium?', o: ['Potassium matters most geologically', 'Its numbers are the largest, so it carries most of the spread', 'It marks the pegmatites', 'Chance'], a: 1, why: 'Rescaling or taking logs puts the elements on comparable footing.' }
     ],
     traps: [
       { q: 'The random split scores far higher than the blocked split. Why?', o: ['Neighbors in the training set look like the test samples', 'The blocked split has more data', 'Random splits are unbiased', 'The model changed'], a: 0, why: 'Nearby locations have similar values, so a random split leaks information about the test samples.' },
       { q: 'Accuracy is 98% and only 2% of the samples are positive. What else should we ask for?', o: ['Nothing, 98% is high', 'Recall, the fraction of the positives we find', 'A bigger k', 'More neurons'], a: 1, why: 'A model that says negative every time also scores 98%.' }
+    ],
+    hw: [
+      { q: 'The PCA on raw values is led by one column with big numbers. What do we try?', o: ['Delete that column for good', 'Rescale the columns, or take logs first', 'Use fewer rows', 'Nothing, PC1 is always right'], a: 1, why: 'PCA follows spread, and big numbers carry a lot of spread. Rescaling or logging puts the columns on comparable footing.' },
+      { q: 'Random-split accuracy is 95% and blocked-split accuracy is 60%. What does that suggest?', o: ['The model is excellent everywhere', 'Nearby samples resemble each other, so the model may not carry to a new area', 'The blocked split has a bug', 'We need a bigger k'], a: 1, why: 'The random split lets near-copies of each test sample into the training set. The blocked split is closer to predicting somewhere new.' }
     ]
   };
 

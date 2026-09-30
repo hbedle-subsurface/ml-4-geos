@@ -47,7 +47,7 @@
           <div>
             <div class="ctl"><label for="hw-label">Label column</label><select id="hw-label"></select></div>
             <div class="ctl"><label for="hw-loc">Location column</label><select id="hw-loc"></select></div>
-            <div class="ctl"><label for="hw-tf">Data used</label><select id="hw-tf"><option value="none">Raw values</option><option value="std" selected>Standardized</option><option value="log">Log10, then standardized</option></select></div>
+            <div class="ctl"><label for="hw-tf">Data used</label><select id="hw-tf"><option value="none">Raw values</option><option value="std" selected>Rescaled (each column on the same scale)</option><option value="log">Log10, then rescaled</option></select></div>
             <p class="note" id="hw-prep"></p>
           </div>
         </div>
@@ -89,7 +89,7 @@
           <h4>Questions for your write-up</h4>
           <ol class="hw-q">
             <li>How many rows and columns did you use, and how many rows were dropped for missing values?</li>
-            <li>Which version of the data did you use (raw, standardized, or log), and what changed when you tried another?</li>
+            <li>Which version of the data did you use (raw, rescaled, or log), and what changed when you tried another?</li>
             <li>What do the PC1 and PC2 loadings tell us? Name one geological association you would check against your own knowledge of the area.</li>
             <li>Did the clusters line up with your label column? What k did you settle on, and why?</li>
             <li>How did accuracy change between the random and the blocked split? What does that say about your data?</li>
@@ -204,9 +204,9 @@
       const pH = H.plot(root, 'hw-h', { xr: [0, 1], yr: [0, 1], nx: 6, ny: 5, aspect: 0.5, xl: '', yl: 'Samples' });
       const pPC = H.plot(root, 'hw-pc', { xr: [-1, 1], yr: [-1, 1], nx: 5, ny: 5 });
       const pPL = H.plot(root, 'hw-pl', { xr: [0.5, 4.5], yr: [-1, 1], nx: 4, ny: 4, yl: 'Loading' });
-      const pPV = H.plot(root, 'hw-pv', { xr: [0.5, 4.5], yr: [0, 100], nx: 4, ny: 5, yl: 'Variance explained (%)' });
+      const pPV = H.plot(root, 'hw-pv', { xr: [0.5, 4.5], yr: [0, 100], nx: 4, ny: 5, yl: 'Share of the spread kept (%)' });
       const pCS = H.plot(root, 'hw-cs', { xr: [-1, 1], yr: [-1, 1], nx: 5, ny: 5 });
-      const pCE = H.plot(root, 'hw-ce', { xr: [0.5, 8.5], yr: [0, 1], nx: 8, ny: 5, xl: 'Number of clusters, k', yl: 'Total squared distance', fmtx: v => (Number.isInteger(v) ? v : '') });
+      const pCE = H.plot(root, 'hw-ce', { xr: [0.5, 8.5], yr: [0, 1], nx: 8, ny: 5, xl: 'Number of clusters, k', yl: 'Total distance to the centers', fmtx: v => (Number.isInteger(v) ? v : '') });
       const pKM = H.plot(root, 'hw-km', { xr: [0, 1], yr: [0, 1], noAxes: true, invY: true, m: { l: 70, r: 6, t: 30, b: 4 } });
       const pKB = H.plot(root, 'hw-kb', { xr: [0.5, 2.5], yr: [0, 1], nx: 2, ny: 5, yl: 'Accuracy', fmtx: v => (v === 1 ? 'Random split' : v === 2 ? 'Blocked split' : ''), fmty: v => Math.round(v * 100) + '%' });
 
@@ -253,7 +253,7 @@
         const d = prep.feat.length, k = keep.get(); pl.o.xr = [0.5, d + 0.5]; pl.o.nx = d; pl.o.fmtx = v => (Number.isInteger(v) && v >= 1 && v <= d ? 'PC' + v : ''); pl.axes();
         prep.P.frac.forEach((f, i) => { pl.rect(i + 1 - 0.32, 0, i + 1 + 0.32, f * 100, i < k ? C.RED : 'rgba(92,102,112,0.35)'); pl.text(Math.round(f * 100) + '', i + 1, Math.min(f * 100 + 5, 96), { align: 'center', font: '11px system-ui' }); });
         const kept = prep.P.frac.slice(0, k).reduce((a, b) => a + b, 0), top = prep.P.vecs[0].reduce((bi, v, j, arr) => (Math.abs(v) > Math.abs(arr[bi]) ? j : bi), 0);
-        q('hw-pout').innerHTML = `Keeping ${k} of ${d} components keeps <b>${Math.round(kept * 100)}%</b> of the variance. The largest PC1 loading is on <b>${esc(st.table.cols[prep.feat[top]])}</b>.${st.tf === 'none' ? ' With raw values the columns with the biggest numbers tend to lead.' : ''}`;
+        q('hw-pout').innerHTML = `Keeping ${k} of ${d} components keeps <b>${Math.round(kept * 100)}%</b> of the spread. The largest PC1 loading is on <b>${esc(st.table.cols[prep.feat[top]])}</b>.${st.tf === 'none' ? ' With raw values the columns with the biggest numbers tend to lead.' : ''}`;
       };
 
       // 3 clusters
@@ -330,8 +330,8 @@
         if (!ok()) return prep && prep.error ? prep.error : 'Load a table first.';
         const t = st.table, L = [];
         L.push(`File: ${t.name}`, `Rows in file: ${t.rows.length}. Rows used: ${prep.n}. Rows dropped for missing values: ${prep.dropped}.${prep.capped ? ' (random 4000 used)' : ''}`);
-        L.push(`Features (${prep.feat.length}): ${prep.feat.map(j => t.cols[j]).join(', ')}`, `Data used: ${({ none: 'raw values', std: 'standardized', log: 'log10 then standardized' })[st.tf]}`);
-        L.push(`PCA variance explained: ${prep.P.frac.slice(0, Math.min(4, prep.P.frac.length)).map((f, i) => 'PC' + (i + 1) + ' ' + Math.round(f * 100) + '%').join(', ')}`);
+        L.push(`Features (${prep.feat.length}): ${prep.feat.map(j => t.cols[j]).join(', ')}`, `Data used: ${({ none: 'raw values', std: 'rescaled', log: 'log10 then standardized' })[st.tf]}`);
+        L.push(`PCA share of the spread kept: ${prep.P.frac.slice(0, Math.min(4, prep.P.frac.length)).map((f, i) => 'PC' + (i + 1) + ' ' + Math.round(f * 100) + '%').join(', ')}`);
         L.push(`PC1 loadings: ${prep.feat.map((j, c) => t.cols[j] + ' ' + prep.P.vecs[0][c].toFixed(2)).join(', ')}`);
         const m = km(kk.get()); const sizes = new Array(kk.get()).fill(0); m.labels.forEach(l => sizes[l]++);
         L.push(`k-means: k = ${kk.get()}, cluster sizes ${sizes.join(', ')}` + (usable() ? `, agreement with ${t.cols[st.label]} ${Math.round(100 * ML.purity(m.labels.filter((_, i) => prep.y[i] >= 0), prep.y.filter(v => v >= 0), kk.get(), prep.classes.length))}%` : ''));

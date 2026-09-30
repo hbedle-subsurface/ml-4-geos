@@ -24,7 +24,7 @@ Small samples, spatial autocorrelation, and rare targets, then a short list of t
 
 The lecture is a row of tabs, and every tab has the same two bands:
 
-* **Concept** (top, tinted): the few points the instructor covers, as short cards or one picture. Nothing in this band needs to be read to do the activity.
+* **Concept** (top, tinted): a one-sentence introduction and then numbered steps in the order the ideas are needed, each with its own drawing. Every term is explained where it first appears, for readers who have not used machine learning before.
 * **Try it Out!** (below): a one-line hook tied to the talk, the steps on the left, a one to two minute activity with sliders and buttons on the right, and a short **Check yourself** quiz at the bottom.
 
 The instructor talks through the top band, the class does the activity, and everyone moves on with the Next button (or the right arrow key). All tabs are open, so students who get ahead can look, and nothing breaks if they do.
@@ -55,7 +55,8 @@ js/modules_sam.js   the Segment Anything tab
 js/modules_geo.js   the geophysics demo (five steps)
 js/modules3.js      paleontology, sedimentology, critical minerals, pitfalls, next steps
 js/main.js          builds the tabs, glossary links, pop-outs, opening figure
-js/start.js         the opening activity (k-means and a SOM on the same samples)
+js/start.js         the opening tab (k-means and a SOM on three measurements, with the true rock types revealed on request)
+js/art.js           the concept drawings and the strata banner behind each tab title
 js/tables.js        reads .csv and .xlsx files in the browser (no library)
 js/homework.js      the homework tab
 js/talk.js          the talk band, the hook, the steps, and the quiz for each tab

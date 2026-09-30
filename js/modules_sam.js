@@ -83,7 +83,7 @@
         const gi = sec.grain[st.y * W + st.x], mi = sec.mineral[gi], garea = sec.grain.filter(v => v === gi).length;
         let inter = 0; for (let i = 0; i < W * HH; i++) if (m.mask[i] && sec.grain[i] === gi) inter++;
         const iou = inter / (m.area + garea - inter);
-        H.q(root, 'sm-out1').innerHTML = `You clicked ${S.MIN[mi].toLowerCase()}. The three masks cover <b>${three.map(t => t.area).join('</b>, <b>')}</b> pixels. The grain itself is ${garea} pixels. The mask now showing overlaps the true grain with an IoU of <b>${iou.toFixed(2)}</b> (1 is a perfect match).`;
+        H.q(root, 'sm-out1').innerHTML = `You clicked ${S.MIN[mi].toLowerCase()}. The three masks cover <b>${three.map(t => t.area).join('</b>, <b>')}</b> pixels. The grain itself is ${garea} pixels. The mask now showing matches the true grain with an overlap score of <b>${iou.toFixed(2)}</b> (1 is a perfect match).`;
         H.q(root, 'sm-side1').innerHTML = `<div class="samcards">${three.map((t, i) => `<div class="sc${i === st.lv - 1 ? ' on' : ''}"><b>${['Part', 'Grain', 'Grain and look-alikes'][i]}</b><br>${t.area} px</div>`).join('')}</div><p class="note">Twin lamellae in plagioclase and cleavage in biotite make a click ambiguous: the model cannot know whether we mean a stripe or the whole grain, so it offers all three.</p>`;
       };
 
@@ -94,7 +94,7 @@
       pB.onDraw = pl => {
         paint(pl, i => { const m = seg.map[i]; return m >= 0 ? [...hue(m), 0.55] : [0, 0, 0, 0.75]; });
         if (H.q(root, 'sm-pts').checked) for (let y = Math.floor(st.spacing / 2); y < HH; y += st.spacing) for (let x = Math.floor(st.spacing / 2); x < W; x += st.spacing) pl.dot(x + 0.5, y + 0.5, 2, '#fff', C.INK, 1);
-        H.q(root, 'sm-out2').innerHTML = `<b>${seg.n}</b> masks for <b>${sec.n}</b> real grains. <b>${ev.merged}</b> grains are inside a mask that mixes grains, <b>${ev.split}</b> grains are cut into pieces, and <b>${Math.round(ev.covered * 100)}%</b> of the section is covered (black is uncovered).`;
+        H.q(root, 'sm-out2').innerHTML = `<b>${seg.n}</b> masks for <b>${sec.n}</b> real grains. <b>${ev.merged}</b> grains ended up inside a mask that mixes grains, <b>${ev.split}</b> grains are cut into pieces, and <b>${Math.round(ev.covered * 100)}%</b> of the section is covered (black is uncovered).`;
         H.q(root, 'sm-side2').innerHTML = `<p class="note">Each color is one mask. Low sensitivity cuts twinned and cleaved grains into stripes. High sensitivity lets a mask leak across grain boundaries. A wide click spacing skips small grains.</p>`;
       };
 
@@ -132,7 +132,7 @@
         for (let m = 0; m < 6; m++) { pl.rect(m + 1 - 0.36, 0, m + 1, mine[m], C.RED); pl.rect(m + 1, 0, m + 1 + 0.36, truth[m], C.SLATE); }
         pl.ptext('yours', pl.x(0.6), pl.y(47), { color: C.RED, font: '12px system-ui' }); pl.ptext('true', pl.x(1.5), pl.y(47), { color: C.SLATE, font: '12px system-ui' });
         const diff = mine.reduce((a, v, m) => a + Math.abs(v - truth[m]), 0) / 6;
-        H.q(root, 'sm-out3').innerHTML = `Your modal analysis is off from the true one by <b>${diff.toFixed(1)}</b> percentage points per mineral on average. Groups that mix two minerals, or masks that swallowed several grains, push this number up.`;
+        H.q(root, 'sm-out3').innerHTML = `Your mineral percentages are off from the true ones by <b>${diff.toFixed(1)}</b> percentage points per mineral on average. Groups that mix two minerals, or masks that swallowed several grains, push this number up.`;
       };
 
       /* tabs */

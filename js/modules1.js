@@ -42,10 +42,10 @@
       <div class="readout" id="v-out"></div>`,
     init(root) {
       const rings = [
-        { n: 'Artificial intelligence', r: 190, f: '#EEF0F2', d: 'Any computer system that performs a task normally associated with human judgment. It includes systems built only from rules written by experts.', e: 'A rule that labels an interval as shale when gamma ray is above 90 API.' },
-        { n: 'Machine learning', r: 145, f: '#DDE1E5', d: 'A program estimates its rules from example data. A person supplies the data and the method.', e: 'A random forest that learns which log combinations go with sandstone, shale, and limestone.' },
-        { n: 'Deep learning', r: 100, f: '#C9CDD2', d: 'Machine learning with neural networks that have many layers.', e: 'A convolutional network trained to pick faults on seismic sections.' },
-        { n: 'Large language model', r: 55, f: '#841617', d: 'A deep neural network trained on very large amounts of text to predict the next token. Chat assistants are built on these.', e: 'Drafting code to read a LAS file, summarizing a paper, translating a field description.' }
+        { n: 'Artificial intelligence', r: 190, f: '#EEF0F2', d: 'Any computer program that does something we would normally expect a person to judge. A program made only of rules that a person wrote down counts.', e: 'A rule that calls a log interval shale when gamma ray is above 90 API.' },
+        { n: 'Machine learning', r: 145, f: '#DDE1E5', d: 'A program that works out its own rules from examples. We give it data, and it finds the pattern.', e: 'A program that studies logs from cored wells and learns which readings go with sandstone, shale and limestone.' },
+        { n: 'Deep learning', r: 100, f: '#C9CDD2', d: 'Machine learning built on neural networks with many layers. Each layer takes the numbers from the layer before and builds something more detailed from them.', e: 'A network trained to pick faults on seismic sections.' },
+        { n: 'Large language model', r: 55, f: '#841617', d: 'A deep learning program trained on a huge amount of text to predict the next word. Chat assistants are built on these.', e: 'Writing a script to read a well-log file, or summarizing a paper.' }
       ];
       const svg = root.querySelector('#v-rings'), info = H.q(root, 'v-info');
       const ns = 'http://www.w3.org/2000/svg';
@@ -173,13 +173,13 @@
     lede: 'Four log curves are hard to look at together. PCA finds the direction with the most spread and the next one at right angles to it.',
     steps: [
       'Turn the three-variable cloud, then move the flatten slider to bring it down onto the first two components.',
-      'Choose a pair of variables. Turn the angle slider through 180°. Each sample projects onto the line, and the curve shows the variance along it.',
-      'Press Go to PC1. The line moves to the angle with the most variance.',
-      'In the four-variable panel, keep 1 component and then 2, 3, 4. The variance readout shows how much of the total each choice keeps.',
+      'Choose a pair of measurements. Turn the angle slider through 180°. Each sample projects onto the line, and the curve shows how spread out the samples are along it.',
+      'Press Go to PC1. The line moves to the angle with the most spread.',
+      'In the four-variable panel, keep 1 component and then 2, 3, 4. The readout shows how much of the spread each choice keeps.',
       'Turn on the lithology colors and compare them with the PC1 axis.'
     ],
     html: () => `
-      <h4>Three variables as a cloud of samples</h4>
+      <h4>Three measurements, plotted as a cloud of samples</h4>
       <div class="row-3d">
         <div>${H.cv('p-3', 0.76)}</div>
         <div>
@@ -191,19 +191,19 @@
       </div>
       <div class="row2">
         <div>
-          <h4>Two variables, standardized</h4>
+          <h4>Two measurements, each rescaled to the same range</h4>
           <div class="ctl"><label for="p-pair">Pair</label><select id="p-pair"></select></div>
           ${H.cv('p-a', 0.95)}
         </div>
         <div>
-          <h4>Variance along the line</h4>
+          <h4>Spread along the line</h4>
           ${H.cv('p-b', 0.95)}
           ${H.S('p-ang', 'Angle of the line', 0, 180, 1, 20)}
           ${H.btn('p-go', 'Go to PC1')}
           <div class="readout" id="p-out1"></div>
         </div>
       </div>
-      <h4>All four variables</h4>
+      <h4>All four measurements</h4>
       <div class="row3">
         <div>${H.cv('p-c', 0.95)}</div><div>${H.cv('p-d', 0.95)}</div><div>${H.cv('p-e', 0.95)}</div>
       </div>
@@ -244,7 +244,7 @@
             c.beginPath(); c.moveTo(pl.x(0), pl.y(0)); c.lineTo(pl.x(X), pl.y(Y)); c.stroke(); c.restore();
             pl.ptext('PC' + (k + 1), pl.x(X) + 5, pl.y(Y) - 7, { color: C.RED, font: 'bold 14px system-ui' });
           });
-          H.q(root, 'p-out0').innerHTML = t < 0.02 ? `Each dot is one sample, placed by gamma ray, density, and sonic slowness. The red lines are the first two principal components.` : `Flattened ${Math.round(t * 100)}%. The first two components keep <b>${Math.round((P3.frac[0] + P3.frac[1]) * 100)}%</b> of the variance of these three variables.`;
+          H.q(root, 'p-out0').innerHTML = t < 0.02 ? `Each dot is one sample, placed by gamma ray, density and sonic slowness. The red lines are the first two principal components.` : `Flattened ${Math.round(t * 100)}%. The first two components keep <b>${Math.round((P3.frac[0] + P3.frac[1]) * 100)}%</b> of the spread in these three measurements.`;
         };
         p3.draw();
         const spin = () => { if (auto.checked && p3.c.isConnected && p3.c.clientWidth) rot.set((rot.get() + 0.5) % 361); requestAnimationFrame(spin); };
@@ -255,13 +255,13 @@
       const sel = H.q(root, 'p-pair');
       pairs.forEach((pr, i) => sel.insertAdjacentHTML('beforeend', `<option value="${i}">${names[pr[0]]} and ${names[pr[1]]}</option>`));
       const pa = H.plot(root, 'p-a', { xr: [-3, 3], yr: [-3, 3], nx: 6, ny: 6 });
-      const pb = H.plot(root, 'p-b', { xr: [0, 180], yr: [0, 2], xl: 'Angle (degrees)', yl: 'Variance', nx: 6, ny: 4 });
+      const pb = H.plot(root, 'p-b', { xr: [0, 180], yr: [0, 2], xl: 'Angle (degrees)', yl: 'Spread', nx: 6, ny: 4 });
       const st = () => pairs[+sel.value];
       const sub = () => R.Z.map(z => [z[st()[0]], z[st()[1]]]);
       const varAt = (X, a) => { const u = [Math.cos(a), Math.sin(a)]; let s = 0; X.forEach(x => { const t = x[0] * u[0] + x[1] * u[1]; s += t * t; }); return s / (X.length - 1); };
       const best = X => { let b = 0, bv = -1; for (let a = 0; a < 180; a += 0.5) { const v = varAt(X, a * Math.PI / 180); if (v > bv) { bv = v; b = a; } } return b; };
       const ang = H.bind(root, 'p-ang', () => { pa.draw(); pb.draw(); }, v => v + '°');
-      sel.addEventListener('change', () => { pa.o.xl = D.VARS[st()[0]] + ', standardized'; pa.o.yl = D.VARS[st()[1]] + ', standardized'; pa.draw(); pb.draw(); });
+      sel.addEventListener('change', () => { pa.o.xl = D.VARS[st()[0]] + ', rescaled'; pa.o.yl = D.VARS[st()[1]] + ', rescaled'; pa.draw(); pb.draw(); });
       H.on(root, 'p-go', 'click', () => ang.set(Math.round(best(sub()))));
       sel.value = '1';
       pa.onDraw = pl => {
@@ -277,14 +277,14 @@
         pl.axes(); const X = sub(), pts = []; for (let a = 0; a <= 180; a += 1) pts.push([a, varAt(X, a * Math.PI / 180)]);
         pl.line(pts, C.SLATE, 2); const b = best(X); pl.vline(b, C.SLATE, 1, [4, 4]); pl.text('PC1 at ' + b + '°', b + 3, 1.9, { color: C.SLATE, font: '11px system-ui' });
         const v = varAt(X, ang.get() * Math.PI / 180); pl.dot(ang.get(), v, 5.5, C.RED);
-        H.q(root, 'p-out1').innerHTML = `Variance along the line at ${ang.get()}°: <b>${v.toFixed(2)}</b>. The maximum for this pair is <b>${varAt(X, b * Math.PI / 180).toFixed(2)}</b>.`;
+        H.q(root, 'p-out1').innerHTML = `Spread along the line at ${ang.get()}°: <b>${v.toFixed(2)}</b>. The most for this pair is <b>${varAt(X, b * Math.PI / 180).toFixed(2)}</b>.`;
       };
       sel.dispatchEvent(new Event('change'));
 
       // four-variable panel
       const P = ML.pca(R.Z);
       const pc = H.plot(root, 'p-c', { xr: [-4, 4], yr: [-4, 4], xl: 'PC1', yl: 'PC2', nx: 8, ny: 8 });
-      const pd = H.plot(root, 'p-d', { xr: [0.5, 4.5], yr: [0, 100], xl: 'Component', yl: 'Variance explained (%)', nx: 4, ny: 5, fmtx: v => (Number.isInteger(v) ? 'PC' + v : '') });
+      const pd = H.plot(root, 'p-d', { xr: [0.5, 4.5], yr: [0, 100], xl: 'Component', yl: 'Share of the spread kept (%)', nx: 4, ny: 5, fmtx: v => (Number.isInteger(v) ? 'PC' + v : '') });
       const pe = H.plot(root, 'p-e', { xr: [0.5, 4.5], yr: [-1, 1], xl: 'Variable', yl: 'Loading', nx: 4, ny: 4, fmtx: v => (Number.isInteger(v) ? names[v - 1] : '') });
       const keep = H.bind(root, 'p-keep', () => { pc.draw(); pd.draw(); pe.draw(); }, v => v);
       const col = H.q(root, 'p-col'); col.addEventListener('change', () => pc.draw());
@@ -298,7 +298,7 @@
         P.frac.forEach((f, i) => pl.rect(i + 1 - 0.32, 0, i + 1 + 0.32, f * 100, i < k ? C.RED : 'rgba(92,102,112,0.35)'));
         P.frac.forEach((f, i) => pl.text((f * 100).toFixed(0), i + 1, f * 100 + 5, { align: 'center', font: '11px system-ui', color: C.INK }));
         const kept = P.frac.slice(0, k).reduce((a, b) => a + b, 0);
-        H.q(root, 'p-out2').innerHTML = `Keeping ${k} of 4 components keeps <b>${(kept * 100).toFixed(0)}%</b> of the total variance. PC1 loadings on ${names.join(', ')}: ${P.vecs[0].map(v => v.toFixed(2)).join(', ')}.`;
+        H.q(root, 'p-out2').innerHTML = `Keeping ${k} of 4 components keeps <b>${(kept * 100).toFixed(0)}%</b> of the total spread. PC1 loadings on ${names.join(', ')}: ${P.vecs[0].map(v => v.toFixed(2)).join(', ')}.`;
       };
       pe.onDraw = pl => {
         pl.axes(); pl.hline(0, C.SLATE, 1);
@@ -334,7 +334,7 @@
     init(root) {
       const Z = H.Z2;
       const pa = H.plot(root, 'u-a', { xr: [0, 150], yr: [2.0, 2.9], xl: D.VARS[0], yl: D.VARS[1], nx: 6, ny: 6 });
-      const pb = H.plot(root, 'u-b', { xr: [0.5, 8.5], yr: [0, 600], xl: 'Number of clusters, k', yl: 'Total squared distance', nx: 8, ny: 6, fmtx: v => (Number.isInteger(v) ? v : '') });
+      const pb = H.plot(root, 'u-b', { xr: [0.5, 8.5], yr: [0, 600], xl: 'Number of clusters, k', yl: 'Total distance to the centers', nx: 8, ny: 6, fmtx: v => (Number.isInteger(v) ? v : '') });
       const rr = ML.rng(12), elbow = []; for (let k = 1; k <= 8; k++) elbow.push(ML.kmeansBest(Z, k, rr, 6).inertia);
       let seed = 31, model = null, view = null, raf = 0, note = '';
       const toRaw = c => [c[0] * R.sd[0] + R.mean[0], c[1] * R.sd[1] + R.mean[1]];
@@ -378,8 +378,8 @@
         pl.axes(); pl.line(elbow.map((v, i) => [i + 1, v]), C.SLATE, 2); elbow.forEach((v, i) => pl.dot(i + 1, v, 3, C.SLATE));
         const cur = view.lab ? inertiaOf(view.lab, view.cen) : null;
         if (cur !== null) pl.dot(kk.get(), Math.min(cur, 600), 6.5, C.RED);
-        H.q(root, 'u-out').innerHTML = (note ? note + ' ' : '') + (cur !== null ? `Total squared distance now <b>${cur.toFixed(0)}</b>.` : '') +
-          (lith.checked && view.lab ? ` Agreement between clusters and lithology: <b>${H.pct(ML.purity(view.lab, R.y, kk.get(), 3))}</b> of samples fall in a cluster whose most common rock type matches theirs.` : '');
+        H.q(root, 'u-out').innerHTML = (note ? note + ' ' : '') + (cur !== null ? `Total distance to the centers now <b>${cur.toFixed(0)}</b>.` : '') +
+          (lith.checked && view.lab ? ` Match with the rock types: <b>${H.pct(ML.purity(view.lab, R.y, kk.get(), 3))}</b> of samples fall in a cluster whose most common rock type matches theirs.` : '');
       };
       pa.draw(); pb.draw();
     }

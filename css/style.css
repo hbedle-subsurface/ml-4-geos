@@ -24,7 +24,7 @@ canvas { display: block; width: 100%; }
 #nav { position: sticky; top: 0; z-index: 20; background: var(--paper); border-bottom: 1px solid var(--grid); display: flex; align-items: stretch; gap: 0; overflow-x: auto; padding: 0 12px; white-space: nowrap; }
 .lt { display: inline-flex; align-items: center; padding: 14px 13px 11px; font: 500 15px var(--sans); color: var(--slate); background: none; border: 0; border-bottom: 3px solid transparent; cursor: pointer; }
 .lt:hover { color: var(--ink); background: var(--fill); }
-.lt.on { color: var(--red); border-bottom-color: var(--red); font-weight: 700; }
+.lt.on { color: var(--acc, var(--red)); border-bottom-color: var(--acc, var(--red)); font-weight: 700; }
 .sep { align-self: center; width: 1px; height: 22px; background: var(--grid); margin: 0 8px; flex: none; }
 .lesson { display: none; }
 .lesson.on { display: block; animation: lessonIn .28s ease-out; }
@@ -102,6 +102,36 @@ canvas { display: block; width: 100%; }
 .meme { margin: 14px 0 0; max-width: 520px; } .meme img { width: 100%; height: auto; border: 1px solid var(--grid); } .meme figcaption { font-size: 13px; color: var(--slate); }
 .samcards { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; } .sc { border: 1px solid var(--grid); border-radius: 3px; padding: 6px 10px; font-size: 14.5px; background: #fff; } .sc.on { border: 2px solid var(--red); }
 .nm { display: flex; align-items: center; gap: 8px; margin: 4px 0; font-size: 14.5px; } .nm i { width: 18px; height: 18px; border: 1px solid var(--ink); flex: none; } .nm span { flex: 1; } .nm select { font: inherit; padding: 2px 4px; }
+
+/* banner, numbered concept steps, switch */
+.lesson { --acc: #841617; }
+.banner { position: relative; border-radius: 6px; overflow: hidden; margin: 8px 0 20px; min-height: 112px; background: var(--acc); }
+.banner svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.banner h3 { position: relative; color: #fff; font: 700 clamp(26px, 3.8vw, 42px)/1.1 var(--serif); margin: 0; padding: 18px 24px 0; text-shadow: 0 1px 4px rgba(0,0,0,.45); max-width: 26em; }
+.banner .sub { position: relative; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.5); margin: 6px 0 0; padding: 0 24px 34px; font: 400 clamp(15px, 1.5vw, 19px)/1.35 var(--serif); max-width: 40em; }
+.banner h3:last-child { padding-bottom: 46px; }
+.talk { border-left: 6px solid var(--acc); }
+.band { color: var(--acc); }
+.hook { border-left-color: var(--acc); }
+.panel { border-top: 4px solid var(--acc); }
+.lead { font: 400 19px/1.5 var(--serif); margin: 0 0 16px; max-width: 46em; }
+.steps { display: flex; flex-wrap: wrap; gap: 26px 40px; margin: 6px 0 4px; }
+.cs { position: relative; flex: 1 1 200px; max-width: 280px; background: #fff; border: 1px solid var(--grid); border-radius: 8px; padding: 14px 14px 14px; box-shadow: 0 1px 0 rgba(22,25,28,.04); }
+.cs .num { position: absolute; top: -13px; left: -10px; width: 32px; height: 32px; border-radius: 50%; background: var(--acc); color: #fff; font: 700 17px/32px var(--sans); text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
+.cs .fig svg { width: 100%; height: auto; max-height: 136px; background: var(--fill); border-radius: 6px; display: block; }
+.cs h5 { font: 600 20px/1.2 var(--serif); margin: 10px 0 4px; color: var(--ink); }
+.cs p { margin: 0; font-size: 16px; color: #33393F; }
+.steps > .cs:not(:last-child)::after { content: ""; position: absolute; right: -32px; top: 58px; width: 24px; height: 3px; background: var(--acc); border-radius: 2px; }
+.steps > .cs:not(:last-child)::before { content: ""; position: absolute; right: -34px; top: 51px; border-left: 10px solid var(--acc); border-top: 8px solid transparent; border-bottom: 8px solid transparent; }
+.lab-demo { display: flex; flex-wrap: wrap; gap: 24px; margin: 4px 0 16px; } .lab-demo .cs { max-width: 250px; }
+.switch { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; font-size: 16px; }
+.switch input { position: absolute; opacity: 0; width: 0; height: 0; }
+.switch .sw { width: 50px; height: 28px; border-radius: 14px; background: var(--grid); position: relative; transition: background .2s; flex: none; }
+.switch .sw::after { content: ""; position: absolute; left: 3px; top: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.4); transition: left .2s; }
+.switch input:checked + .sw { background: var(--red); } .switch input:checked + .sw::after { left: 25px; }
+.switch input:focus-visible + .sw { outline: 3px solid #E0703C; outline-offset: 2px; }
+.st-top { align-items: center; gap: 8px 28px; } .hintline { color: var(--slate); font-size: 14px; }
+.legend .dotc { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--ink); background: #fff; display: inline-block; margin-right: 5px; vertical-align: -1px; }
 
 /* homework */
 .drop { border: 2px dashed var(--slate); border-radius: 4px; padding: 22px; text-align: center; background: var(--fill); margin-bottom: 10px; font-size: 16.5px; }
@@ -184,12 +214,13 @@ footer { max-width: 1240px; margin: 20px auto 0; padding: 18px 24px 40px; border
 
 /* pop-out windows */
 body.solo main { padding-top: 14px; max-width: none; }
-body.solo .lede, body.solo .talk, body.solo .try > .band, body.solo .hook, body.solo .check, body.solo .mh { display: none; }
+body.solo .lede, body.solo .talk, body.solo .try > .band, body.solo .hook, body.solo .check, body.solo .banner { display: none; }
 body.solo-ex .panel { display: none; } body.solo-ex .mod-grid { grid-template-columns: 1fr; } body.solo-ex .ex { position: static; font-size: 17px; }
 body.solo-ex .ex .link { display: none; } body.solo-ex .mh h3 { font-size: 20px; }
 body.solo-panel .ex, body.solo-panel .tools { display: none; } body.solo-panel .mod-grid { grid-template-columns: 1fr; }
 
 @media (max-width: 980px) {
+  .steps > .cs::before, .steps > .cs::after { display: none; }
   #hero { grid-template-columns: 1fr; }
   .row-3d, .row-reg { grid-template-columns: 1fr; }
   .mod-grid { grid-template-columns: 1fr; } .ex { position: static; }
@@ -201,4 +232,4 @@ body.solo-panel .ex, body.solo-panel .tools { display: none; } body.solo-panel .
   main, #hero { padding-left: 14px; padding-right: 14px; }
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .lesson.on { animation: none; } }
-@media print { #nav, .tools, .ctl, .btn { display: none; } .lesson { display: block !important; } }
+@media print { #nav, .tools, .ctl, .btn { display: none; } .lesson { display: block !important; break-before: page; } .steps > .cs { break-inside: avoid; } .banner { print-color-adjust: exact; -webkit-print-color-adjust: exact; } }
