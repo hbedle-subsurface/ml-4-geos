@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Machine learning in the geosciences</title>
+<meta name="description" content="An interactive lecture on machine learning vocabulary, methods, and pitfalls for incoming graduate students in the geosciences.">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<a class="skip" href="#modules">Skip to the lecture</a>
+
+<header id="hero">
+  <div class="hero-text">
+    <h1>Machine learning in the geosciences</h1>
+    <p class="sub">An interactive lecture for incoming graduate students, School of Geosciences, University of Oklahoma</p>
+    <p class="hero-note">Everything on this page runs in the browser on synthetic data. The sliders and buttons are the lecture.</p>
+    <div class="hero-btns">
+      <button type="button" class="btn primary" id="h-group">Group the samples</button>
+      <button type="button" class="btn" id="h-rocks">Show the rock types</button>
+      <a class="btn" href="#m-vocab">Start</a>
+    </div>
+  </div>
+  <div class="hero-plot">
+    <canvas id="hero-c" data-aspect="0.8" aria-label="300 rock samples plotted by gamma ray and density"></canvas>
+    <p class="cap" id="h-cap">300 rock samples, gamma ray against density, with no labels attached.</p>
+  </div>
+</header>
+
+<nav id="nav" aria-label="Lecture sections"></nav>
+
+<main id="modules"></main>
+
+<dialog id="gloss">
+  <h3 id="g-t"></h3>
+  <p id="g-d"></p>
+  <p id="g-g" class="ex-line"></p>
+  <button type="button" class="btn" id="g-x">Close</button>
+</dialog>
+
+<footer>
+  <p>Teaching material by Heather Bedle, School of Geosciences, University of Oklahoma. All data on this site are synthetic and generated in the browser. Licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>: free to use, share, and adapt with citation, and adaptations carry the same license.</p>
+</footer>
+
+<script src="js/ml.js"></script>
+<script src="js/data.js"></script>
+<script src="js/plot.js"></script>
+<script src="js/glossary.js"></script>
+<script src="js/modules1.js"></script>
+<script src="js/modules2.js"></script>
+<script src="js/seismic.js"></script>
+<script src="js/modules_geo.js"></script>
+<script src="js/modules3.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

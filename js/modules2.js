@@ -1,0 +1,299 @@
+/* modules2.js - supervised, semi-supervised, neural network playground, LLMs in research */
+(function (g) {
+  const { ML, DATA: D, Plot, H, MODULES: M } = g;
+  const C = Plot.C, R = H.R, Z = H.Z2;
+  const XR = [0, 150], YR = [2.0, 2.9];
+  const toZ = (x, y) => [(x - R.mean[0]) / R.sd[0], (y - R.mean[1]) / R.sd[1]];
+
+  /* decision-region shading on a grid; predictor takes a standardized point */
+  function regions(pl, pred, nx, ny, cols) {
+    for (let i = 0; i < nx; i++) for (let j = 0; j < ny; j++) {
+      const x0 = pl.o.xr[0] + (i / nx) * (pl.o.xr[1] - pl.o.xr[0]), x1 = pl.o.xr[0] + ((i + 1) / nx) * (pl.o.xr[1] - pl.o.xr[0]);
+      const y0 = pl.o.yr[0] + (j / ny) * (pl.o.yr[1] - pl.o.yr[0]), y1 = pl.o.yr[0] + ((j + 1) / ny) * (pl.o.yr[1] - pl.o.yr[0]);
+      const c = pred((x0 + x1) / 2, (y0 + y1) / 2);
+      pl.rect(x0, y0, x1, y1, Plot.hex2rgba(cols[c], 0.2));
+    }
+  }
+
+  /* ---------- 4. supervised ---------- */
+  M.push({
+    id: 'sup', part: 1, title: 'Supervised learning',
+    lede: 'Now the lithology labels are known for some samples. The model learns a boundary from them and predicts the rest.',
+    steps: [
+      'Move the angle and offset sliders until the line separates sandstone from shale. Red rings mark samples on the wrong side.',
+      'Press Fit by machine and compare its accuracy with the hand-placed line.',
+      'In the second panel, set k to 1. Filled dots are training samples and hollow dots are test samples.',
+      'Raise k in steps and follow the training and test curves. Press New split to see how much they depend on the split.'
+    ],
+    html: () => `
+      <h4>A boundary drawn by hand, sandstone and shale</h4>
+      <div class="row2">
+        <div>${H.cv('s-a', 0.85)}</div>
+        <div>
+          ${H.S('s-ang', 'Angle of the line', 0, 179, 1, 90)}
+          ${H.S('s-off', 'Offset of the line', -3, 3, 0.05, 0)}
+          ${H.btn('s-fit', 'Fit by machine')}
+          <div class="readout" id="s-out1"></div>
+          ${H.legend(D.LITH.slice(0, 2), D.LCOL.slice(0, 2))}
+        </div>
+      </div>
+      <h4>k-nearest neighbors, three lithologies, half the samples held out</h4>
+      <div class="row2">
+        <div>${H.cv('s-b', 0.85)}</div>
+        <div>${H.cv('s-c', 0.85)}</div>
+      </div>
+      <div class="ctlrow">${H.S('s-k', 'Neighbors, k', 1, 51, 2, 1)}${H.btn('s-new', 'New split')}</div>
+      ${H.legend(D.LITH, D.LCOL)}
+      <div class="readout" id="s-out2"></div>`,
+    init(root) {
+      // panel A: hand line
+      const sub = R.y.map((y, i) => i).filter(i => R.y[i] < 2 && R.y[i] !== 2).filter(i => R.y[i] === 0 || R.y[i] === 1);
+      const pa = H.plot(root, 's-a', { xr: XR, yr: YR, xl: D.VARS[0], yl: D.VARS[1], nx: 6, ny: 6 });
+      const ang = H.bind(root, 's-ang', () => pa.draw(), v => v + '°'), off = H.bind(root, 's-off', () => pa.draw(), v => v.toFixed(2));
+      const side = (z, a, b) => Math.cos(a) * z[0] + Math.sin(a) * z[1] > b;
+      const accLine = (a, b) => { let c = 0; sub.forEach(i => { if ((side(Z[i], a, b) ? 1 : 0) === R.y[i]) c++; }); return Math.max(c, sub.length - c) / sub.length; };
+      H.on(root, 's-fit', 'click', () => {
+        const m = ML.logistic(sub.map(i => Z[i]), sub.map(i => R.y[i]), { iters: 600 });
+        let nrm = Math.hypot(m.w[0], m.w[1]), a = Math.atan2(m.w[1], m.w[0]), b = -m.b / nrm;
+        if (a < 0) { a += Math.PI; b = -b; } if (a >= Math.PI) { a -= Math.PI; b = -b; }
+        ang.set(Math.min(179, Math.round(a * 180 / Math.PI))); off.set(Math.max(-3, Math.min(3, Math.round(b * 20) / 20)));
+      });
+      pa.onDraw = pl => {
+        pl.axes(); const a = ang.get() * Math.PI / 180, b = off.get(), w = [Math.cos(a), Math.sin(a)];
+        pl.clipStart();
+        const p0 = [w[0] * b, w[1] * b], dv = [-w[1], w[0]], q = t => { const z = [p0[0] + t * dv[0], p0[1] + t * dv[1]]; return [z[0] * R.sd[0] + R.mean[0], z[1] * R.sd[1] + R.mean[1]]; };
+        const wrong = sub.filter(i => { const pr = side(Z[i], a, b) ? 1 : 0; return pr !== R.y[i]; }).length > sub.length / 2;
+        sub.forEach(i => {
+          const pr = side(Z[i], a, b) ? 1 : 0, bad = wrong ? pr === R.y[i] : pr !== R.y[i];
+          pl.dot(R.X[i][0], R.X[i][1], 3.6, Plot.hex2rgba(D.LCOL[R.y[i]], 0.85), bad ? C.RED : null, 2);
+        });
+        pl.line([q(-8), q(8)], C.INK, 2.2); pl.clipEnd();
+        H.q(root, 's-out1').innerHTML = `Samples on the correct side: <b>${H.pct(accLine(a, b))}</b> of ${sub.length}.`;
+      };
+      pa.draw();
+
+      // panel B/C: kNN with train/test split
+      const pb = H.plot(root, 's-b', { xr: XR, yr: YR, xl: D.VARS[0], yl: D.VARS[1], nx: 6, ny: 6 });
+      const pc = H.plot(root, 's-c', { xr: [0, 52], yr: [0.5, 1], xl: 'Neighbors, k', yl: 'Accuracy', nx: 5, ny: 5, fmty: v => Math.round(v * 100) + '%' });
+      let seed = 5, tr, te, curve;
+      const ks = []; for (let k = 1; k <= 51; k += 2) ks.push(k);
+      const predict = (idx, k, Q) => ML.knnPredict(idx.map(i => Z[i]), idx.map(i => R.y[i]), Q, k, 3);
+      const split = () => {
+        const s = ML.shuffle(300, ML.rng(seed)); tr = s.slice(0, 150); te = s.slice(150);
+        curve = ks.map(k => [k, ML.acc(predict(tr, k, tr.map(i => Z[i])), tr.map(i => R.y[i])), ML.acc(predict(tr, k, te.map(i => Z[i])), te.map(i => R.y[i]))]);
+      };
+      split();
+      const kk = H.bind(root, 's-k', () => { pb.draw(); pc.draw(); }, v => v);
+      H.on(root, 's-new', 'click', () => { seed += 13; split(); pb.draw(); pc.draw(); });
+      pb.onDraw = pl => {
+        pl.axes(); const k = kk.get();
+        pl.clipStart();
+        regions(pl, (x, y) => predict(tr, k, [toZ(x, y)])[0], 30, 24, D.LCOL);
+        tr.forEach(i => pl.dot(R.X[i][0], R.X[i][1], 3.2, D.LCOL[R.y[i]], '#fff', 0.8));
+        te.forEach(i => pl.dot(R.X[i][0], R.X[i][1], 3.4, '#fff', D.LCOL[R.y[i]], 1.6));
+        pl.clipEnd();
+      };
+      pc.onDraw = pl => {
+        pl.axes(); pl.line(curve.map(c => [c[0], c[1]]), C.RED, 2); pl.line(curve.map(c => [c[0], c[2]]), C.SLATE, 2);
+        const k = kk.get(), c = curve.find(v => v[0] === k) || curve[0];
+        pl.dot(k, c[1], 5, C.RED); pl.dot(k, c[2], 5, C.SLATE);
+        pl.text('training', 30, 0.985, { color: C.RED, font: '12px system-ui' }); pl.text('test', 44, 0.985, { color: C.SLATE, font: '12px system-ui' });
+        H.q(root, 's-out2').innerHTML = `k = ${k}: training accuracy <b>${H.pct(c[1])}</b>, test accuracy <b>${H.pct(c[2])}</b>.`;
+      };
+      pb.draw(); pc.draw();
+    }
+  });
+
+  /* ---------- 5. semi-supervised ---------- */
+  M.push({
+    id: 'semi', part: 1, title: 'Semi-supervised learning',
+    lede: 'Labels need core description or lab work, while logs come with every well. Label propagation lets a few labeled samples pass their labels along to unlabeled neighbors.',
+    steps: [
+      'Set 1 labeled sample per lithology. Compare the two maps.',
+      'Raise the number of labels one at a time. Both methods improve.',
+      'Press New labels several times. The average over 30 random draws is printed below the maps.'
+    ],
+    html: () => `
+      <div class="row2">
+        <div><h4>Supervised only</h4>${H.cv('m-a', 0.9)}</div>
+        <div><h4>Labels spread through the neighbors</h4>${H.cv('m-b', 0.9)}</div>
+      </div>
+      <div class="ctlrow">${H.S('m-n', 'Labeled samples per lithology', 1, 10, 1, 1)}${H.btn('m-new', 'New labels')}</div>
+      ${H.legend(D.LITH, D.LCOL)}
+      <div class="readout" id="m-out"></div>`,
+    init(root) {
+      const pa = H.plot(root, 'm-a', { xr: XR, yr: YR, xl: D.VARS[0], yl: D.VARS[1], nx: 5, ny: 6 });
+      const pb = H.plot(root, 'm-b', { xr: XR, yr: YR, xl: D.VARS[0], yl: D.VARS[1], nx: 5, ny: 6 });
+      let seed = 100, sup, sem, li, lb, avg;
+      const draw1 = (m, seedv) => {
+        const rr = ML.rng(seedv), idx = [], lab = [];
+        for (let c = 0; c < 3; c++) { const pool = R.y.map((v, i) => (v === c ? i : -1)).filter(i => i >= 0); ML.shuffle(pool.length, rr).slice(0, m).forEach(q => { idx.push(pool[q]); lab.push(c); }); }
+        return { idx, lab, sup: ML.knnPredict(idx.map(i => Z[i]), lab, Z, 1, 3), sem: ML.labelProp(Z, idx, lab, 3) };
+      };
+      const scoreOf = (d, pred) => { const s = new Set(d.idx); let a = 0, n = 0; R.y.forEach((y, i) => { if (s.has(i)) return; n++; if (pred[i] === y) a++; }); return a / n; };
+      const run = () => {
+        const m = nn.get(), d = draw1(m, seed); sup = d.sup; sem = d.sem; li = d.idx; lb = d.lab;
+        li.set = new Set(li);
+        let s1 = 0, s2 = 0; for (let t = 0; t < 30; t++) { const q = draw1(m, 1000 + t); s1 += scoreOf(q, q.sup) / 30; s2 += scoreOf(q, q.sem) / 30; }
+        avg = [s1, s2, scoreOf(d, d.sup), scoreOf(d, d.sem)];
+      };
+      const nn = H.bind(root, 'm-n', () => { run(); pa.draw(); pb.draw(); }, v => v);
+      H.on(root, 'm-new', 'click', () => { seed += 7; run(); pa.draw(); pb.draw(); });
+      run();
+      const show = (pl, pred) => {
+        pl.axes();
+        R.X.forEach((x, i) => { if (!li.set.has(i)) pl.dot(x[0], x[1], 3.2, Plot.hex2rgba(D.LCOL[pred[i]], 0.75), pred[i] !== R.y[i] ? C.RED : null, 1.4); });
+        li.forEach((i, t) => pl.dot(R.X[i][0], R.X[i][1], 6.5, D.LCOL[lb[t]], C.INK, 2.2));
+      };
+      pa.onDraw = pl => show(pl, sup);
+      pb.onDraw = pl => {
+        show(pl, sem);
+        H.q(root, 'm-out').innerHTML = `This draw: supervised <b>${H.pct(avg[2])}</b>, label propagation <b>${H.pct(avg[3])}</b> correct on the unlabeled samples. Average over 30 draws: <b>${H.pct(avg[0])}</b> and <b>${H.pct(avg[1])}</b>. Large dots with black rings are the labeled samples; red rings mark wrong predictions.`;
+      };
+      pa.draw(); pb.draw();
+    }
+  });
+
+  /* ---------- 6. neural network ---------- */
+  M.push({
+    id: 'nn', part: 1, title: 'Neural networks',
+    lede: 'A neural network draws the same kind of boundary as before. Hidden layers and neurons let the boundary bend.',
+    steps: [
+      'Choose the mineralized zone with a ring-shaped contact aureole. Set 0 hidden layers and press Train. A straight boundary cannot follow a ring.',
+      'Raise the neurons and layers and train again.',
+      'Watch the training and test accuracy. Compare them after 1000 epochs for the small and the large network.',
+      'Switch to the lithology data and repeat.'
+    ],
+    html: () => `
+      <div class="row2">
+        <div>${H.cv('n-a', 0.95)}</div>
+        <div>${H.cv('n-b', 0.95)}</div>
+      </div>
+      <div class="ctlrow">
+        <div class="ctl"><label for="n-data">Data</label><select id="n-data"><option value="ring">Map: mineralized ring around an intrusion</option><option value="lith">Logs: three lithologies</option></select></div>
+      </div>
+      <div class="ctlrow">${H.S('n-h', 'Hidden layers', 0, 3, 1, 1)}${H.S('n-u', 'Neurons per layer', 1, 8, 1, 3)}</div>
+      <div class="ctlrow">${H.btn('n-go', 'Train')}${H.btn('n-stop', 'Pause')}${H.btn('n-reset', 'Reset')}</div>
+      <div class="readout" id="n-out"></div>`,
+    init(root) {
+      const mk = kind => {
+        const r = ML.rng(9), X = [], y = [], raw = [];
+        if (kind === 'ring') {
+          for (let i = 0; i < 320; i++) { const a = r() * 10, b = r() * 10, d = Math.hypot(a - 5, b - 5); raw.push([a, b]); X.push([(a - 5) / 3, (b - 5) / 3]); y.push(d > 1.4 && d < 3.2 ? 1 : 0); }
+          return { X, y, raw, nc: 2, cols: ['#C9CDD2', '#841617'], names: ['barren', 'mineralized'], xr: [0, 10], yr: [0, 10], xl: 'Easting (km)', yl: 'Northing (km)', toIn: (a, b) => [(a - 5) / 3, (b - 5) / 3] };
+        }
+        for (let i = 0; i < 300; i++) { raw.push(R.X[i].slice(0, 2)); X.push(Z[i]); y.push(R.y[i]); }
+        return { X, y, raw, nc: 3, cols: D.LCOL, names: D.LITH, xr: XR, yr: YR, xl: D.VARS[0], yl: D.VARS[1], toIn: toZ };
+      };
+      const pa = H.plot(root, 'n-a', { xr: [0, 10], yr: [0, 10], nx: 5, ny: 5 });
+      const pb = H.plot(root, 'n-b', { xr: [0, 1000], yr: [0, 1], xl: 'Epoch', yl: 'Loss', nx: 4, ny: 5 });
+      let data, tr, te, net, hist, running = false, raf = 0, epoch = 0, gridCache = null, frame = 0;
+      const sel = H.q(root, 'n-data');
+      const build = () => {
+        cancelAnimationFrame(raf); running = false;
+        data = mk(sel.value);
+        const s = ML.shuffle(data.X.length, ML.rng(3)), cut = Math.round(0.7 * s.length); tr = s.slice(0, cut); te = s.slice(cut);
+        pa.o.xr = data.xr; pa.o.yr = data.yr; pa.o.xl = data.xl; pa.o.yl = data.yl;
+        const sizes = [2]; for (let l = 0; l < hh.get(); l++) sizes.push(uu.get()); sizes.push(data.nc);
+        net = new ML.MLP(sizes, ML.rng(2)); hist = []; epoch = 0; gridCache = null; pa.draw(); pb.draw();
+      };
+      const hh = H.bind(root, 'n-h', build, v => v), uu = H.bind(root, 'n-u', build, v => v);
+      sel.addEventListener('change', build);
+      const acc = idx => ML.acc(idx.map(i => net.predict(data.X[i])), idx.map(i => data.y[i]));
+      const loop = () => {
+        if (!running) return;
+        for (let s = 0; s < 8 && epoch < 1000; s++) { hist.push(net.step(tr.map(i => data.X[i]), tr.map(i => data.y[i]), 0.03)); epoch++; }
+        if (++frame % 2 === 0 || epoch >= 1000) { gridCache = null; pa.draw(); pb.draw(); }
+        if (epoch >= 1000) { running = false; return; }
+        raf = requestAnimationFrame(loop);
+      };
+      H.on(root, 'n-go', 'click', () => { if (!running && epoch < 1000) { running = true; loop(); } });
+      H.on(root, 'n-stop', 'click', () => { running = false; });
+      H.on(root, 'n-reset', 'click', build);
+      pa.onDraw = pl => {
+        pl.axes(); pl.clipStart();
+        const nx = 32, ny = 32;
+        regions(pl, (x, y) => net.predict(data.toIn(x, y)), nx, ny, data.cols);
+        tr.forEach(i => pl.dot(data.raw[i][0], data.raw[i][1], 3, data.cols[data.y[i]] === '#C9CDD2' ? '#8A929A' : data.cols[data.y[i]], '#fff', 0.8));
+        te.forEach(i => pl.dot(data.raw[i][0], data.raw[i][1], 3.2, '#fff', data.cols[data.y[i]] === '#C9CDD2' ? '#5C6670' : data.cols[data.y[i]], 1.6));
+        pl.clipEnd();
+      };
+      pb.onDraw = pl => {
+        pl.axes(); if (hist.length > 1) pl.line(hist.map((v, i) => [i + 1, Math.min(v, 1)]), C.RED, 2);
+        H.q(root, 'n-out').innerHTML = `Epoch <b>${epoch}</b>. Loss <b>${hist.length ? hist[hist.length - 1].toFixed(3) : '-'}</b>. Training accuracy <b>${H.pct(acc(tr))}</b>, test accuracy <b>${H.pct(acc(te))}</b>. Network: ${net.s.join(' → ')} (${net.s.slice(1, -1).reduce((a, b) => a + b, 0)} hidden neurons). Filled dots are training samples and hollow dots are test samples.`;
+      };
+      build();
+    }
+  });
+
+  /* ---------- 7. LLMs in research ---------- */
+  M.push({
+    id: 'llm', part: 1, title: 'Large language models in research',
+    lede: 'A language model writes the continuation that is likely given its training text. The slider shows what that looks like for a number, and the game shows what it looks like for a reference.',
+    steps: [
+      'Set the temperature low and press Sample 20 times. Raise the temperature and sample again.',
+      'Go through the eight references and mark each one real or made up. Four are real and four were written for this page.',
+      'Open each card under strengths and limits.'
+    ],
+    html: () => `
+      <h4>The next token after "The Cretaceous–Paleogene boundary is dated at about ___ million years ago"</h4>
+      <p class="note">These probabilities are a toy distribution written for this page. They show the mechanism and are not output from a real model.</p>
+      ${H.cv('l-a', 0.5)}
+      <div class="ctlrow">${H.S('l-t', 'Temperature', 0.1, 2, 0.05, 0.5)}${H.btn('l-go', 'Sample 20 answers')}</div>
+      <div class="readout" id="l-out"></div>
+      <h4>Real or made up?</h4>
+      <div id="l-game"></div>
+      <h4>Strengths and limits in research</h4>
+      <div id="l-cards" class="cards"></div>`,
+    init(root) {
+      const toks = ['66', '65', '67', '64', '70', '56'], logit = [4.0, 3.0, 2.4, 1.6, 1.0, 0.8];
+      const pl = H.plot(root, 'l-a', { xr: [0.5, 6.5], yr: [0, 1], xl: 'Next token (million years)', yl: 'Probability', nx: 6, ny: 5, fmtx: v => (Number.isInteger(v) ? toks[v - 1] : '') });
+      let counts = null;
+      const probs = t => { const e = logit.map(l => Math.exp(l / t)), s = e.reduce((a, b) => a + b, 0); return e.map(v => v / s); };
+      const tt = H.bind(root, 'l-t', () => { counts = null; pl.draw(); }, v => v.toFixed(2));
+      H.on(root, 'l-go', 'click', () => {
+        const p = probs(tt.get()), r = ML.rng(Math.floor(Math.random() * 1e9)); counts = new Array(6).fill(0);
+        for (let i = 0; i < 20; i++) { let u = r(), k = 0; while (k < 5 && u > p[k]) { u -= p[k]; k++; } counts[k]++; }
+        pl.draw();
+      });
+      pl.onDraw = c => {
+        c.axes(); const p = probs(tt.get());
+        p.forEach((v, i) => { c.rect(i + 1 - 0.33, 0, i + 1 + 0.33, v, i === 0 ? C.RED : 'rgba(92,102,112,0.5)'); c.text(v.toFixed(2), i + 1, Math.min(v + 0.05, 0.97), { align: 'center', font: '11px system-ui' }); });
+        if (counts) counts.forEach((n, i) => { if (n) c.dot(i + 1, n / 20, 6, '#fff', C.INK, 2); });
+        const o = H.q(root, 'l-out');
+        o.innerHTML = counts ? `20 samples: ${toks.map((t, i) => (counts[i] ? `<b>${t}</b> × ${counts[i]}` : '')).filter(Boolean).join(', ')}. The accepted age is about 66 Ma; the model has no step that checks a value against a source.` : `At temperature ${tt.get().toFixed(2)} the most likely token, 66, has probability <b>${p[0].toFixed(2)}</b>.`;
+      };
+      pl.draw();
+
+      // citation game
+      const refs = [
+        { t: 'Breiman, L., 2001, Random forests: Machine Learning, v. 45, no. 1, p. 5–32.', real: true },
+        { t: 'Marlowe, D. T., and Kessinger, A. R., 2019, Deep convolutional networks for automatic fault throw estimation from seismic amplitudes: Geophysics, v. 84, no. 5, p. IM31–IM47.', real: false },
+        { t: 'Bergen, K. J., Johnson, P. A., de Hoop, M. V., and Beroza, G. C., 2019, Machine learning for data-driven discovery in solid Earth geoscience: Science, v. 363, eaau0323.', real: true },
+        { t: 'Adeyemi, O. K., Lindqvist, S., and Rao, P. V., 2020, Random forest prediction of porosity from core photographs in carbonate reservoirs: AAPG Bulletin, v. 104, no. 8, p. 1723–1745.', real: false },
+        { t: 'Hall, B., 2016, Facies classification using machine learning: The Leading Edge, v. 35, no. 10, p. 906–909.', real: true },
+        { t: 'Vasquez-Tran, M., and Holloway, E. J., 2018, Unsupervised classification of geochemical anomalies for porphyry exploration in the Andean belt: Economic Geology, v. 113, no. 6, p. 1301–1322.', real: false },
+        { t: 'Kohonen, T., 1982, Self-organized formation of topologically correct feature maps: Biological Cybernetics, v. 43, p. 59–69.', real: true },
+        { t: 'Brennan, C. L., Osei, F., and Nakamura, H., 2021, Neural network estimation of paleotemperature from foraminifera assemblages: Paleoceanography and Paleoclimatology, v. 36, no. 2.', real: false }
+      ];
+      const game = H.q(root, 'l-game'); let score = 0, done = 0;
+      game.innerHTML = refs.map((r, i) => `<div class="ref" data-i="${i}"><p>${r.t}</p><div class="ref-b"><button type="button" class="btn sm" data-a="1">Real</button><button type="button" class="btn sm" data-a="0">Made up</button><span class="res"></span></div></div>`).join('') + `<div class="readout" id="l-score">Answered 0 of 8.</div>`;
+      game.addEventListener('click', e => {
+        const b = e.target.closest('button[data-a]'); if (!b) return;
+        const box = b.closest('.ref'), r = refs[+box.dataset.i]; if (box.classList.contains('done')) return;
+        const ok = (b.dataset.a === '1') === r.real; box.classList.add('done', ok ? 'right' : 'wrong'); done++; if (ok) score++;
+        box.querySelector('.res').textContent = (ok ? 'Correct. ' : 'Not quite. ') + (r.real ? 'This reference is real.' : 'This reference was written for this page and does not correspond to a real paper.');
+        H.q(root, 'l-score').innerHTML = `Answered ${done} of 8, ${score} correct. ${done === 8 ? 'Every reference here is formatted the same way, so the format alone did not separate the two groups. A reference from an assistant is checked against the journal or a database before it is cited.' : ''}`;
+      });
+      const cards = [
+        ['Drafting and editing code', 'Models write working scripts for reading files, plotting, and cleaning tables. The output runs, and it still needs to be tested on a known case because a script can run and be wrong.'],
+        ['Summaries and explanations', 'Models summarize a paper or explain an unfamiliar method in plain terms. Numbers, names, and claims in the summary are checked against the paper.'],
+        ['References and numerical values', 'Models produce references and values that read correctly and may not exist. Each reference is looked up, and each value is taken from a source.'],
+        ['Unpublished data', 'Text typed into a hosted model is sent to the provider. Unpublished data, student work, and data under agreement follow the rules of the owner and the institution.'],
+        ['Reproducibility', 'The same prompt can return different text, and models are updated. Methods sections record the model name, version, date, and what it was used for.'],
+        ['Knowledge cutoff', 'A model has no knowledge of papers and data released after its training. A search tool adds recent material, and the results are read and checked.']
+      ];
+      H.q(root, 'l-cards').innerHTML = cards.map(c => `<details><summary>${c[0]}</summary><p>${c[1]}</p></details>`).join('');
+    }
+  });
+})(window);
