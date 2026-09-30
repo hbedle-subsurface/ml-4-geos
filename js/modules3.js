@@ -352,7 +352,8 @@
             <li>Record which rows went into training, the software versions, and any use of a language model.</li>
           </ol>
         </div>
-      </div>`,
+      </div>
+      <p class="closer">I always like to end by asking for one thing. Take a table of measurements from your own project, run PCA on it this week, and see what shows up. Then go and try a method you haven't used before.</p>`,
     init() {}
   });
 })(window);

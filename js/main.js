@@ -4,18 +4,21 @@
   const { ML, DATA: D, Plot, H, MODULES: M, GLOSSARY: GL } = g;
   const params = new URLSearchParams(g.location.search);
   const soloId = params.get('m'), view = params.get('view') === 'ex' ? 'ex' : 'panel';
-  const SHORT = { vocab: 'Vocabulary', fit: 'When ML fits', pca: 'Dimensions', unsup: 'Unsupervised', sup: 'Supervised', semi: 'Semi-supervised', nn: 'Neural networks', llm: 'LLMs', geo: 'Geophysics', tracks: 'Other fields', traps: 'Pitfalls', next: 'Next steps' };
+  const SHORT = { vocab: 'Vocabulary', types: 'Types of ML', fit: 'When ML fits', hw: 'Homework', pca: 'Dimensions', unsup: 'Unsupervised', sup: 'Supervised', semi: 'Semi-supervised', nn: 'Neural networks', cnn: 'CNN', sam: 'Segment Anything', llm: 'LLMs', geo: 'Geophysics', tracks: 'Other fields', traps: 'Pitfalls', next: 'Next steps' };
   const main = document.getElementById('modules');
+  const ORDER = ['vocab', 'types', 'fit', 'pca', 'unsup', 'sup', 'semi', 'nn', 'cnn', 'sam', 'llm', 'geo', 'tracks', 'traps', 'next', 'hw'];
+  M.sort((a, b) => (ORDER.indexOf(a.id) < 0 ? 99 : ORDER.indexOf(a.id)) - (ORDER.indexOf(b.id) < 0 ? 99 : ORDER.indexOf(b.id)));
 
   /* ---- build the sections ---- */
   const list = soloId ? M.filter(m => m.id === soloId) : M;
   if (soloId) { document.body.classList.add('solo', 'solo-' + view); const st = document.getElementById('m-start'); if (st) st.remove(); }
-  const TK = g.TALK || {};
+  const TK = g.TALK || {}, TR = g.TRY || {}, QZ = g.QUIZ || {};
+  const quizHtml = id => (QZ[id] ? `<div class="check"><h5>Check yourself</h5>${QZ[id].map((q, i) => `<div class="qz" data-q="${id}:${i}"><p>${q.q}</p><div class="qo">${q.o.map((o, k) => `<button type="button" class="btn sm" data-k="${k}">${o}</button>`).join('')}</div><p class="qw" hidden></p></div>`).join('')}</div>` : '');
   list.forEach(m => {
-    const hasEx = m.steps && m.steps.length, tk = TK[m.id];
+    const tr = TR[m.id] || {}, steps = tr.steps || m.steps || [], hasEx = steps.length, tk = TK[m.id];
     const cards = tk && tk.cards ? `<div class="tcards">${tk.cards.map(c => `<div class="tc"><h5>${c.h}</h5><p>${c.t}</p></div>`).join('')}</div>` : '';
-    const talk = tk ? `<div class="talk"><h4 class="band">Talk<span>about ${tk.mins[0]} min</span></h4>${tk.html || ''}${cards}</div>` : '';
-    const tryLab = m.noPanel ? '' : `<h4 class="band">Try it<span>about ${tk ? tk.mins[1] : 2} min</span></h4>`;
+    const talk = tk ? `<div class="talk"><h4 class="band">Talk<span class="pill">${tk.pills ? tk.pills[0] : 'about ' + tk.mins[0] + ' min'}</span></h4>${tk.html || ''}${cards}</div>` : '';
+    const tryLab = m.noPanel ? '' : `<h4 class="band">Try it<span class="pill">${tk && tk.pills ? tk.pills[1] : 'about ' + (tk ? tk.mins[1] : 2) + ' min'}</span></h4>${tr.hook ? `<p class="hook">${tr.hook}</p>` : ''}`;
     const sec = document.createElement('section');
     sec.className = 'module lesson' + (hasEx ? '' : ' no-ex') + (soloId ? ' on' : ''); sec.id = 'm-' + m.id;
     sec.innerHTML = `
@@ -23,11 +26,26 @@
       ${talk}
       <div class="try">${tryLab}
       <div class="mod-grid">
-        <div class="panel">${m.html()}${m.noPanel ? '' : '<div class="tools"><button type="button" class="link" data-pop="panel">Pop out this panel</button></div>'}</div>
-        ${hasEx ? `<aside class="ex"><h4>What to do</h4><ol>${m.steps.map(s => `<li>${s}</li>`).join('')}</ol><button type="button" class="link" data-pop="ex">Pop out these steps</button></aside>` : ''}
+        ${hasEx ? `<aside class="ex"><h4>What to do</h4><ol>${steps.map(t => `<li>${t}</li>`).join('')}</ol><button type="button" class="link" data-pop="ex">Pop out these steps</button></aside>` : ''}
+        <div class="panel">${m.html()}${quizHtml(m.id)}${m.noPanel ? '' : '<div class="tools"><button type="button" class="link" data-pop="panel">Pop out this panel</button></div>'}</div>
       </div></div>
       ${soloId ? '' : '<div class="lesson-nav"><button type="button" class="btn" data-go="prev"></button><button type="button" class="btn primary" data-go="next"></button></div>'}`;
     main.appendChild(sec);
+  });
+
+  /* quizzes and the map-of-machine-learning cards */
+  document.addEventListener('click', e => {
+    const q = e.target.closest('.qz button[data-k]');
+    if (q) {
+      const box = q.closest('.qz'); if (box.classList.contains('done')) return;
+      const [id, i] = box.dataset.q.split(':'), item = QZ[id][+i], ok = +q.dataset.k === item.a;
+      box.classList.add('done', ok ? 'right' : 'wrong');
+      box.querySelectorAll('button').forEach((b, k) => { if (k === item.a) b.classList.add('key'); });
+      const w = box.querySelector('.qw'); w.hidden = false; w.textContent = (ok ? 'Yes. ' : 'Not quite. ') + item.why;
+      return;
+    }
+    const c = e.target.closest('.mcard');
+    if (c) { const open = c.getAttribute('aria-expanded') === 'true'; c.setAttribute('aria-expanded', open ? 'false' : 'true'); }
   });
 
   /* ---- glossary links ---- */
@@ -39,7 +57,7 @@
   function linkTerms(scope) {
     const seen = new Set();
     const walker = document.createTreeWalker(scope, NodeFilter.SHOW_TEXT, {
-      acceptNode: n => (n.parentElement.closest('button,label,option,select,canvas,svg,output,summary,h3,h4,h5,.readout,.legend,.term') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT)
+      acceptNode: n => (n.parentElement.closest('a,button,label,option,select,canvas,svg,output,summary,h3,h4,h5,.readout,.legend,.term,.qz,.mcard') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT)
     });
     const nodes = []; while (walker.nextNode()) nodes.push(walker.currentNode);
     nodes.forEach(n => {
@@ -78,7 +96,7 @@
   if (soloId) {
     const nav = document.getElementById('nav'); if (nav) nav.remove();
     const ft = document.querySelector('footer'); if (ft) ft.remove();
-    list.forEach(m => { const sec = document.getElementById('m-' + m.id); m.init(sec); sec.querySelectorAll('.ex li, .note, .tc p, .pc li, .hint, .next li').forEach(linkTerms); });
+    list.forEach(m => { const sec = document.getElementById('m-' + m.id); m.init(sec); sec.querySelectorAll('.ex li, .note, .tc p, .pc li, .hint, .hook, .next li, .closer').forEach(linkTerms); });
     setTimeout(Plot.refit, 50);
     return;
   }
@@ -107,7 +125,7 @@
     const sec = secOf(i); sec.classList.add('on');
     if (!inited.has(lessons[i].id)) {
       inited.add(lessons[i].id);
-      lessons[i].init(sec); sec.querySelectorAll('.ex li, .note, .tc p, .pc li, .hint, .next li').forEach(linkTerms);
+      lessons[i].init(sec); sec.querySelectorAll('.ex li, .note, .tc p, .pc li, .hint, .hook, .next li, .closer').forEach(linkTerms);
     }
     tabs.forEach((t, k) => t.classList.toggle('on', k === i));
     if (tabs[i].scrollIntoView) tabs[i].scrollIntoView({ block: 'nearest', inline: 'center' });
@@ -136,24 +154,30 @@
       R.X.forEach((x, i) => p.dot(x[0], x[1], 4, lab ? Plot.hex2rgba(Plot.CLUSTER[lab[i]], 0.85) : 'rgba(92,102,112,0.55)', rocks ? D.LCOL[R.y[i]] : null, 1.8));
       if (cen) cen.forEach(c => { const q = toRaw(c); p.dot(q[0], q[1], 8, '#fff', Plot.C.INK, 2.4); });
     };
-    hp.draw();
+    const leg = document.getElementById('h-legend');
+    const setLegend = () => {
+      const sw = (c, ring) => `<i style="background:${c};${ring ? 'box-shadow:0 0 0 2.5px ' + ring + ';' : ''}"></i>`;
+      leg.innerHTML = (lab ? [0, 1, 2].map(k => `<span>${sw(Plot.CLUSTER[k])}Group ${'ABC'[k]}, found by k-means</span>`).join('') + `<span><i class="ctr">×</i>Group center</span>` : `<span>${sw('#8A929A')}One rock sample, no label</span>`) +
+        (rocks ? D.LITH.map((n, k) => `<span>${sw('#fff', D.LCOL[k])}${n} (ring)</span>`).join('') : '');
+    };
+    hp.draw(); setLegend();
     const cap = document.getElementById('h-cap');
     const reduce = g.matchMedia && g.matchMedia('(prefers-reduced-motion: reduce)').matches;
     document.getElementById('h-group').addEventListener('click', () => {
       clearInterval(timer); const r = ML.rng(Math.floor(Math.random() * 1e6)); cen = ML.kppInit(Z, 3, r); lab = null; let steps = 0;
       const step = () => {
         const nl = ML.assign(Z, cen), same = lab && nl.every((v, i) => v === lab[i]); lab = nl;
-        if (same || steps++ > 14) { clearInterval(timer); cap.textContent = 'k-means with k = 3 stopped changing. The groups came from the measurements alone.'; hp.draw(); return; }
-        hp.draw(); cen = ML.update(Z, lab, 3, r);
+        if (same || steps++ > 14) { clearInterval(timer); cap.textContent = 'k-means with k = 3 stopped changing. The groups came from the measurements alone.'; hp.draw(); setLegend(); return; }
+        hp.draw(); setLegend(); cen = ML.update(Z, lab, 3, r);
         cap.textContent = 'k-means, step ' + steps + ': assign each sample to the nearest center, then move each center to the mean of its samples.';
         if (reduce) step();
       };
-      if (reduce) { for (let i = 0; i < 20; i++) { const nl = ML.assign(Z, cen); if (lab && nl.every((v, j) => v === lab[j])) break; lab = nl; cen = ML.update(Z, lab, 3, r); } lab = ML.assign(Z, cen); cap.textContent = 'k-means with k = 3 stopped changing.'; hp.draw(); }
+      if (reduce) { for (let i = 0; i < 20; i++) { const nl = ML.assign(Z, cen); if (lab && nl.every((v, j) => v === lab[j])) break; lab = nl; cen = ML.update(Z, lab, 3, r); } lab = ML.assign(Z, cen); cap.textContent = 'k-means with k = 3 stopped changing.'; hp.draw(); setLegend(); }
       else { step(); timer = setInterval(step, 800); }
     });
     document.getElementById('h-rocks').addEventListener('click', e => {
-      rocks = !rocks; e.target.textContent = rocks ? 'Hide the rock types' : 'Show the rock types'; hp.draw();
-      if (rocks) cap.textContent = 'Ring colors: ' + D.LITH.join(', ') + '. The samples had these labels all along, and the method never saw them.';
+      rocks = !rocks; e.target.textContent = rocks ? 'Hide the rock types' : 'Show the rock types'; hp.draw(); setLegend();
+      if (rocks) cap.textContent = 'The ring colors are the real rock types. The samples had these labels all along, and the method never saw them.';
     });
   }
 

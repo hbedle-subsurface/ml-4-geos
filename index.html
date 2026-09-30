@@ -14,19 +14,30 @@
 
 <main id="modules">
   <section class="lesson on" id="m-start">
-    <div id="hero">
-      <div class="hero-text">
-        <h1>Machine learning in the geosciences</h1>
-        <p class="sub">An interactive lecture for incoming graduate students, School of Geosciences, University of Oklahoma</p>
-        <p class="hero-note">Everything on this page runs in the browser on synthetic data. Each tab has the talking points at the top and a short activity below them.</p>
-        <div class="hero-btns">
-          <button type="button" class="btn primary" id="h-group">Group the samples</button>
-          <button type="button" class="btn" id="h-rocks">Show the rock types</button>
-        </div>
+    <div class="mh"><h3>Machine learning in the geosciences</h3></div>
+    <div class="talk"><h4 class="band">Talk<span class="pill">about 1 min</span></h4>
+      <div class="tcards">
+        <div class="tc"><h5>What we will do</h5><p>Get the vocabulary straight, try each idea on rocks we know, and then see how it works in geophysics, sedimentology, geochemistry and minerals.</p></div>
+        <div class="tc"><h5>How each tab works</h5><p>We talk through the top band, and then you try it in the band below. Every tab has a short quiz at the bottom.</p></div>
+        <div class="tc"><h5>What the data are</h5><p>Everything runs in your browser on synthetic data, so the rocks are made up and the answers are known.</p></div>
       </div>
-      <div class="hero-plot">
-        <canvas id="hero-c" data-aspect="0.8" aria-label="300 rock samples plotted by gamma ray and density"></canvas>
-        <p class="cap" id="h-cap">300 rock samples, gamma ray against density, with no labels attached.</p>
+    </div>
+    <div class="try"><h4 class="band">Try it<span class="pill">about 1 min</span></h4>
+      <p class="hook">Nobody told the method what a sandstone is. Press the button and see whether it can find the three rock types anyway.</p>
+      <div id="hero">
+        <div class="hero-text">
+          <p class="sub">An interactive lecture for incoming graduate students, School of Geosciences, University of Oklahoma</p>
+          <ol class="hero-steps"><li>Press <b>Group the samples</b> and watch k-means work.</li><li>Press <b>Show the rock types</b> and see how close it got.</li></ol>
+          <div class="hero-btns">
+            <button type="button" class="btn primary" id="h-group">Group the samples</button>
+            <button type="button" class="btn" id="h-rocks">Show the rock types</button>
+          </div>
+        </div>
+        <div class="hero-plot">
+          <canvas id="hero-c" data-aspect="0.8" aria-label="300 rock samples plotted by gamma ray and density"></canvas>
+          <div class="legend" id="h-legend"></div>
+          <p class="cap" id="h-cap">300 rock samples, gamma ray against density, with no labels attached.</p>
+        </div>
       </div>
     </div>
     <div class="lesson-nav"><span></span><button type="button" class="btn primary" data-go="next">Next: Vocabulary</button></div>
@@ -50,9 +61,15 @@
 <script src="js/glossary.js"></script>
 <script src="js/modules1.js"></script>
 <script src="js/modules2.js"></script>
+<script src="js/cnnlab.js"></script>
+<script src="js/modules_cnn.js"></script>
+<script src="js/samlab.js"></script>
+<script src="js/modules_sam.js"></script>
 <script src="js/seismic.js"></script>
 <script src="js/modules_geo.js"></script>
 <script src="js/modules3.js"></script>
+<script src="js/tables.js"></script>
+<script src="js/homework.js"></script>
 <script src="js/talk.js"></script>
 <script src="js/main.js"></script>
 </body>

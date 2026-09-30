@@ -98,6 +98,44 @@
   });
 
 
+  /* ---------- 1a. types of machine learning ---------- */
+  M.push({
+    id: 'types', part: 1, title: 'Types of machine learning',
+    lede: '',
+    steps: [],
+    html: () => `
+      <h4>Regression: a line through the dots</h4>
+      <div class="row-reg">
+        <div>${H.cv('ty-a', 0.62)}</div>
+        <div>
+          ${H.S('ty-d', 'How curvy is the line', 1, 10, 1, 1)}
+          <div class="readout" id="ty-out"></div>
+          ${H.legend(['Training samples', 'Test samples'], ['#5C6670', '#FFFFFF'])}
+        </div>
+      </div>`,
+    init(root) {
+      const r = ML.rng(14), all = [];
+      for (let i = 0; i < 44; i++) { const z = 0.2 + 3.6 * r(); all.push([z, 0.34 * Math.exp(-0.5 * z) + 0.022 * ML.gauss(r)]); }
+      const tr = all.slice(0, 30), te = all.slice(30), sx = z => z / 2 - 1;
+      const pl = H.plot(root, 'ty-a', { xr: [0, 4], yr: [0, 0.4], xl: 'Depth (km)', yl: 'Porosity (fraction)', nx: 4, ny: 4, aspect: 0.62 });
+      let co;
+      const dd = H.bind(root, 'ty-d', () => { fit(); pl.draw(); }, v => v);
+      const fit = () => { co = ML.polyfit(tr.map(p => sx(p[0])), tr.map(p => p[1]), dd.get()); };
+      const rmse = set => Math.sqrt(set.reduce((s, p) => s + (ML.polyval(co, sx(p[0])) - p[1]) ** 2, 0) / set.length);
+      fit();
+      pl.onDraw = p => {
+        p.axes(); p.clipStart();
+        const pts = []; for (let z = 0.05; z <= 3.95; z += 0.04) pts.push([z, ML.polyval(co, sx(z))]);
+        p.line(pts, C.RED, 2.6);
+        tr.forEach(q => p.dot(q[0], q[1], 4, 'rgba(92,102,112,0.85)'));
+        te.forEach(q => p.dot(q[0], q[1], 4.2, '#fff', C.SLATE, 1.8));
+        p.clipEnd();
+        H.q(root, 'ty-out').innerHTML = `Typical miss on the training samples: <b>${(rmse(tr) * 100).toFixed(1)}</b> porosity points. On the test samples: <b>${(rmse(te) * 100).toFixed(1)}</b>.`;
+      };
+      pl.draw();
+    }
+  });
+
   /* ---------- 1b. when machine learning fits ---------- */
   M.push({
     id: 'fit', part: 1, title: 'When machine learning fits',
@@ -109,7 +147,7 @@
     html: () => `<div id="f-list"></div><div class="readout" id="f-out">Answered 0 of 6.</div>`,
     init(root) {
       const items = [
-        { t: 'Picking faults on 3,000 line-km of seismic when a few hundred line-km are already interpreted.', a: 'good', r: 'Many samples and a set of known answers to learn from. This is a common use of deep learning.' },
+        { t: 'Picking faults on 3,000 line-km of seismic when a few hundred line-km are already interpreted.', a: 'good', r: 'Many samples and a set of known answers to learn from. Deep learning gets used on this a lot.' },
         { t: 'Predicting lithology in a new well from its logs, with core and logs from ten nearby wells.', a: 'good', r: 'Labeled examples from the same area and the same measurements. Facies prediction from logs is a standard case.' },
         { t: 'Dating one ash bed from a single sample.', a: 'poor', r: 'One sample gives nothing to learn from, and radiometric dating already has a physical equation.' },
         { t: 'Calculating travel time through a layered model with known velocities and thicknesses.', a: 'poor', r: 'The physics gives the exact answer. A learned model would approximate an equation that is already known.' },

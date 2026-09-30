@@ -242,6 +242,25 @@
     }
   };
 
+  /* polynomial least squares by the normal equations (x should be scaled to about -1..1) */
+  ML.polyfit = function (x, y, deg) {
+    const n = deg + 1, A = Array.from({ length: n }, () => new Array(n + 1).fill(0));
+    for (let k = 0; k < x.length; k++) {
+      const pw = [1]; for (let i = 1; i < 2 * n; i++) pw.push(pw[i - 1] * x[k]);
+      for (let i = 0; i < n; i++) { for (let j = 0; j < n; j++) A[i][j] += pw[i + j]; A[i][n] += y[k] * pw[i]; }
+    }
+    for (let i = 0; i < n; i++) A[i][i] += 1e-9;
+    for (let c = 0; c < n; c++) {
+      let m = c; for (let r = c + 1; r < n; r++) if (Math.abs(A[r][c]) > Math.abs(A[m][c])) m = r;
+      [A[c], A[m]] = [A[m], A[c]];
+      for (let r = c + 1; r < n; r++) { const f = A[r][c] / A[c][c]; for (let k = c; k <= n; k++) A[r][k] -= f * A[c][k]; }
+    }
+    const co = new Array(n).fill(0);
+    for (let i = n - 1; i >= 0; i--) { let s = A[i][n]; for (let j = i + 1; j < n; j++) s -= A[i][j] * co[j]; co[i] = s / A[i][i]; }
+    return co;
+  };
+  ML.polyval = (co, x) => { let s = 0; for (let i = co.length - 1; i >= 0; i--) s = s * x + co[i]; return s; };
+
   g.ML = ML;
   if (typeof module !== 'undefined') module.exports = ML;
 })(typeof window !== 'undefined' ? window : globalThis);
