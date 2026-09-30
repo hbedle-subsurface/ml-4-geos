@@ -100,6 +100,18 @@
       let s = ln(14, 8, 14, 66, GR, 1.4) + ln(14, 66, 112, 66, GR, 1.4); s += `<path d="M16 12 C28 40 40 54 58 58 C76 62 92 62 110 63" fill="none" stroke="${RED}" stroke-width="3"/>`;
       return s + tx(64, 78, 'more passes', 8, SL) + tx(30, 10, 'loss', 8, SL);
     },
+    onecut() {
+      let s = ln(10, 62, 112, 62, GR, 1.4); const r = ML.rng(41);
+      for (let i = 0; i < 9; i++) s += dot(14 + 36 * r(), 62 - 3, GOLD, 3) + dot(72 + 36 * r(), 62 - 3, PUR, 3);
+      s += `<path d="M10 56 C40 56 44 12 62 12 S86 12 112 12" fill="none" stroke="${RED}" stroke-width="3"/>`.replace('C40 56 44 12 62 12 S86 12 112 12','C44 56 52 14 66 14 S90 14 112 14');
+      return s + ln(60, 8, 60, 66, INK, 1.6, '4 3') + tx(60, 79, 'one cut: above or below', 7.5, SL);
+    },
+    twocuts() {
+      let s = ln(10, 62, 112, 62, GR, 1.4); const r = ML.rng(42);
+      for (let i = 0; i < 7; i++) s += dot(12 + 26 * r(), 59, GOLD, 3) + dot(44 + 28 * r(), 59, RED, 3) + dot(82 + 26 * r(), 59, PUR, 3);
+      s += `<path d="M10 56 C30 56 34 56 42 40 S50 12 60 12 S72 12 80 40 S92 56 112 56" fill="none" stroke="${RED}" stroke-width="3"/>`;
+      return s + ln(40, 8, 40, 66, INK, 1.6, '4 3') + ln(80, 8, 80, 66, INK, 1.6, '4 3') + tx(60, 79, 'two cuts make a window', 7.5, SL);
+    },
     ring() {
       const r = ML.rng(15); let s = ''; for (let i = 0; i < 26; i++) s += dot(10 + 100 * r(), 6 + 72 * r(), '#B4BAC1', 2.8); for (let i = 0; i < 16; i++) { const a = i / 16 * 6.283; s += dot(60 + 25 * Math.cos(a), 42 + 25 * Math.sin(a), RED, 3.2); }
       return s + `<circle cx="60" cy="42" r="25" fill="none" stroke="${INK}" stroke-width="2" stroke-dasharray="4 3"/>`;
