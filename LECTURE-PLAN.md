@@ -1,33 +1,42 @@
-# Lecture plan, 40 minutes
+# Lecture plan: a live session and homework
 
-Students open the site on their own laptops and the instructor projects the same page. Every tab has the same layout:
+The site is built as a teaching tool first. About 40 minutes of it fits in a live session, and the rest is homework. Students open the site on their own laptops and the instructor projects the same page. Every tab has the same layout:
 
-* **Concept** (top band): the few points to cover, as cards or one picture. The site does not show any minutes; the table below is for planning only.
-* **Try it Out!** (below): a one-line hook that ties the activity to what was just said, the steps on the left, the activity on the right, and a short **Check yourself** quiz at the bottom.
+* **Concept** (top band): the few points to cover, as cards or one picture, in plain language that assumes no background in machine learning.
+* **Try it Out!** (below): a one-line hook that ties the activity to what was just said, the steps on the left, the activity on the right, and a short **Check yourself** quiz at the bottom. Activities with several steps have tabs, and each step opens with a box that says *What to do* and *What to notice*, so a student working alone knows what to look for.
 
-Talk through the Concept band, let the class do the activity, then press *Next* (or the right arrow). All tabs are open, so students who get ahead can look, and nothing breaks.
+All tabs are open, so students can go in any order and nothing breaks. The Next and Back buttons (or the arrow keys) move between tabs.
 
-| Tab | Talk | Try it | Running | Note |
-|---|---|---|---|---|
-| Start | 1 | 1 | 2 | |
-| Vocabulary | 1 | 1 | 4 | |
-| Types of ML | 2 | 1 | 7 | |
-| When ML fits | 1 | 1 | 9 | |
-| Dimensions | 2 | 1 | 12 | |
-| Unsupervised | 1 | 2 | 15 | |
-| Semi-supervised | 1 | 1 | 17 | |
-| Supervised | 2 | 3 | 22 |
-| Neural networks | 1 | 1 | 24 | |
-| CNN (muffin or chihuahua) | 1 | 2 | 27 | |
-| Segment Anything | 1 | 2 | 30 | optional |
-| LLMs | 2 | 2 | 34 | |
-| Geophysics | 2 | 4 | 40 | |
-| Other fields | 1 | 2 | 43 | |
-| Pitfalls | 1 | 2 | 46 | |
-| Next steps | 1 | | 47 | |
+## A suggested split
 
-Everything adds up to about 47 minutes. Skipping the two optional tabs (Semi-supervised and Segment Anything) brings it to about 44, so a few more cuts are needed for 40: drop Other fields to its Concept band, and run the Pitfalls tab with the small-sample slider only. The quizzes at the bottom of each tab can run out loud or be skipped when time is short.
+| In the live session (about 40 minutes) | Approximate minutes |
+|---|---|
+| Start | 3 |
+| Vocabulary | 2 |
+| Types of ML | 3 |
+| When ML fits | 2 |
+| Dimensions (steps 1 and 3) | 5 |
+| Unsupervised | 5 |
+| Supervised (steps 1 to 3) | 7 |
+| Neural networks (step 1) | 4 |
+| Pitfalls (small samples) | 3 |
+| Next steps | 1 |
 
+| Homework | Why it works as homework |
+|---|---|
+| Dimensions steps 2 and 4 | The by-hand search for PC2 and the four-measurement loadings |
+| Semi-supervised | One labeled sample per range, and label propagation |
+| Supervised step 4 | The mystery samples and the mega flood |
+| Neural networks step 2 | The ore shell map and the small maps of each neuron |
+| CNN | Labeling LiDAR patches, then the two-layer network |
+| Segment Anything | Click, segment everything, name the masks |
+| LLMs | The real-or-made-up reference game |
+| Geophysics | Five steps from a seismic section to a facies map |
+| Other fields | Sedimentology, geochemistry, prospectivity, paleontology |
+| Pitfalls (spatial and rare targets) | Why a high score can mislead |
+| Homework tab | The same workflow on the student's own table, with six write-up questions |
+
+This split is a suggestion. The minutes are for planning only, and the site does not show any. The quizzes at the bottom of each tab can run out loud in the session, or they can be part of the homework.
 
 ## What happens on each tab
 
@@ -47,7 +56,7 @@ Everything adds up to about 47 minutes. Skipping the two optional tabs (Semi-sup
 * **Other fields.** Sedimentology (gamma ray alone, then more curves), geochemistry (raw, standardized, log10), prospectivity (5 and then 30 deposits), paleontology if time allows.
 * **Pitfalls.** Small sample, spatial split, rare targets.
 * **Next steps.** The tools list, a first project, and the closing ask.
-* **Homework.** Not part of the 40 minutes. Point students to it at the end. They load a .csv or .xlsx of their own (or a sample table), work through Look, PCA, Clusters and Predict, and download a summary to answer six questions. The page links to Analyze 2D and scan-lecture for anyone who wants seismic.
+* **Homework.** The last tab, for after the session. Point students to it at the end. They load a .csv or .xlsx of their own (or a sample table), work through Look, PCA, Clusters and Predict, and download a summary to answer six questions. The page links to Analyze 2D and scan-lecture for anyone who wants seismic.
 
 If time runs short: drop *Semi-supervised* to its talk band, keep the neural network to the ring demo only, and skip the crossplot in geophysics step 2. Keep unsupervised versus supervised at full length.
 

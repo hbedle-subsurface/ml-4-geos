@@ -36,7 +36,7 @@
       'Find the number of samples where the learned threshold stops moving much.'
     ],
     html: () => `
-      <h4>A hand-written rule and a learned threshold, gamma ray of 300 synthetic samples</h4>
+      <h4>A rule a person wrote and a rule the computer learned, on the gamma ray of 300 made-up samples</h4>
       ${H.cv('v-c', 0.42)}
       ${H.S('v-n', 'Training samples used', 2, 100, 1, 6)}
       <div class="readout" id="v-out"></div>`,
@@ -91,7 +91,7 @@
         pl.vline(RULE, C.SLATE, 2, [6, 4]); pl.vline(tl, C.RED, 2.5);
         pl.text('expert rule ' + RULE, RULE + 1.5, 47, { color: C.SLATE, font: '11px system-ui' });
         pl.text('learned ' + tl.toFixed(0), tl + 1.5, 43, { color: C.RED, font: '11px system-ui' });
-        H.q(root, 'v-out').innerHTML = `Expert rule (gamma ray &gt; ${RULE}): <b>${H.pct(accAt(RULE, all))}</b> correct. Learned from ${s.get()} samples (gamma ray &gt; ${tl.toFixed(0)}): <b>${H.pct(accAt(tl, all))}</b> correct on all 300. Purple bars are shale and gray bars are the other rocks.`;
+        H.q(root, 'v-out').innerHTML = `The expert's rule (call it shale above ${RULE} API): <b>${H.pct(accAt(RULE, all))}</b> right. The rule learned from ${s.get()} samples (call it shale above ${tl.toFixed(0)} API): <b>${H.pct(accAt(tl, all))}</b> right on all 300. Purple bars are shale and gray bars are the other rocks.`;
       };
       p.draw();
     }
@@ -105,6 +105,7 @@
     steps: [],
     html: () => `
       <h4>Regression: a line through the dots</h4>
+      ${H.look('Slide How curvy is the line from 1 to 10. Filled dots are training samples: the computer draws the line using only these. Hollow dots are test samples: we hide them while drawing the line and use them afterward as a fair check.', 'A very straight line misses the trend. A very curvy line hugs the filled dots and can miss the hollow ones. The two numbers say how far off the line is, on average, for each set. The best line is not the curviest one.')}
       <div class="row-reg">
         <div>${H.cv('ty-a', 0.62)}</div>
         <div>
@@ -130,7 +131,7 @@
         tr.forEach(q => p.dot(q[0], q[1], 4, 'rgba(92,102,112,0.85)'));
         te.forEach(q => p.dot(q[0], q[1], 4.2, '#fff', C.SLATE, 1.8));
         p.clipEnd();
-        H.q(root, 'ty-out').innerHTML = `Typical miss on the training samples: <b>${(rmse(tr) * 100).toFixed(1)}</b> porosity points. On the test samples: <b>${(rmse(te) * 100).toFixed(1)}</b>.`;
+        H.q(root, 'ty-out').innerHTML = `Average miss on the training samples: <b>${(rmse(tr) * 100).toFixed(1)}</b> porosity points (percentage points of porosity). Average miss on the test samples: <b>${(rmse(te) * 100).toFixed(1)}</b>.`;
       };
       pl.draw();
     }
@@ -208,7 +209,7 @@
       </div>
 
       <div class="track" data-s="3">
-        ${H.look('Slide Flatten from 0 to 100%. The cloud swings around and then lies flat, so only PC1 and PC2 are left. Then turn on the lithology colors.', 'The flat plot still holds most of the pattern from the 3D cloud, and it is easy to read. The computer never saw the rock types, and yet they land in different parts of the plot.')}
+        ${H.look('Slide Flatten from 0 to 100%. The cloud swings around and then lies flat, so only PC1 and PC2 are left. Then turn on the rock-type colors.', 'The flat plot still holds most of the pattern from the 3D cloud, and it is easy to read. The computer never saw the rock types, and yet they land in different parts of the plot.')}
         <div class="row-3d"><div>${H.cv('pc-c', 0.8)}</div>
           <div>
             ${H.S('pc-rot', 'Turn the cloud', 0, 360, 1, 30)}
@@ -318,7 +319,7 @@
         pl.axes(); const k = keep.get();
         P4.frac.forEach((f, i) => { pl.rect(i + 1 - 0.32, 0, i + 1 + 0.32, f * 100, i < k ? C.RED : 'rgba(92,102,112,0.35)'); pl.text(Math.round(f * 100) + '', i + 1, f * 100 + 5, { align: 'center', font: '12px system-ui', color: C.INK }); });
         const kept = P4.frac.slice(0, k).reduce((a, b) => a + b, 0);
-        root.querySelector('#pc4-out').innerHTML = `Keeping ${k} of 4 components keeps <b>${(kept * 100).toFixed(0)}%</b> of the total spread. PC1 loadings on ${names.join(', ')}: ${P4.vecs[0].map(v => v.toFixed(2)).join(', ')}.`;
+        root.querySelector('#pc4-out').innerHTML = `Keeping ${k} of 4 components keeps <b>${(kept * 100).toFixed(0)}%</b> of the total spread. PC1 is a mix of the four measurements: gamma ray ${P4.vecs[0][0].toFixed(2)}, density ${P4.vecs[0][1].toFixed(2)}, sonic ${P4.vecs[0][2].toFixed(2)}, neutron porosity ${P4.vecs[0][3].toFixed(2)}. Measurements with the same sign rise together, and a measurement with the opposite sign falls when they rise.`;
       };
       pf.onDraw = pl => { pl.axes(); pl.hline(0, C.SLATE, 1); for (let j = 0; j < 4; j++) { pl.rect(j + 1 - 0.35, 0, j + 1, P4.vecs[0][j], C.RED); pl.rect(j + 1, 0, j + 1 + 0.35, P4.vecs[1][j], C.SLATE); } pl.ptext('PC1', pl.x(0.6), pl.y(0.9), { color: C.RED, font: '12px system-ui' }); pl.ptext('PC2', pl.x(1.2), pl.y(0.9), { color: C.SLATE, font: '12px system-ui' }); };
 
@@ -346,7 +347,7 @@
       <div class="ctlrow st-top">
         <label class="switch"><input type="checkbox" id="u-true"><span class="sw"></span><b>Reveal the true source of each sample</b></label>
         <label class="chk"><input type="checkbox" id="u-auto" checked> Keep turning</label>
-        <div class="hintline">Drag either cloud to turn it. Both clouds show the first three principal components of all six measurements.</div>
+        <div class="hintline">Drag either cloud to turn it. Six measurements cannot be drawn, so both clouds show three new axes, PC1, PC2 and PC3, built from all six (as in the Dimensions tab). k-means still uses all six measurements to make the groups.</div>
       </div>
       <div class="ctlrow">${H.S('u-k', 'Number of groups, k', 1, 8, 1, 4)}${H.btn('u-run', 'Watch it run')}${H.btn('u-new', 'New start')}</div>
       <div class="row2">
@@ -354,6 +355,7 @@
         <div><h5>What each group is made of</h5>${H.cv('u-g', 0.8)}</div>
       </div>
       <div class="legend" id="u-legend"></div>
+      <p class="note">Clues from geology: granite sand is rich in potassium (K₂O) and zirconium (Zr). Dark volcanic rock gives sand rich in chromium (Cr) and nickel (Ni). Limestone gives calcium (CaO) and strontium (Sr). Old, recycled sandstone is rich in zircon (Zr) and poor in most other things.</p>
       <div class="readout" id="u-out"></div>`,
     init(root) {
       const PV = D.provenance(), Z = PV.Z, P6 = ML.pca(Z), SC = P6.scores.map(s => s.slice(0, 3)), n = Z.length, q = id => root.querySelector('#' + id);
@@ -412,7 +414,7 @@
           }
           if (st.show && sz[g]) { const d = info.dom[g], pct = Math.round(100 * info.cnt[g][d] / sz[g]); c.fillStyle = D.SCOL[d]; c.fillRect(lw + 6 * cw + 4, y + 3, 10, rh - 6); c.fillStyle = C.INK; c.textAlign = 'left'; c.font = '600 11.5px system-ui'; c.fillText(d === 4 ? 'None of them' : D.SRCS[d], lw + 6 * cw + 18, y + rh / 2 - 6); c.font = '11px system-ui'; c.fillStyle = C.SLATE; c.fillText(pct + '%', lw + 6 * cw + 18, y + rh / 2 + 8); }
         }
-        c.font = '11.5px system-ui'; c.fillStyle = C.SLATE; c.textAlign = 'left'; c.fillText('Red: higher than average. Blue: lower. The number is how many standard deviations.', 4, pl.H - 8);
+        c.font = '11.5px system-ui'; c.fillStyle = C.SLATE; c.textAlign = 'left'; c.fillText('Red: above the average of all samples. Blue: below. The number says how far, in units of typical spread.', 4, pl.H - 8);
         c.restore();
       };
 

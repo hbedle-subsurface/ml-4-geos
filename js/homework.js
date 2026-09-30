@@ -47,7 +47,7 @@
           <div>
             <div class="ctl"><label for="hw-label">Label column</label><select id="hw-label"></select></div>
             <div class="ctl"><label for="hw-loc">Location column</label><select id="hw-loc"></select></div>
-            <div class="ctl"><label for="hw-tf">Data used</label><select id="hw-tf"><option value="none">Raw values</option><option value="std" selected>Rescaled (each column on the same scale)</option><option value="log">Log10, then rescaled</option></select></div>
+            <div class="ctl"><label for="hw-tf">Data used</label><select id="hw-tf"><option value="none">Raw values</option><option value="std" selected>Rescaled (each column on the same scale)</option><option value="log">Logarithms (base 10), then rescaled</option></select></div>
             <p class="note" id="hw-prep"></p>
           </div>
         </div>
@@ -79,7 +79,7 @@
         <div class="track" data-h="4">
           <p class="note" id="hw-knote"></p>
           <div class="row2"><div>${H.cv('hw-km', 0.95)}</div><div>${H.cv('hw-kb', 0.95)}</div></div>
-          <div class="ctlrow">${H.S('hw-tr', 'Share used for training', 10, 90, 5, 70)}${H.S('hw-nn', 'Neighbors, k', 1, 25, 2, 5)}${H.btn('hw-snew', 'New split')}</div>
+          <div class="ctlrow">${H.S('hw-tr', 'Share used for training', 10, 90, 5, 70)}${H.S('hw-nn', 'Number of trees in the forest', 5, 100, 5, 25)}${H.btn('hw-snew', 'New split')}</div>
           <div class="readout" id="hw-kout"></div>
         </div>
 
@@ -90,7 +90,7 @@
           <ol class="hw-q">
             <li>How many rows and columns did you use, and how many rows were dropped for missing values?</li>
             <li>Which version of the data did you use (raw, rescaled, or log), and what changed when you tried another?</li>
-            <li>What do the PC1 and PC2 loadings tell us? Name one geological association you would check against your own knowledge of the area.</li>
+            <li>What mix of measurements makes up PC1 and PC2 (the loadings)? Name one geological association you would check against your own knowledge of the area.</li>
             <li>Did the clusters line up with your label column? What k did you settle on, and why?</li>
             <li>How did accuracy change between the random and the blocked split? What does that say about your data?</li>
             <li>What one thing would change your mind about these results?</li>
@@ -280,9 +280,9 @@
       H.on(root, 'hw-snew', 'click', () => { st.splitSeed += 3; pKM.draw(); pKB.draw(); });
       const pool = () => {
         const all = prep.y.map((v, i) => (v >= 0 ? i : -1)).filter(i => i >= 0);
-        return all.length > 1500 ? ML.shuffle(all.length, ML.rng(31)).slice(0, 1500).map(i => all[i]) : all;
+        return all.length > 800 ? ML.shuffle(all.length, ML.rng(31)).slice(0, 800).map(i => all[i]) : all;
       };
-      const knnOf = (tr, te) => ML.knnPredict(tr.map(i => prep.Z[i]), tr.map(i => prep.y[i]), te.map(i => prep.Z[i]), Math.min(nns.get(), tr.length), prep.classes.length);
+      const knnOf = (tr, te) => { const nc = prep.classes.length, f = ML.forest(tr.map(i => prep.Z[i]), tr.map(i => prep.y[i]), nc, nns.get(), ML.rng(5), { maxDepth: 6 }); return te.map(i => ML.argmax(ML.forestVotes(f, prep.Z[i], nc))); };
       let res4 = null;
       function run4() {
         const P = pool(), nc = prep.classes.length, order = ML.shuffle(P.length, ML.rng(st.splitSeed)).map(i => P[i]), cut = Math.max(2, Math.round(trs.get() / 100 * order.length));
@@ -330,12 +330,12 @@
         if (!ok()) return prep && prep.error ? prep.error : 'Load a table first.';
         const t = st.table, L = [];
         L.push(`File: ${t.name}`, `Rows in file: ${t.rows.length}. Rows used: ${prep.n}. Rows dropped for missing values: ${prep.dropped}.${prep.capped ? ' (random 4000 used)' : ''}`);
-        L.push(`Features (${prep.feat.length}): ${prep.feat.map(j => t.cols[j]).join(', ')}`, `Data used: ${({ none: 'raw values', std: 'rescaled', log: 'log10 then standardized' })[st.tf]}`);
+        L.push(`Features (${prep.feat.length}): ${prep.feat.map(j => t.cols[j]).join(', ')}`, `Data used: ${({ none: 'raw values', std: 'rescaled', log: 'logarithms (base 10), then rescaled' })[st.tf]}`);
         L.push(`PCA share of the spread kept: ${prep.P.frac.slice(0, Math.min(4, prep.P.frac.length)).map((f, i) => 'PC' + (i + 1) + ' ' + Math.round(f * 100) + '%').join(', ')}`);
         L.push(`PC1 loadings: ${prep.feat.map((j, c) => t.cols[j] + ' ' + prep.P.vecs[0][c].toFixed(2)).join(', ')}`);
         const m = km(kk.get()); const sizes = new Array(kk.get()).fill(0); m.labels.forEach(l => sizes[l]++);
         L.push(`k-means: k = ${kk.get()}, cluster sizes ${sizes.join(', ')}` + (usable() ? `, agreement with ${t.cols[st.label]} ${Math.round(100 * ML.purity(m.labels.filter((_, i) => prep.y[i] >= 0), prep.y.filter(v => v >= 0), kk.get(), prep.classes.length))}%` : ''));
-        if (usable()) { const r = run4(); L.push(`Nearest neighbors (k = ${nns.get()}) on ${t.cols[st.label]}: ${Math.round(r.acc * 100)}% on the held-out ${100 - trs.get()}%. Five-fold random ${Math.round(r.rnd * 100)}%${r.blk !== null ? `, blocked by ${t.cols[st.loc]} ${Math.round(r.blk * 100)}%` : ''}.`); }
+        if (usable()) { const r = run4(); L.push(`Random forest (${nns.get()} trees) on ${t.cols[st.label]}: ${Math.round(r.acc * 100)}% on the held-out ${100 - trs.get()}%. Five-fold random ${Math.round(r.rnd * 100)}%${r.blk !== null ? `, blocked by ${t.cols[st.loc]} ${Math.round(r.blk * 100)}%` : ''}.`); }
         return L.join('\n');
       }
       const showResults = () => { q('hw-res').innerHTML = esc(summary()).replace(/\n/g, '<br>'); };

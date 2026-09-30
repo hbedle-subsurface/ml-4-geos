@@ -26,7 +26,7 @@
       ${H.legend(S.FAC, S.FCOL)}
 
       <div class="track on" data-s="1">
-        <p class="note">The section is a synthetic seismic line across the map on the right. The colored strip above it is the geology along the line, and the dotted lines carry each boundary down through the section.</p>
+        ${H.look('Press Play the line across the map, or click the map to move the red line. Follow the channel on the seismic section. Slide the wavelet frequency and the noise.', 'The section on the left is a made-up seismic line across the map on the right. The colored strip above it is the geology along the line, and the dotted lines carry each boundary down through the section. The channel sand shows up as a change in the reflections. More noise and a lower frequency make that change harder to see.')}
         <div class="row-sec">
           <div>${H.cv('gs-a', 0.78)}</div>
           <div><h5>RMS amplitude map, line in red (click to move it)</h5>${H.cv('gs-b', 1)}</div>
@@ -49,10 +49,10 @@
         </div>
         ${H.S('ga-w', 'Window length around the target (ms)', 20, 120, 4, 60)}
         <div class="cards">
-          <details><summary>RMS amplitude</summary><p class="note">Measures the square root of the average squared amplitude in the window, so it tracks how strong the reflections are. Strong values often go with sandstone bodies that contrast with the shale around them, and weak values often go with uniform shale.</p></details>
-          <details><summary>Peak envelope</summary><p class="note">Measures the largest value of the envelope in the window. The envelope is the instantaneous strength of the trace whatever the polarity. High values often mark strong impedance contrasts, such as channel fill against shale.</p></details>
-          <details><summary>Mean frequency</summary><p class="note">Measures the average frequency of the amplitude spectrum in the window, from 0 to 100 Hz. Lower values often go with attenuation and thick beds. In this model the channel sand lowers the frequency by construction.</p></details>
-          <details><summary>Local variability</summary><p class="note">Measures the standard deviation of RMS amplitude in each 3 × 3 block of neighboring traces. High values mark places where amplitude changes quickly from trace to trace, such as the edges of bodies.</p></details>
+          <details><summary>RMS amplitude</summary><p class="note">Measures how strong the reflections are inside the window (the square root of the average of the squared amplitudes). Strong values often go with sandstone bodies that contrast with the shale around them, and weak values often go with uniform shale.</p></details>
+          <details><summary>Peak envelope</summary><p class="note">Measures the biggest value of the envelope in the window. The envelope is the strength of the trace at each moment, whether the swing is positive or negative. High values often mark strong contrasts in rock properties (impedance), such as channel fill against shale.</p></details>
+          <details><summary>Mean frequency</summary><p class="note">Measures the average frequency in the window, on a scale from 0 to 100 Hz. Lower values often go with thick beds and with high frequencies fading out as the waves travel (attenuation). In this made-up model, the channel sand lowers the frequency on purpose.</p></details>
+          <details><summary>Local variability</summary><p class="note">Measures how much the RMS amplitude varies among a 3 × 3 block of neighboring traces. High values mark places where the amplitude changes quickly from trace to trace, such as the edges of bodies.</p></details>
         </div>
       </div>
 
@@ -69,7 +69,7 @@
       </div>
 
       <div class="track" data-s="4">
-        <p class="note">Two tests. Shuffling an attribute among the traces removes its link to location and leaves the others alone, and the share of traces that change facies measures how much the trained map relies on it. Refitting the SOM without an attribute shows how much the result depends on having it at all. Attributes that carry the same information cover for each other.</p>
+        ${H.look('Pick an attribute and slide the share of traces to shuffle. Then look at the right-hand map, where the SOM was refit without that attribute.', 'Shuffling scrambles one attribute among the traces, so it no longer matches the place it came from. If the facies map changes a lot, the trained map relied on that attribute. Refitting without the attribute shows how much the answer depends on having it at all. Attributes that carry the same information cover for each other, so removing one of two similar attributes changes little.')}
         <div class="row3">
           <div><h5>Facies map with one attribute shuffled</h5>${H.cv('g4-a', 1)}</div>
           <div><h5>Traces that change facies after a full shuffle</h5>${H.cv('g4-b', 1)}</div>
@@ -80,7 +80,7 @@
       </div>
 
       <div class="track" data-s="5">
-        <p class="note">Wells give the facies at a few locations. Each trace takes the facies of the well with the most similar attributes (nearest neighbor). Clicking the map adds a well.</p>
+        ${H.look('Slide the number of wells, or click the map to add a well. Then turn on the true facies.', 'A well tells us the facies at one spot. Each trace takes the facies of the well whose attributes it most resembles (its nearest neighbor). A facies that no well cut, such as the channel when the wells all miss it, cannot appear on the map at all.')}
         <div class="row2">
           <div><h5>Supervised facies map, wells marked</h5>${H.cv('g5-a', 1)}</div>
           <div><h5>True facies</h5>${H.cv('g5-b', 1)}</div>
@@ -194,7 +194,7 @@
       p3c.onDraw = pl => { if (t3.checked) cell(pl, t => S.FCOL[S.fac[t]]); else { pl.rect(0, 0, N, N, '#F4F6F7', C.GRID); pl.ptext('hidden', pl.W / 2, pl.H / 2, { align: 'center', color: C.SLATE }); } };
       const readout3 = () => {
         const k = Math.min(st.k, st.side * st.side);
-        noteEl.innerHTML = `${cols.length} attribute${cols.length > 1 ? 's' : ''} in: ${cols.map(c => S.ANAMES[c]).join(', ')}. Each dot in the map is a neuron, sized by the number of traces that fall on it and colored by the facies group it belongs to.${st.side * st.side < st.k ? ' There are fewer neurons than facies, so the number of groups is capped.' : ''}`;
+        noteEl.innerHTML = `${cols.length} attribute${cols.length > 1 ? 's' : ''} in: ${cols.map(c => S.ANAMES[c]).join(', ')}. Each dot in the map is a neuron. Its size shows how many traces land on it, and its color shows which facies group it belongs to.${st.side * st.side < st.k ? ' There are fewer neurons than facies groups, so the number of groups is limited to the number of neurons.' : ''}`;
         H.q(root, 'g3-out').innerHTML = `${st.side * st.side} neurons in ${k} groups.` + (t3.checked ? ` Agreement with the true facies: <b>${H.pct(ML.purity(cls, Array.from(S.fac), k, 3))}</b> of traces fall in a group whose most common true facies matches theirs.` : ' The true facies are hidden.');
       };
       H.bind(root, 'g3-s', v => { stopTrain(); st.side = v; calcAll(3); drawStep(); }, v => v);

@@ -138,7 +138,7 @@
       };
       pb.onDraw = pl => {
         pl.axes(); if (hist.length > 1) pl.line(hist.map((v, i) => [i + 1, Math.min(v, 1)]), C.RED, 2);
-        H.q(root, 'n-out').innerHTML = (epoch === 0 ? 'Untrained network, so the map colors are random. Press Train. ' : '') + `Epoch <b>${epoch}</b>. Loss <b>${hist.length ? hist[hist.length - 1].toFixed(3) : '-'}</b>. Training accuracy <b>${H.pct(acc(tr))}</b>, test accuracy <b>${H.pct(acc(te))}</b>. Network: ${net.s.join(' → ')} (${net.s.slice(1, -1).reduce((a, b) => a + b, 0)} hidden neurons). Filled dots are training samples and hollow dots are test samples.`;
+        H.q(root, 'n-out').innerHTML = (epoch === 0 ? 'Untrained network, so the map colors are random. Press Train. ' : '') + `Epoch <b>${epoch}</b>. Loss <b>${hist.length ? hist[hist.length - 1].toFixed(3) : 'not measured yet'}</b>. Training accuracy <b>${H.pct(acc(tr))}</b>, test accuracy <b>${H.pct(acc(te))}</b>. Network: ${net.s.join(' → ')} (${net.s.slice(1, -1).reduce((a, b) => a + b, 0)} hidden neurons). Filled dots are training samples and hollow dots are test samples.`;
       };
       pt.onDraw = pl => {
         const c = pl.ctx;
@@ -190,10 +190,10 @@
     ],
     html: () => `
       <h4>Real or made up?</h4>
+      ${H.look('Mark each of the eight references Real or Made up. Four are real and four were written for this page.', 'All eight are formatted the same way, with authors, year, journal, volume and pages. A reference that looks complete tells us nothing about whether the paper exists. We have to look it up in the journal or a database.')}
       <div id="l-game"></div>
       <h4>If there is time: how a language model picks its next word</h4>
-      <p class="note">The next token after "The Cretaceous–Paleogene boundary is dated at about ___ million years ago"</p>
-      <p class="note">These probabilities are a toy distribution written for this page. They show the mechanism and are not output from a real model.</p>
+      ${H.look('The bars show how likely each possible next number is, after the words "The Cretaceous–Paleogene boundary is dated at about ___ million years ago". Slide Randomness, then press Sample 20 answers.', 'At low randomness the model picks 66 almost every time. At high randomness it spreads its picks around, so the same question gets different answers. The model picks likely-sounding numbers. It does not look the age up. These probabilities are a toy example written for this page, not output from a real model.')}
       ${H.cv('l-a', 0.5)}
       <div class="ctlrow">${H.S('l-t', 'Randomness (temperature)', 0.1, 2, 0.05, 0.5)}${H.btn('l-go', 'Sample 20 answers')}</div>
       <div class="readout" id="l-out"></div>
@@ -214,7 +214,7 @@
         p.forEach((v, i) => { c.rect(i + 1 - 0.33, 0, i + 1 + 0.33, v, i === 0 ? C.RED : 'rgba(92,102,112,0.5)'); c.text(v.toFixed(2), i + 1, Math.min(v + 0.05, 0.97), { align: 'center', font: '11px system-ui' }); });
         if (counts) counts.forEach((n, i) => { if (n) c.dot(i + 1, n / 20, 6, '#fff', C.INK, 2); });
         const o = H.q(root, 'l-out');
-        o.innerHTML = counts ? `20 samples: ${toks.map((t, i) => (counts[i] ? `<b>${t}</b> × ${counts[i]}` : '')).filter(Boolean).join(', ')}. The accepted age is about 66 Ma; the model has no step that checks a value against a source.` : `At temperature ${tt.get().toFixed(2)} the most likely token, 66, has probability <b>${p[0].toFixed(2)}</b>.`;
+        o.innerHTML = counts ? `20 samples: ${toks.map((t, i) => (counts[i] ? `<b>${t}</b> × ${counts[i]}` : '')).filter(Boolean).join(', ')}. The accepted age is about 66 Ma; the model has no step that checks a value against a source.` : `At randomness ${tt.get().toFixed(2)} the most likely answer, 66, has a probability of <b>${p[0].toFixed(2)}</b>.`;
       };
       pl.draw();
 

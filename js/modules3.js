@@ -27,7 +27,8 @@
       </div>
 
       <div class="track" data-t="pal">
-        <p class="note">Four log-transformed measurements on brachiopod-like shells of three species. Growth stages change every measurement together.</p>
+        ${H.look('Slide the range of growth stages from small to large, and look at the plot of PC1 against PC2.', 'A shell grows, so a bigger shell is bigger in every measurement at once. That shared growth becomes PC1. The differences between species show up in the next directions. With a wide range of growth stages, PC1 is mostly size, and the species are harder to see on it.')}
+        <p class="note">Four measurements (each converted to logarithms, so that growth shows up as even steps) on made-up, brachiopod-like shells of three species.</p>
         <div class="row2"><div>${H.cv('p2-a', 0.9)}</div><div>${H.cv('p2-b', 0.9)}</div></div>
         <div class="ctlrow">${H.S('p2-s', 'Range of growth stages', 0, 0.5, 0.01, 0.35)}</div>
         ${H.legend(['Species A, elongate', 'Species B, wide hinge', 'Species C, inflated'], Plot.CLUSTER.slice(0, 3))}
@@ -35,7 +36,8 @@
       </div>
 
       <div class="track on" data-t="sed">
-        <p class="note">A synthetic 200 m well with four log curves. The model is trained on one cored interval and predicts facies for the rest of the well. The curves it may use, the length of the core, and where the core starts all change the answer.</p>
+        ${H.look('Check only gamma ray, then add curves one at a time. Then slide the length of the cored interval and where it starts.', 'The computer learns from the cored interval only, where we know the rock, and then predicts the rest of the well. Gamma ray alone mixes up two rock types. More curves help. A core that misses one of the rock types can never teach the computer about it.')}
+        <p class="note">A made-up 200 m well with four log curves.</p>
         ${H.cv('sd-a', 0.8)}
         <div class="ctlrow">${H.S('sd-l', 'Cored interval length (m)', 5, 100, 1, 5)}${H.S('sd-s', 'Core starts at (m)', 0, 100, 1, 0)}</div>
         <div class="ctlrow" id="sd-curves">${D.SHORT.map((n, i) => H.chk('sd-c' + i, n, i < 2)).join('')}</div>
@@ -45,13 +47,15 @@
 
       <div class="track" data-t="min">
         <h4>Geochemistry: the transform decides what PCA finds</h4>
-        <p class="note">400 synthetic stream-sediment samples with eight elements in ppm. Some catchments drain lithium-cesium-tantalum pegmatites, which raise Li, Cs, Rb, Ta, and Sn together. Potassium and magnesium are present at percent levels.</p>
+        ${H.look('Try the three choices under Data used: raw values, rescaled values, and logarithms then rescaled. Turn on the color for catchments that drain pegmatites.', 'PCA follows spread. With raw values, the element with the biggest numbers (potassium and magnesium, which are measured in percent) has the biggest spread and takes over PC1, while the pegmatite elements (measured in ppm) barely register. Rescaling puts every element on equal footing. Logarithms tame elements whose values range over several orders of magnitude. The pegmatite catchments only stand out once the data are rescaled.')}
+        <p class="note">400 made-up stream-sediment samples with eight elements, measured in ppm (parts per million). Some catchments drain pegmatites rich in lithium, cesium and tantalum, which raise Li, Cs, Rb, Ta and Sn together.</p>
         <div class="row2"><div>${H.cv('gc-a', 0.9)}</div><div>${H.cv('gc-b', 0.9)}</div></div>
         <div class="ctlrow"><div class="ctl"><label for="gc-t">Data used</label><select id="gc-t"><option value="raw">Raw ppm</option><option value="std">Rescaled ppm (each element on the same scale)</option><option value="log">Log10, then rescaled</option></select></div>${H.S('gc-p', 'Catchments with pegmatite influence', 2, 40, 1, 12)}</div>
         ${H.chk('gc-h', 'Color pegmatite-influenced catchments', false)}
         <div class="readout" id="gc-out"></div>
         <h4>Prospectivity: few known deposits</h4>
-        <p class="note">A 40 × 40 map with three synthetic evidence layers (distance to fault, magnetics, stream-sediment lithium). Deposits are placed where the layers combine.</p>
+        ${H.look('Slide the number of known deposits used for training from a few to many. Count how many of the other deposits fall inside the deep red areas.', 'Only a handful of deposits are known, and the map has a lot of empty cells. The model learns what the known deposits have in common (near a fault, a magnetic high, lithium in the streams) and ranks every cell by how much it resembles them. The readout counts how many of the deposits the model did not see fall in the top tenth of the map. Picking a tenth of the map at random would find about a tenth of them.')}
+        <p class="note">A made-up 40 × 40 map with three layers of evidence: distance to a fault, magnetics, and lithium in stream sediment.</p>
         <div class="row2"><div>${H.cv('mn-a', 1)}</div><div id="mn-side"></div></div>
         ${H.S('mn-m', 'Known deposits used for training', 3, 35, 1, 5)}
         <div class="readout" id="mn-out"></div>
@@ -76,7 +80,7 @@
         calc();
         pa.onDraw = pl => {
           pl.axes(); P.scores.forEach((q, i) => pl.dot(q[0], q[1], 3.4, Plot.hex2rgba(Plot.CLUSTER[sp[i]], 0.8)));
-          H.q(root, 'p2-out').innerHTML = `PC1 carries <b>${(P.frac[0] * 100).toFixed(0)}%</b> of the spread and PC2 <b>${(P.frac[1] * 100).toFixed(0)}%</b>. PC1 loadings: ${P.vecs[0].map(v => v.toFixed(2)).join(', ')}.`;
+          H.q(root, 'p2-out').innerHTML = `PC1 holds <b>${(P.frac[0] * 100).toFixed(0)}%</b> of the spread and PC2 holds <b>${(P.frac[1] * 100).toFixed(0)}%</b>. The four numbers in PC1 are ${P.vecs[0].map(v => v.toFixed(2)).join(', ')}. When they are all about the same, PC1 is overall size.`;
         };
         pb.onDraw = pl => {
           pl.axes(); pl.hline(0, C.SLATE, 1);
@@ -126,7 +130,7 @@
           c.strokeStyle = C.RED; c.lineWidth = 1.5; c.beginPath(); c.moveTo(44, yt); c.lineTo(p.W - 8, yt); c.moveTo(44, yb); c.lineTo(p.W - 8, yb); c.stroke();
           p.ptext('cored', 48, Math.min(yt + 10, p.H - 14), { color: C.RED, font: '11px system-ui' });
           c.restore();
-          H.q(root, 'sd-out').innerHTML = `Core from ${(n0 * 0.5).toFixed(0)} to ${(n1 * 0.5).toFixed(0)} m contains: <b>${out.present.join(', ')}</b>. Curves used: <b>${cols.map(k => NAMES[k]).join(', ')}</b>. Correct outside the core: <b>${H.pct(out.ok)}</b> of ${out.m} samples.`;
+          H.q(root, 'sd-out').innerHTML = `Core from ${(n0 * 0.5).toFixed(0)} to ${(n1 * 0.5).toFixed(0)} m contains: <b>${out.present.join(', ')}</b>. Curves used: <b>${cols.map(k => NAMES[k]).join(', ')}</b>. Right outside the core: <b>${H.pct(out.ok)}</b> of the ${out.m} samples there.`;
         };
         pm.onDraw = p => {
           const c = p.ctx, cw = (p.W - 62) / 3, ch = (p.H - 30) / 3;
@@ -163,7 +167,7 @@
           top = prob.map(p => p >= cut);
         };
         calc();
-        H.q(root, 'mn-side').innerHTML = `<p class="note">Color is the predicted probability of a deposit, from 0 (light) to 1 (deep red). Filled black dots are the deposits used for training. Hollow dots are the other deposits on the map, which the model has not seen.</p><div class="legend"><span><i style="background:${ramp(0)};border:1px solid #C9CDD2"></i>0</span><span><i style="background:${ramp(0.5)}"></i>0.5</span><span><i style="background:${ramp(1)}"></i>1</span></div>`;
+        H.q(root, 'mn-side').innerHTML = `<p class="note">Color is the model's estimate of how likely a deposit is, from 0 (light) to 1 (deep red). Filled black dots are the deposits used for training. Hollow dots are the other deposits on the map, which the model has not seen.</p><div class="legend"><span><i style="background:${ramp(0)};border:1px solid #C9CDD2"></i>0</span><span><i style="background:${ramp(0.5)}"></i>0.5</span><span><i style="background:${ramp(1)}"></i>1</span></div>`;
         pl.onDraw = p => {
           p.axes();
           for (let j = 0; j < G; j++) for (let i = 0; i < G; i++) p.rect(i, j, i + 1.02, j + 1.02, ramp(prob[j * G + i]));
@@ -199,7 +203,7 @@
           pl.axes(); pl.clipStart();
           P.scores.forEach((q, i) => pl.dot(q[0], q[1], 3, hi.checked ? (peg[i] ? C.RED : 'rgba(92,102,112,0.45)') : 'rgba(92,102,112,0.55)'));
           pl.clipEnd();
-          H.q(root, 'gc-out').innerHTML = `PC1 carries <b>${Math.round(P.frac[0] * 100)}%</b> of the spread and PC2 <b>${Math.round(P.frac[1] * 100)}%</b>. The largest PC1 loading is on <b>${EL[P.vecs[0].reduce((b, v, j, a) => (Math.abs(v) > Math.abs(a[b]) ? j : b), 0)]}</b>. Points outside the fixed axes are clipped.`;
+          H.q(root, 'gc-out').innerHTML = `PC1 holds <b>${Math.round(P.frac[0] * 100)}%</b> of the spread and PC2 holds <b>${Math.round(P.frac[1] * 100)}%</b>. The element with the biggest say in PC1 is <b>${EL[P.vecs[0].reduce((b, v, j, a) => (Math.abs(v) > Math.abs(a[b]) ? j : b), 0)]}</b>. Points outside the fixed axes are cut off at the edge.`;
         };
         pb.onDraw = pl => {
           pl.axes(); pl.hline(0, C.SLATE, 1);
@@ -222,18 +226,19 @@
     ],
     html: () => `
       <h4>Small samples</h4>
-      <p class="note">Each dot is one random draw of training samples from the 300 synthetic rocks, tested on the same 100 held-out samples. 40 draws per column.</p>
+      ${H.look('Slide the number of training samples down from 100 toward 2 and watch how spread out the dots become.', 'Each dot is one random choice of training samples (from 300 made-up rocks), scored on the same 100 samples that were held out and never used for training. With only a few training samples, a lucky draw scores well and an unlucky draw scores badly. One test score from a small sample can be far from the typical score.')}
       ${H.cv('t-a', 0.5)}
       ${H.S('t-n', 'Training samples', 3, 150, 1, 8)}
       <div class="readout" id="t-out"></div>
-      <h4>Spatial autocorrelation</h4>
-      <p class="note">300 samples on a map, three feature layers, and a label. The layers are unrelated to the label except through location. Any accuracy above 50% comes from neighbors resembling each other.</p>
+      <h4>Neighbors look alike (spatial autocorrelation)</h4>
+      ${H.look('Raise how far the pattern extends across the map, then press New map a few times. Compare the two scores.', 'The three measurement layers have nothing to do with the label except through location. A random split puts neighbors of every test sample into the training set, so the model can score well just by copying nearby values. The blocked split holds out whole strips of the map, so the model has to predict somewhere new, and its score falls toward 50%, which is chance. Any score above 50% here comes from neighbors resembling each other.')}
       <div class="row2"><div>${H.cv('t-b', 0.95)}</div><div>${H.cv('t-c', 0.95)}</div></div>
       <div class="ctlrow">${H.S('t-r', 'How far the pattern extends across the map', 0.03, 0.3, 0.01, 0.1)}${H.btn('t-new', 'New map')}</div>
       <div class="readout" id="t-out2"></div>
       <h4>Rare targets</h4>
+      ${H.look('Slide the share of positive samples down toward 1%, and compare accuracy with recall. Then turn on Weight classes equally.', 'Suppose only a few samples are the thing we are looking for, such as a rare mineral. A model that says no to everything is right almost every time, so its accuracy looks great, and it finds nothing. Recall asks the better question: of the real positives, how many did we find? Weighting the classes equally tells the model that missing a rare positive matters as much as a mistake on a common sample.')}
       <div class="row2"><div>${H.cv('t-d', 0.95)}</div><div>${H.cv('t-e', 0.95)}</div></div>
-      <div class="ctlrow">${H.S('t-f', 'Share of positive samples', 1, 50, 1, 20)}${H.chk('t-w', 'Weight classes equally', false)}</div>
+      <div class="ctlrow">${H.S('t-f', 'Share of positive samples', 1, 50, 1, 20)}${H.chk('t-w', 'Weight classes equally (count a rare positive as much as a common negative)', false)}</div>
       <div class="readout" id="t-out3"></div>`,
     init(root) {
       const Z2 = H.Z2;
@@ -251,7 +256,7 @@
           p.axes(); p.line(env.map(e => [e[0], e[1]]), C.GRID, 2); p.line(env.map(e => [e[0], e[3]]), C.GRID, 2); p.line(env.map(e => [e[0], e[2]]), C.SLATE, 2);
           const a = draw(nn.get()), r = ML.rng(2);
           p.vline(nn.get(), C.RED, 1, [4, 4]); a.forEach(v => p.dot(nn.get() + (r() - 0.5) * 3, v, 3.2, Plot.hex2rgba(C.RED, 0.7)));
-          H.q(root, 't-out').innerHTML = `With <b>${nn.get()}</b> training samples the 40 test accuracies run from <b>${H.pct(Math.min(...a))}</b> to <b>${H.pct(Math.max(...a))}</b>, mean <b>${H.pct(a.reduce((s, v) => s + v, 0) / 40)}</b>. Gray lines are the lowest and highest values over 40 draws at each size, and the slate line is the mean.`;
+          H.q(root, 't-out').innerHTML = `With <b>${nn.get()}</b> training samples the 40 test accuracies run from <b>${H.pct(Math.min(...a))}</b> to <b>${H.pct(Math.max(...a))}</b>, and they average <b>${H.pct(a.reduce((s, v) => s + v, 0) / 40)}</b>. Gray lines are the lowest and highest values over 40 draws at each size, and the dark line is the average.`;
         };
         pl.draw();
       })();
@@ -287,7 +292,7 @@
           p.axes(); p.hline(0.5, C.SLATE, 1, [5, 4]); p.text('chance', 2.42, 0.53, { align: 'right', color: C.SLATE, font: '11px system-ui' });
           p.rect(0.7, 0, 1.3, avg[0], C.RED); p.rect(1.7, 0, 2.3, avg[1], C.SLATE);
           p.text(H.pct(avg[0]), 1, avg[0] + 0.05, { align: 'center', font: 'bold 12px system-ui' }); p.text(H.pct(avg[1]), 2, avg[1] + 0.05, { align: 'center', font: 'bold 12px system-ui' });
-          H.q(root, 't-out2').innerHTML = `Average over 6 maps: random split <b>${H.pct(avg[0])}</b>, blocked split (whole vertical strips held out) <b>${H.pct(avg[1])}</b>. The dashed lines on the map mark the four blocks. Red dots are one label and gray dots the other.`;
+          H.q(root, 't-out2').innerHTML = `Average over 6 maps: the random split scores <b>${H.pct(avg[0])}</b>, and the blocked split (whole vertical strips held out) scores <b>${H.pct(avg[1])}</b>. The dashed lines on the map mark the four blocks. Red dots are one label and gray dots are the other.`;
         };
         pm.draw(); pbar.draw();
       })();
@@ -319,7 +324,7 @@
         pb.onDraw = p => {
           p.axes(); [res.acc, res.rec, res.pre].forEach((v, i) => { p.rect(i + 1 - 0.3, 0, i + 1 + 0.3, v, i === 1 ? C.RED : 'rgba(92,102,112,0.6)'); p.text(H.pct(v), i + 1, Math.min(v + 0.05, 0.97), { align: 'center', font: 'bold 12px system-ui' }); });
           p.line([[0.6, res.base], [1.4, res.base]], C.INK, 2, [5, 4]);
-          H.q(root, 't-out3').innerHTML = `Positives are <b>${ff.get()}%</b> of the samples. A model that says "negative" for everything scores <b>${H.pct(res.base)}</b> accuracy (dashed line) and finds none of the positives. This model has accuracy <b>${H.pct(res.acc)}</b>, recall <b>${H.pct(res.rec)}</b>, precision <b>${H.pct(res.pre)}</b>.`;
+          H.q(root, 't-out3').innerHTML = `Positives are <b>${ff.get()}%</b> of the samples. A model that says "negative" for everything scores <b>${H.pct(res.base)}</b> accuracy (dashed line) and finds none of the positives. This model has accuracy <b>${H.pct(res.acc)}</b>. Recall (the share of the real positives it finds) is <b>${H.pct(res.rec)}</b>. Precision (the share of its positive calls that are right) is <b>${H.pct(res.pre)}</b>.`;
         };
         ps.draw(); pb.draw();
       })();
@@ -336,7 +341,7 @@
         <div>
           <h4>Tools</h4>
           <ul>
-            <li><a href="https://scikit-learn.org" target="_blank" rel="noopener">scikit-learn</a> for PCA, k-means, k-nearest neighbors, random forests, and cross-validation.</li>
+            <li><a href="https://scikit-learn.org" target="_blank" rel="noopener">scikit-learn</a> for PCA, k-means, random forests and the other methods from class, plus tools for checking a model on data it has not seen (cross-validation).</li>
             <li><a href="https://colab.research.google.com" target="_blank" rel="noopener">Google Colab</a> for running notebooks in a browser with no installation.</li>
             <li><a href="https://github.com/seg/2016-ml-contest" target="_blank" rel="noopener">SEG 2016 machine learning contest</a>: well-log facies classification with open data and many worked solutions.</li>
             <li><a href="https://softwareunderground.org" target="_blank" rel="noopener">Software Underground</a>: an open community of geoscientists who write code.</li>
@@ -346,9 +351,9 @@
           <h4>A first project</h4>
           <ol>
             <li>Pick a table of measurements from your own thesis area, with a column you would like to predict or group.</li>
-            <li>Standardize the columns and run PCA. Plot the first two components.</li>
+            <li>Rescale the columns so each is on the same scale, and run PCA. Plot the first two components.</li>
             <li>Run k-means for several k and look at the elbow.</li>
-            <li>Fit k-nearest neighbors with a held-out block, and compare with a random split.</li>
+            <li>Train a classifier, such as a random forest, on part of the data. Hold out a whole block of the map or well for testing, and compare with a random split.</li>
             <li>Record which rows went into training, the software versions, and any use of a language model.</li>
           </ol>
         </div>

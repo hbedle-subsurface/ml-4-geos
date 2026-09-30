@@ -61,7 +61,7 @@
       pB.onDraw = pl => {
         cloud(pl, st.rot, (i, d) => Plot.hex2rgba(D.SCOL[predB[i]], d), { wrong: err => q('sm2-err').checked && err < NB && predB[err] !== PV.y[err], field: idx });
         const a1 = acc(predA), a2 = acc(predB);
-        q('sm2-out').innerHTML = `This field trip (${st.n * 4} labeled samples, the big outlined dots): closest field sample <b>${H.pct(a1)}</b>, labels spread through the basin <b>${H.pct(a2)}</b> correct on the 360 samples whose main source is known. Averaged over 20 field trips at ${st.n} per range: <b>${H.pct(avg[0])}</b> and <b>${H.pct(avg[1])}</b>. The 15 mystery samples (the gray ones in the Unsupervised tab) fit none of the ranges, but these methods can only choose among the ranges we sampled, so each still gets a label.`;
+        q('sm2-out').innerHTML = `This field trip has ${st.n * 4} labeled samples (the big outlined dots). Giving each basin sample the label of the closest field sample gets <b>${H.pct(a1)}</b> right. Letting the labels spread through the basin samples gets <b>${H.pct(a2)}</b> right. Over 20 different field trips with ${st.n} per range, the averages are <b>${H.pct(avg[0])}</b> and <b>${H.pct(avg[1])}</b>. Scores use the 360 samples whose main source we know. The 15 mystery samples fit none of the ranges, but both methods can only choose among the ranges we sampled, so each still gets a label.`;
       };
       q('sm2-leg').innerHTML = srcLegend(c => `<i style="background:${c}"></i>`) + '<span><i class="dotc"></i>Field sample (labeled)</span>';
       H.bind(root, 'sm2-n', v => { st.n = v; run(); draw(); }, v => v);
@@ -162,7 +162,7 @@
       function step1() {
         pT.draw(); pA.draw();
         const t = trainAcc(tree);
-        q('su-o1').innerHTML = `${st.n * 4} field samples, depth ${st.depth}. Right on the <b>field samples it learned from: ${H.pct(t)}</b>. Right on the <b>360 basin samples it has not seen: ${H.pct(accN(pred1))}</b>.${t - accN(pred1) > 0.25 ? ' The tree knows its own field samples far better than the basin, which is overfitting.' : ''} The tree shows the first three levels of questions.`;
+        q('su-o1').innerHTML = `${st.n * 4} field samples, and a tree that asks at most ${st.depth} question${st.depth === 1 ? '' : 's'} in a row. It is right on <b>${H.pct(t)}</b> of the field samples it learned from, and on <b>${H.pct(accN(pred1))}</b> of the 360 basin samples it has not seen.${t - accN(pred1) > 0.25 ? ' The tree knows its own field samples far better than the basin, which is overfitting.' : ''} The diagram shows the first three levels of questions.`;
       }
       pT.onDraw = drawTree;
       pA.onDraw = pl => cloud(pl, st.rot, (i, d) => Plot.hex2rgba(D.SCOL[pred1[i]], d), { wrong: i => i < NB && pred1[i] !== PV.y[i], field: idx });
@@ -198,7 +198,7 @@
         pl.line(sweep.map(s => [s.n - 0.4, mean(s.t)]), C.SLATE, 2); pl.line(sweep.map(s => [s.n + 0.4, mean(s.f)]), C.RED, 2);
         sweep.forEach(s => { s.t.forEach(v => pl.dot(s.n - 0.4 + (r() - 0.5) * 0.7, v, 2.6, 'rgba(92,102,112,0.55)')); s.f.forEach(v => pl.dot(s.n + 0.4 + (r() - 0.5) * 0.7, v, 2.6, 'rgba(132,22,23,0.55)')); });
         const nearest = sweep.reduce((b, s) => (Math.abs(s.n - st.n) < Math.abs(b.n - st.n) ? s : b)), rg = a => `${Math.round(Math.min(...a) * 100)}% to ${Math.round(Math.max(...a) * 100)}%`;
-        q('su-o3').innerHTML = `Near ${nearest.n} per range, across 25 field trips: a single tree scored <b>${rg(nearest.t)}</b> (mean ${H.pct(mean(nearest.t))}), and the forest scored <b>${rg(nearest.f)}</b> (mean ${H.pct(mean(nearest.f))}). The dots are drawn only at the sample sizes we tried.`;
+        q('su-o3').innerHTML = `Near ${nearest.n} field samples per range, across 25 different field trips: a single tree scored <b>${rg(nearest.t)}</b> (average ${H.pct(mean(nearest.t))}), and the forest scored <b>${rg(nearest.f)}</b> (average ${H.pct(mean(nearest.f))}). The dots are drawn only at the sample sizes we tried.`;
       };
 
       /* ---- step 4: the mystery samples ---- */
