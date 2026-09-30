@@ -29,8 +29,8 @@
         <h4>A. Set the cuts by hand</h4>
         ${H.cv('nn1-a', 0.42)}
         <div class="ctlrow">${H.S('nn1-lo', 'Lower cut (gamma ray)', 5, 145, 1, 45)}${H.S('nn1-hi', 'Upper cut (gamma ray)', 5, 145, 1, 135)}</div>
-        <div class="readout" id="nn1-ha"></div>
         ${H.legend(['Sandstone', 'Siltstone', 'Shale'], ['#D9A21B', '#841617', '#7A4F8F'])}
+        <div class="readout" id="nn1-ha"></div>
         <h4>B. Let a network find the cuts</h4>
         ${H.cv('nn1-b', 0.5)}
         <div class="ctlrow">${H.S('nn1-h', 'Hidden neurons', 0, 4, 1, 0)}${H.btn('nn1-go', 'Train')}${H.btn('nn1-reset', 'Reset')}</div>
@@ -75,11 +75,13 @@
         pl.axes(); const h = hn.get(), curve = [], hid = Array.from({ length: h }, () => []);
         for (let g = 0; g <= 150; g += 2) { const f = net1.forward([(g - 75) / 40]); curve.push([g, f.p[1]]); for (let j = 0; j < h; j++) hid[j].push([g, (f.a[1][j] + 1) / 2]); }
         pl.hline(0.5, C.GRID, 1.5, [5, 4]);
-        hid.forEach((pts, j) => pl.line(pts, Plot.hex2rgba(Plot.CLUSTER[j], 0.85), 1.8));
-        pl.line(curve, C.RED, 3.4);
-        curve.forEach(([g, p], k) => { if (p > 0.5 && k < curve.length - 1) pl.rect(g, -0.22, g + 2, -0.15, C.RED); });
-        pl.text('network says siltstone', 2, -0.185, { color: '#fff', font: '11px system-ui' });
-        dots1(pl, i => (net1.forward(S1.X[i]).p[1] > 0.5 ? 1 : 0) !== S1.y[i]);
+        if (ep1 > 0) {
+          hid.forEach((pts, j) => pl.line(pts, Plot.hex2rgba(Plot.CLUSTER[j], 0.85), 1.8));
+          pl.line(curve, C.RED, 3.4);
+          curve.forEach(([g, p], k) => { if (p > 0.5 && k < curve.length - 1) pl.rect(g, -0.22, g + 2, -0.15, C.RED); });
+          pl.text('network says siltstone', 2, -0.185, { color: '#fff', font: '11px system-ui' });
+        } else { pl.line(curve, '#9AA1A8', 2.5, [6, 4]); pl.text('untrained: random cuts', 112, 0.72, { align: 'center', color: C.SLATE, font: '12px system-ui' }); }
+        dots1(pl, i => ep1 > 0 && (net1.forward(S1.X[i]).p[1] > 0.5 ? 1 : 0) !== S1.y[i]);
         const acc = S1.X.filter((x, i) => (net1.forward(x).p[1] > 0.5 ? 1 : 0) === S1.y[i]).length / 300;
         let msg = ep1 === 0 ? 'Press Train. The red curve is the network\'s probability that a sample is siltstone.' : `Epoch <b>${ep1}</b>. <b>${H.pct(acc)}</b> right.`;
         if (ep1 > 0) msg += h === 0 ? ' With no hidden neuron there is one cut, so the curve can only rise once or fall once.' : h === 1 ? ' One hidden neuron makes one cut, so the curve still cannot come back down.' : acc > 0.88 ? ' Two or more cuts let the curve rise and then fall again: a bump around siltstone.' : '';
@@ -136,7 +138,7 @@
       };
       pb.onDraw = pl => {
         pl.axes(); if (hist.length > 1) pl.line(hist.map((v, i) => [i + 1, Math.min(v, 1)]), C.RED, 2);
-        H.q(root, 'n-out').innerHTML = `Epoch <b>${epoch}</b>. Loss <b>${hist.length ? hist[hist.length - 1].toFixed(3) : '-'}</b>. Training accuracy <b>${H.pct(acc(tr))}</b>, test accuracy <b>${H.pct(acc(te))}</b>. Network: ${net.s.join(' → ')} (${net.s.slice(1, -1).reduce((a, b) => a + b, 0)} hidden neurons). Filled dots are training samples and hollow dots are test samples.`;
+        H.q(root, 'n-out').innerHTML = (epoch === 0 ? 'Untrained network, so the map colors are random. Press Train. ' : '') + `Epoch <b>${epoch}</b>. Loss <b>${hist.length ? hist[hist.length - 1].toFixed(3) : '-'}</b>. Training accuracy <b>${H.pct(acc(tr))}</b>, test accuracy <b>${H.pct(acc(te))}</b>. Network: ${net.s.join(' → ')} (${net.s.slice(1, -1).reduce((a, b) => a + b, 0)} hidden neurons). Filled dots are training samples and hollow dots are test samples.`;
       };
       pt.onDraw = pl => {
         const c = pl.ctx;

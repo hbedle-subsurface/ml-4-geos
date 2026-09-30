@@ -135,6 +135,14 @@
     if (e.key === 'ArrowRight' && !e.altKey && !e.metaKey) show(current + 1);
     if (e.key === 'ArrowLeft' && !e.altKey && !e.metaKey) show(current - 1);
   });
+  /* printing: build every tab and draw every sub-tab first, so the printout shows all the plots */
+  g.addEventListener('beforeprint', () => {
+    document.body.classList.add('printing');
+    lessons.forEach((l, i) => { const sec = secOf(i); if (!inited.has(l.id)) { inited.add(l.id); l.init(sec); linkAll(sec); } });
+    lessons.forEach((l, i) => secOf(i).querySelectorAll('.tabs').forEach(tb => { const btns = [...tb.querySelectorAll('.tab')], act = btns.find(b => b.classList.contains('on')); btns.forEach(b => b.click()); if (act) act.click(); }));
+    Plot.refit();
+  });
+  g.addEventListener('afterprint', () => document.body.classList.remove('printing'));
   const h0 = lessons.findIndex(l => '#' + l.id === g.location.hash);
   show(h0 > 0 ? h0 : 0, true);
 

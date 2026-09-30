@@ -93,7 +93,7 @@ canvas { display: block; width: 100%; }
 .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); gap: 10px; margin: 6px 0 8px; }
 .tile { border: 2px solid var(--grid); border-radius: 3px; padding: 5px; text-align: center; background: #fff; cursor: pointer; }
 .tile canvas { width: 100%; height: auto; aspect-ratio: 1; image-rendering: pixelated; }
-.tile .tb { display: flex; gap: 4px; justify-content: center; margin-top: 4px; } .tile .btn.sm { padding: 3px 7px; font-size: 13px; }
+.tile .tb { display: flex; gap: 4px; justify-content: center; margin-top: 4px; } .tile .tb.five { flex-wrap: wrap; gap: 3px; } .tile .tb.five .btn.sm { padding: 2px 5px; font-size: 12px; } .tile .btn.sm { padding: 3px 7px; font-size: 13px; }
 .tile .tr { display: block; min-height: 1.3em; font-size: 13px; color: var(--slate); }
 .tile.sel { border-color: var(--slate); box-shadow: 0 0 0 2px var(--slate); }
 .tile.right { border-color: var(--teal); background: #F1F8F7; } .tile.wrong { border-color: var(--red); background: #FAF2F2; }
@@ -241,4 +241,5 @@ body.solo-panel .ex, body.solo-panel .tools { display: none; } body.solo-panel .
   main, #hero { padding-left: 14px; padding-right: 14px; }
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .lesson.on { animation: none; } }
-@media print { #nav, .tools, .ctl, .btn { display: none; } .lesson { display: block !important; break-before: page; } .steps > .cs { break-inside: avoid; } .banner { print-color-adjust: exact; -webkit-print-color-adjust: exact; } }
+body.printing .lesson { display: block !important; }
+@media print { * { -webkit-print-color-adjust: exact; print-color-adjust: exact; } #nav, .tools, .btn { display: none; } .lesson { display: block !important; break-before: page; } .track { display: block !important; margin-bottom: 14px; } .steps > .cs { break-inside: avoid; } .qo .btn { display: inline-block !important; } }

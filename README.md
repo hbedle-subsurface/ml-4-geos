@@ -9,7 +9,7 @@ Published at `https://hbedle-subsurface.github.io/ml-4-geos/`
 ## Contents of the page
 
 **Part 1. The vocabulary** (about 26 minutes)
-AI / machine learning / deep learning / LLM, a map of the types of machine learning (eight drawings and a naming quiz), when machine learning fits (a six-card sorting activity), dimension reduction (PCA), unsupervised learning (k-means on six-element sandstone chemistry from four made-up mountain ranges), semi-supervised learning (one field sample per range plus label propagation), supervised learning (decision tree, random forest, and what too few samples does), supervised learning (a hand-drawn boundary, then k-nearest neighbors with a train/test split), semi-supervised learning (label propagation), neural networks (a small playground), convolutional networks (a drawn muffin-or-chihuahua game and a two-layer network with hand-set filters), Segment Anything (click, segment everything, and name the masks on a synthetic thin section), and large language models in research (a next-token demo and a real-or-made-up citation game).
+AI / machine learning / deep learning / LLM, a map of the types of machine learning (eight drawings and a naming quiz), when machine learning fits (a six-card sorting activity), dimension reduction (PCA), unsupervised learning (k-means on six-element sandstone chemistry from four made-up mountain ranges), semi-supervised learning (one field sample per range plus label propagation), supervised learning (decision tree, random forest, and what too few samples does), supervised learning (a hand-drawn boundary, then k-nearest neighbors with a train/test split), semi-supervised learning (label propagation), neural networks (a small playground), convolutional networks (labeling LiDAR patches from a photo or from heights, then a two-layer network that maps land cover on a made-up LiDAR scene), Segment Anything (click, segment everything, and name the masks on a synthetic thin section), and large language models in research (a next-token demo and a real-or-made-up citation game).
 
 **Part 2. Geophysics, then three more fields** (about 15 minutes)
 Geophysics is a five-step live demo on a synthetic channel system: (1) a seismic section and the wavelet that made it, (2) four attributes measured in a window and a crossplot, (3) a self-organizing map that groups the attributes into facies, (4) which attributes the map relies on (shuffling and refitting without one), (5) wells and a supervised map, including the facies the first wells never cut. Then tabs for sedimentology (facies from four log curves, with choices of curves, core length and core position, and a confusion matrix), geochemistry and critical minerals (PCA on raw, standardized, and log-transformed stream-sediment data, then prospectivity from few known deposits), and paleontology (morphometrics).
@@ -48,7 +48,7 @@ js/glossary.js      clickable term definitions
 js/modules1.js      vocabulary, dimension reduction, unsupervised
 js/modules2.js      supervised, semi-supervised, neural network, LLMs
 js/seismic.js       synthetic seismic, attributes, and SOM for the geophysics demo
-js/cnnlab.js        drawn muffin and chihuahua pictures and the hand-built filters
+js/lidarlab.js      made-up LiDAR scene, photo, filters and land-cover rules
 js/modules_cnn.js   the CNN tab
 js/samlab.js        synthetic thin section and a region-growing segmenter
 js/modules_sam.js   the Segment Anything tab
@@ -73,13 +73,17 @@ Push to a repo named `ml-4-geos` under `hbedle-subsurface`, then in Settings > P
 
 Open `index.html` in a browser. No build step.
 
+## Printing
+
+Printing builds every tab and draws every sub-tab first, so a PDF printout shows all the plots.
+
 ## Checking the prose
 
 `tools/prose-scan.py` lists phrases from the LLM-tics checklist (stock openers, importance words, promotional words, em dashes, rhetorical questions, and the words in the voice reference) in the site text. Run `python3 tools/prose-scan.py` from the repo folder. It flags candidates only, and a person decides which ones to change.
 
 ## Images
 
-The muffin and chihuahua pictures in the game are drawn by the page. The well-known photo grid by @teenybiscuit is not included. To show it in the CNN talk band, add your copy as `img/muffin-or-chihuahua.png` (the figure stays hidden until the file exists).
+The LiDAR scene is made up and generated in `js/lidarlab.js`. The well-known muffin and chihuahua photo grid by @teenybiscuit is not included. To show it in the CNN talk band, add your copy as `img/muffin-or-chihuahua.png` (the figure stays hidden until the file exists).
 
 ## Data
 

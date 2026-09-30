@@ -1,84 +1,134 @@
-/* modules_cnn.js - "muffin or chihuahua": what a convolutional network looks at */
+/* modules_cnn.js - a convolutional network reading a made-up LiDAR scene: bare soil, grass, shrubs, trees, roofs */
 (function (g) {
-  const { ML, Plot, H, MODULES: M, CNNLAB: L } = g;
+  const { ML, Plot, H, MODULES: M, LIDARLAB: L } = g;
   const C = Plot.C, N = L.N;
-  const tint = v => `rgb(${Math.min(255, Math.round(v * 300))},${Math.min(255, Math.round(v * 250))},${Math.min(255, Math.round(v * 210))})`;
-  const ramp = t => { t = Math.max(0, Math.min(1, t)); const a = [244, 246, 247], b = [132, 22, 23]; return `rgb(${a.map((v, i) => Math.round(v + (b[i] - v) * t)).join(',')})`; };
-  const FACT = [1, 2, 4, 8], RESN = ['full', 'half', 'quarter', 'eighth'];
+  const hex = h => { const n = parseInt(h.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; };
+  const CC = L.CCOL.map(hex), RES = ['full', 'half', 'quarter'], FACT = [1, 2, 4];
+  const retColor = v => { const t = Math.max(0, Math.min(1, (v - 1) / 2)), a = [244, 246, 247], b = [110, 40, 120]; return a.map((c, i) => c + (b[i] - c) * t); };
+  const T0 = { a: 0.25, b: 0.9, c: 3.5, q: 1.8 };
 
   M.push({
-    id: 'cnn', part: 1, title: 'Convolutional networks: muffin or chihuahua?',
+    id: 'cnn', part: 1, title: 'Convolutional networks: reading a LiDAR scene',
     lede: '', steps: [],
     html: () => `
-      <h4>Can we tell?</h4>
-      <div class="ctlrow">${H.S('c-res', 'Resolution', 0, 3, 1, 0)}${H.btn('c-new', 'New set of eight')}</div>
-      <div id="c-tiles" class="tiles"></div>
-      <div class="readout" id="c-score">Answered 0 of 8.</div>
-      <h4>A tiny convolutional network, filters set by hand</h4>
-      <div class="row4">
-        <div><h5>Picture (click one above)</h5>${H.cv('c-in', 1)}</div>
-        <div><h5 id="c-h1">Layer 1: spots</h5>${H.cv('c-l1', 1)}</div>
-        <div><h5>Layer 2: two spots above a third</h5>${H.cv('c-l2', 1)}</div>
-        <div><h5>Score for 40 test pictures</h5>${H.cv('c-sc', 1)}</div>
+      <div class="tabs" role="tablist" id="cn-tabs">
+        <button type="button" class="tab on" data-s="1">1 Can we tell?</button><button type="button" class="tab" data-s="2">2 A tiny convolutional network</button>
       </div>
-      <div class="ctlrow"><div class="ctl"><label for="c-f">Layer 1 filter to display</label><select id="c-f"><option value="spots">Spots (feeds layer 2)</option><option value="v">Vertical edges</option><option value="h">Horizontal edges</option><option value="blur">Blur</option></select></div></div>
-      <div class="ctlrow">${H.S('c-rad', 'Spot size', 1, 4, 1, 2)}${H.S('c-sp', 'Eye spacing', 3, 8, 1, 5)}${H.S('c-th', 'Decision threshold', 0.05, 0.6, 0.01, 0.4)}</div>
-      <div class="readout" id="c-out"></div>`,
-    init(root) {
-      const seedBase = { v: 300 };
-      let set = [], answered = 0, right = 0, sel = 0;
-      const test = L.testSet();
-      const res = H.bind(root, 'c-res', () => { drawTiles(); redraw(); }, v => RESN[v]);
-      const rad = H.bind(root, 'c-rad', () => redraw(), v => v), sp = H.bind(root, 'c-sp', () => redraw(), v => v), th = H.bind(root, 'c-th', () => redraw(), v => v.toFixed(2));
-      const fsel = H.q(root, 'c-f'); fsel.addEventListener('change', () => redraw());
-      const tiles = H.q(root, 'c-tiles');
 
+      <div class="track on" data-s="1">
+        ${H.look('Label the eight patches. The crosshair marks the spot to label. Start with the Photo view, then switch to LiDAR heights to see the same eight patches again. Then lower the point density and try once more.', 'In the photo, bare soil and dry grass are nearly the same color, and shrubs look like small trees, so we make the same kind of mistakes as with the muffin and the chihuahua. Heights separate them: soil is flat, grass is a few decimeters tall, shrubs one to two and a half meters, trees eight meters or more, and roofs are tall and flat. With few LiDAR points per square meter the heights get noisy, and the small differences disappear.')}
+        <div class="ctlrow"><div class="ctl"><label for="c-view">View</label><select id="c-view"><option value="photo">Aerial photo</option><option value="lidar">LiDAR heights</option></select></div>${H.S('c-res', 'Resolution', 0, 2, 1, 0)}${H.S('c-den', 'LiDAR points per m²', 1, 16, 1, 16)}${H.btn('c-new', 'New set of eight')}</div>
+        <div id="c-tiles" class="tiles"></div>
+        <div class="readout" id="c-score"></div>
+        <div class="legend" id="c-leg1"></div>
+      </div>
+
+      <div class="track" data-s="2">
+        ${H.look('Slide the filter size and the point density and watch the two feature maps. Then set the four thresholds by hand until the land-cover map matches the true one (turn on the reveal switch), and press Auto-tune.', 'Layer 1 makes new pictures from the LiDAR: the typical height in each window and the average number of returns. Layer 2 combines them: about zero is soil, a little above zero is grass, one to a few meters is shrubs, tall with many returns is trees, and tall with about one return is a roof. A small filter is noisy, and a large filter smears the edges of trees and buildings. In a real CNN the computer learns the filters from labeled pictures. Here the filters are fixed and Auto-tune learns the thresholds.')}
+        <div class="row4">
+          <div><h5>Input: height above ground</h5>${H.cv('c-in', 1)}</div>
+          <div><h5>Input: returns per pulse</h5>${H.cv('c-ir', 1)}</div>
+          <div><h5>Layer 1: typical height</h5>${H.cv('c-fh', 1)}</div>
+          <div><h5>Layer 1: average returns</h5>${H.cv('c-fr', 1)}</div>
+        </div>
+        <div class="row3">
+          <div><h5>Layer 2: land cover from your thresholds</h5>${H.cv('c-pr', 1)}</div>
+          <div><h5>True land cover</h5>${H.cv('c-tr', 1)}</div>
+          <div><h5>Where the mistakes are (true classes down the side)</h5>${H.cv('c-cf', 1)}</div>
+        </div>
+        <div class="ctlrow st-top"><label class="switch"><input type="checkbox" id="c-true"><span class="sw"></span><b>Reveal the true land cover</b></label>${H.btn('c-tune', 'Auto-tune the thresholds')}${H.btn('c-reset', 'Reset the thresholds')}</div>
+        <div class="ctlrow">${H.S('c-fs', 'Filter size (cells)', 3, 9, 2, 5)}${H.S('c-den2', 'LiDAR points per m²', 1, 16, 1, 4)}</div>
+        <div class="ctlrow">${H.S('c-a', 'Grass starts at (m)', 0.05, 0.6, 0.01, 0.25)}${H.S('c-b', 'Shrubs start at (m)', 0.4, 2.0, 0.02, 0.9)}</div>
+        <div class="ctlrow">${H.S('c-c', 'Tall things start at (m)', 2, 8, 0.1, 3.5)}${H.S('c-q', 'Roofs have fewer returns than', 1.1, 2.4, 0.02, 1.8)}</div>
+        <div class="legend" id="c-leg2"></div>
+        <div class="readout" id="c-out"></div>
+      </div>`,
+    init(root) {
+      const q = id => root.querySelector('#' + id), sc = L.scene(11);
+      const sw = c => `<i style="background:${c}"></i>`, legend = L.CLS.map((n, i) => `<span>${sw(L.CCOL[i])}${n}</span>`).join('');
+      q('c-leg1').innerHTML = `<span>Answer choices: ${L.SHORT.join(', ')}</span>`; q('c-leg2').innerHTML = legend;
+      const off = document.createElement('canvas'); off.width = N; off.height = N;
+      const paint = (pl, fn) => { const c = off.getContext('2d'), id = c.createImageData(N, N), d = id.data; for (let i = 0; i < N * N; i++) { const p = fn(i); d[i * 4] = p[0]; d[i * 4 + 1] = p[1]; d[i * 4 + 2] = p[2]; d[i * 4 + 3] = 255; } c.putImageData(id, 0, 0); const k = pl.ctx; k.save(); k.imageSmoothingEnabled = false; k.drawImage(off, pl.o.m.l, pl.o.m.t, pl.pw, pl.ph); k.restore(); };
+      const opt = { xr: [0, N], yr: [0, N], invY: true, noAxes: true, m: { l: 2, r: 2, t: 2, b: 2 } };
+
+      /* ================= step 1: the labeling game ================= */
+      const tiles = q('c-tiles'), view = q('c-view');
+      const res = H.bind(root, 'c-res', () => drawTiles(), v => RES[v]), den = H.bind(root, 'c-den', () => { obs1 = L.observe(sc, den.get()); drawTiles(); }, v => v);
+      let obs1 = L.observe(sc, 16), patches = [], answers = [], seed = 20, best = { photo: null, lidar: null };
       function newSet() {
-        seedBase.v += 17; const r = ML.rng(seedBase.v), items = [];
-        for (let i = 0; i < 4; i++) { items.push({ dog: false, img: L.makeMuffin(ML.rng(seedBase.v * 7 + i)) }); items.push({ dog: true, img: L.makeDog(ML.rng(seedBase.v * 11 + i)) }); }
-        set = ML.shuffle(8, r).map(i => items[i]); answered = 0; right = 0; sel = 0;
-        tiles.innerHTML = set.map((_, i) => `<div class="tile" data-i="${i}"><canvas width="128" height="128"></canvas><div class="tb"><button type="button" class="btn sm" data-a="muffin">Muffin</button><button type="button" class="btn sm" data-a="dog">Chihuahua</button></div><span class="tr"></span></div>`).join('');
-        H.q(root, 'c-score').textContent = 'Answered 0 of 8.';
-        drawTiles(); redraw();
+        seed += 13; const r = ML.rng(seed), want = ML.shuffle(8, r).map(i => [0, 1, 1, 2, 3, 3, 4, [0, 1, 2, 3, 4][Math.floor(r() * 5)]][i]);
+        patches = want.map(c => L.pickPatch(sc, c, r)).filter(Boolean); answers = patches.map(() => null); best = { photo: null, lidar: null };
+        tiles.innerHTML = patches.map((_, i) => `<div class="tile" data-i="${i}"><canvas width="128" height="128"></canvas><div class="tb five">${L.SHORT.map((n, k) => `<button type="button" class="btn sm" data-a="${k}">${n}</button>`).join('')}</div><span class="tr"></span></div>`).join('');
+        drawTiles(true);
       }
-      function drawTiles() {
+      function tileColor(x, y) {
+        const f = FACT[res.get()], bx = x - (x % f), by = y - (y % f); let s = [0, 0, 0], n = 0;
+        for (let j = 0; j < f; j++) for (let i = 0; i < f; i++) { const xx = Math.min(N - 1, bx + i), yy = Math.min(N - 1, by + j), k = yy * N + xx; let c; if (view.value === 'photo') c = [sc.img[k * 3], sc.img[k * 3 + 1], sc.img[k * 3 + 2]]; else { const hc = L.heightColor(obs1.h[k]), sh = L.shade(obs1.h, xx, yy); c = hc.map(v => v * sh); } s[0] += c[0]; s[1] += c[1]; s[2] += c[2]; n++; }
+        return s.map(v => Math.max(0, Math.min(255, v / n)));
+      }
+      function drawTiles(fresh) {
+        if (!fresh) { answers = answers.map(() => null); }
         tiles.querySelectorAll('.tile').forEach((t, i) => {
-          const c = t.querySelector('canvas'), x = c.getContext('2d'), img = L.pixelate(set[i].img, FACT[res.get()]), k = c.width / N;
-          for (let yy = 0; yy < N; yy++) for (let xx = 0; xx < N; xx++) { x.fillStyle = tint(img[yy * N + xx]); x.fillRect(xx * k, yy * k, k + 0.5, k + 0.5); }
-          t.classList.toggle('sel', i === sel);
+          const cv = t.querySelector('canvas'), x = cv.getContext('2d'), p = patches[i], k = cv.width / 16;
+          for (let yy = 0; yy < 16; yy++) for (let xx = 0; xx < 16; xx++) { const c = tileColor(p.x - 8 + xx, p.y - 8 + yy); x.fillStyle = `rgb(${c.map(Math.round).join(',')})`; x.fillRect(xx * k, yy * k, k + 0.5, k + 0.5); }
+          x.strokeStyle = '#fff'; x.lineWidth = 3; x.beginPath(); x.moveTo(64 - 10, 64); x.lineTo(64 + 10, 64); x.moveTo(64, 64 - 10); x.lineTo(64, 64 + 10); x.stroke(); x.strokeStyle = '#16191C'; x.lineWidth = 1.2; x.stroke();
+          t.classList.remove('done', 'right', 'wrong'); t.querySelector('.tr').textContent = '';
         });
+        score();
+      }
+      function score() {
+        const n = answers.filter(a => a !== null).length, ok = answers.filter((a, i) => a === patches[i].c).length;
+        if (n === patches.length) best[view.value] = ok;
+        q('c-score').innerHTML = `${view.value === 'photo' ? 'Aerial photo' : 'LiDAR heights'}: answered ${n} of ${patches.length}, ${ok} right. ` + `Same eight patches so far: photo ${best.photo === null ? '-' : best.photo + ' of ' + patches.length}, LiDAR ${best.lidar === null ? '-' : best.lidar + ' of ' + patches.length}.`;
       }
       tiles.addEventListener('click', e => {
-        const t = e.target.closest('.tile'); if (!t) return; const i = +t.dataset.i;
-        const b = e.target.closest('button[data-a]');
-        if (b && !t.classList.contains('done')) {
-          const ok = (b.dataset.a === 'dog') === set[i].dog; t.classList.add('done', ok ? 'right' : 'wrong'); answered++; if (ok) right++;
-          t.querySelector('.tr').textContent = (ok ? 'Yes: ' : 'It was a ') + (set[i].dog ? 'chihuahua' : 'muffin');
-          H.q(root, 'c-score').innerHTML = `Answered ${answered} of 8, ${right} right.${answered === 8 ? ' Now slide the resolution down and press New set of eight.' : ''}`;
-        }
-        sel = i; drawTiles(); redraw();
+        const b = e.target.closest('button[data-a]'), t = e.target.closest('.tile'); if (!b || !t || t.classList.contains('done')) return;
+        const i = +t.dataset.i, a = +b.dataset.a, ok = a === patches[i].c; answers[i] = a; t.classList.add('done', ok ? 'right' : 'wrong'); t.querySelector('.tr').textContent = ok ? 'Yes: ' + L.CLS[patches[i].c].toLowerCase() : 'It was ' + L.CLS[patches[i].c].toLowerCase(); score();
       });
-      H.on(root, 'c-new', 'click', newSet);
+      view.addEventListener('change', () => drawTiles());
+      q('c-new').addEventListener('click', newSet);
 
-      const mk = id => H.plot(root, id, { xr: [0, N], yr: [0, N], invY: true, noAxes: true, m: { l: 2, r: 2, t: 2, b: 2 } });
-      const pIn = mk('c-in'), p1 = mk('c-l1'), p2 = mk('c-l2');
-      const pS = H.plot(root, 'c-sc', { xr: [0.5, 2.5], yr: [0, 0.6], nx: 2, ny: 6, yl: 'Score', fmtx: v => (v === 1 ? 'Muffins' : v === 2 ? 'Chihuahuas' : ''), m: { l: 42, r: 6, t: 8, b: 34 } });
-      const cur = () => L.pixelate(set[sel].img, FACT[res.get()]);
-      const layer1 = img => (fsel.value === 'v' || fsel.value === 'h' ? L.edges(img, fsel.value) : fsel.value === 'blur' ? L.blur(img) : L.spots(img, rad.get()));
-      const cells = (pl, m, fn) => { for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) pl.rect(x, y, x + 1.03, y + 1.03, fn(m[y * N + x])); };
-      pIn.onDraw = pl => { const im = cur(); cells(pl, im, tint); };
-      p1.onDraw = pl => { const m = layer1(cur()), hi = fsel.value === 'blur' ? 1 : fsel.value === 'spots' ? 0.8 : 0.7; H.q(root, 'c-h1').textContent = 'Layer 1: ' + ({ spots: 'spots', v: 'vertical edges', h: 'horizontal edges', blur: 'blur' })[fsel.value]; cells(pl, m, v => ramp(v / hi)); };
-      p2.onDraw = pl => { const f = L.face(L.spots(cur(), rad.get()), sp.get()); cells(pl, f, v => ramp(v / 0.7)); const mx = L.maxOf(f); for (let i = 0; i < f.length; i++) if (f[i] === mx && mx > 0) { pl.dot(i % N + 0.5, Math.floor(i / N) + 0.5, 5, null, C.INK, 2); break; } };
-      pS.onDraw = pl => {
-        pl.axes(); const f = FACT[res.get()], sc = test.map(t => L.maxOf(L.face(L.spots(L.pixelate(t.img, f), rad.get()), sp.get()))), T = th.get();
-        pl.hline(T, C.INK, 2, [6, 4]);
-        let ok = 0, fp = 0, fn = 0; const r = ML.rng(4);
-        test.forEach((t, i) => { const pred = sc[i] > T; if (pred === t.dog) ok++; else if (pred) fp++; else fn++; pl.dot((t.dog ? 2 : 1) + (r() - 0.5) * 0.6, sc[i], 4.2, pred === t.dog ? (t.dog ? '#B58A2B' : '#5C6670') : C.RED, '#fff', 1); });
-        const mine = L.maxOf(L.face(L.spots(cur(), rad.get()), sp.get()));
-        H.q(root, 'c-out').innerHTML = `The picture you clicked scores <b>${mine.toFixed(2)}</b>, so the network says <b>${mine > T ? 'chihuahua' : 'muffin'}</b>${mine > T === set[sel].dog ? ', and that is right' : ', and that is wrong'}. Across the 40 test pictures: <b>${ok}</b> right, ${fp} muffins called chihuahua, ${fn} chihuahuas called muffin (red dots). At ${RESN[res.get()]} resolution.`;
+      /* ================= step 2: the tiny network ================= */
+      const pIn = H.plot(root, 'c-in', opt), pIr = H.plot(root, 'c-ir', opt), pFh = H.plot(root, 'c-fh', opt), pFr = H.plot(root, 'c-fr', opt), pPr = H.plot(root, 'c-pr', opt), pTr = H.plot(root, 'c-tr', opt);
+      const pCf = H.plot(root, 'c-cf', { xr: [0, 1], yr: [0, 1], noAxes: true, aspect: 1, m: { l: 2, r: 2, t: 2, b: 2 } });
+      const idx = ML.shuffle(N * N, ML.rng(5)).slice(0, 600), inIdx = new Set(idx), rest = []; for (let i = 0; i < N * N; i++) if (!inIdx.has(i)) rest.push(i);
+      const T = Object.assign({}, T0); let obs, hm, rm, pred, cf, tuneNote = '';
+      const fs = H.bind(root, 'c-fs', () => { calc(); drawAll(); }, v => v + ' × ' + v), den2 = H.bind(root, 'c-den2', () => { calc(); drawAll(); }, v => v);
+      const sl = { a: H.bind(root, 'c-a', v => { T.a = v; classify(); drawAll(); }, v => v.toFixed(2)), b: H.bind(root, 'c-b', v => { T.b = v; classify(); drawAll(); }, v => v.toFixed(2)), c: H.bind(root, 'c-c', v => { T.c = v; classify(); drawAll(); }, v => v.toFixed(1)), q: H.bind(root, 'c-q', v => { T.q = v; classify(); drawAll(); }, v => v.toFixed(2)) };
+      const setT = t => { Object.assign(T, t); ['a', 'b', 'c', 'q'].forEach(k => { q('c-' + k).value = T[k]; q('c-' + k + '-o').textContent = k === 'c' ? T[k].toFixed(1) : T[k].toFixed(2); }); };
+      function calc() { obs = L.observe(sc, den2.get()); hm = L.median(obs.h, fs.get()); rm = L.smooth(obs.ret, fs.get()); classify(); }
+      function classify() { pred = L.classify(hm, rm, T); cf = L.confusion(pred, sc.cls); }
+      q('c-tune').addEventListener('click', () => { const t = L.tune(hm, rm, sc.cls, idx, T); setT(t); classify(); tuneNote = `Auto-tune looked at 600 labeled pixels: ${H.pct(L.accuracy(pred, sc.cls, idx))} right on those, and ${H.pct(L.accuracy(pred, sc.cls, rest))} right on all the others. `; drawAll(); });
+      q('c-reset').addEventListener('click', () => { setT(T0); tuneNote = ''; classify(); drawAll(); });
+      q('c-true').addEventListener('change', () => pTr.draw());
+      pIn.onDraw = pl => paint(pl, i => { const hc = L.heightColor(obs.h[i]), sh = L.shade(obs.h, i % N, Math.floor(i / N)); return hc.map(v => Math.min(255, v * sh)); });
+      pIr.onDraw = pl => paint(pl, i => retColor(obs.ret[i]));
+      pFh.onDraw = pl => paint(pl, i => L.heightColor(hm[i]));
+      pFr.onDraw = pl => paint(pl, i => retColor(rm[i]));
+      pPr.onDraw = pl => paint(pl, i => CC[pred[i]]);
+      pTr.onDraw = pl => {
+        if (q('c-true').checked) paint(pl, i => CC[sc.cls[i]]);
+        else { paint(pl, i => [244, 246, 247]); const c = pl.ctx; c.save(); c.fillStyle = 'rgba(255,255,255,0.92)'; c.fillRect(pl.W / 2 - 110, pl.H / 2 - 20, 220, 40); c.restore(); pl.ptext('Hidden. Turn on the switch.', pl.W / 2, pl.H / 2, { align: 'center', font: '600 14px system-ui', color: C.INK }); }
       };
-      const redraw = () => { [pIn, p1, p2, pS].forEach(p => { p.fit(); p.draw(); }); };
-      newSet();
+      pCf.onDraw = pl => {
+        const c = pl.ctx, W = pl.W, lw = 48, top = 34, cw = (W - lw - 4) / 5, ch = (pl.H - top - 4) / 5;
+        c.save(); c.font = '600 11px system-ui'; c.fillStyle = C.INK; c.textAlign = 'center'; c.textBaseline = 'middle'; L.SHORT.forEach((n, k) => c.fillText(n, lw + (k + 0.5) * cw, top - 10)); c.textAlign = 'right'; L.SHORT.forEach((n, k) => c.fillText(n, lw - 4, top + (k + 0.5) * ch)); c.textAlign = 'left'; c.font = '11px system-ui'; c.fillStyle = C.SLATE; c.fillText('predicted', lw, 8);
+        for (let i = 0; i < 5; i++) { const tot = cf[i].reduce((a, b) => a + b, 0) || 1; for (let j = 0; j < 5; j++) { const v = cf[i][j] / tot, a = [244, 246, 247], b = [132, 22, 23]; c.fillStyle = `rgb(${a.map((x, k) => Math.round(x + (b[k] - x) * v)).join(',')})`; c.fillRect(lw + j * cw + 1, top + i * ch + 1, cw - 2, ch - 2); c.fillStyle = v > 0.55 ? '#fff' : C.INK; c.textAlign = 'center'; c.font = '600 12px system-ui'; c.fillText(Math.round(v * 100) + '%', lw + (j + 0.5) * cw, top + (i + 0.5) * ch); } }
+        c.restore();
+      };
+      function drawAll() {
+        [pIn, pIr, pFh, pFr, pPr, pTr, pCf].forEach(p => p.draw());
+        const acc = L.accuracy(pred, sc.cls), col = L.accuracy(L.colorOnly(sc, idx), sc.cls);
+        q('c-out').innerHTML = `${tuneNote}Land cover right with these thresholds: <b>${H.pct(acc)}</b> of the 9,216 cells (${fs.get()} × ${fs.get()} filters, ${den2.get()} LiDAR points per m²). Using only the photo colors, a classifier trained on the same 600 pixels gets <b>${H.pct(col)}</b>.`;
+      }
+
+      /* ---- tabs ---- */
+      let step = 1;
+      root.querySelectorAll('#cn-tabs .tab').forEach(b => b.addEventListener('click', () => {
+        step = +b.dataset.s; root.querySelectorAll('#cn-tabs .tab').forEach(x => x.classList.toggle('on', x === b)); root.querySelectorAll('.track[data-s]').forEach(x => x.classList.toggle('on', +x.dataset.s === step));
+        if (step === 2) { [pIn, pIr, pFh, pFr, pPr, pTr, pCf].forEach(p => p.fit()); drawAll(); }
+      }));
+      newSet(); calc();
     }
   });
 })(window);

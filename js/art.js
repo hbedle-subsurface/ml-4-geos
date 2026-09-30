@@ -237,6 +237,19 @@
       for (let i = 0; i < 12; i++) s += dot(14 + 92 * r(), 46 + 12 * r(), '#9AA1A8', 2.6);
       return s + arrow(112, 20, 74, 44, INK) + tx(80, 14, 'far away', 8, SL);
     },
+    lidar() {
+      let s = `<path d="M6 66 C30 62 50 66 70 64 S104 60 114 62" fill="none" stroke="${SL}" stroke-width="2"/>`;
+      s += ln(30, 66, 30, 48, '#6B5B3E', 3) + `<circle cx="30" cy="40" r="13" fill="#1F5E3A" stroke="${INK}" stroke-width="1.4"/>` + rc(76, 46, 22, 18, '#C9BDB8', INK, 1.4) + `<ellipse cx="55" cy="60" rx="7" ry="5" fill="#5E8C31" stroke="${INK}" stroke-width="1.2"/>`;
+      s += `<path d="M52 8 L68 8 L60 16 Z" fill="${INK}"/>`;
+      [[30, 27], [24, 34], [36, 33], [55, 55], [87, 46], [70, 63], [104, 61], [12, 65]].forEach(p => { s += ln(60, 16, p[0], p[1], RED, 1.1, '3 2') + dot(p[0], p[1], RED, 2.2); });
+      return s + tx(60, 80, 'pulses and returns', 7.5, SL);
+    },
+    lidarlayers() {
+      let s = ''; [[4, 'height'], [40, 'returns']].forEach((t, k) => { s += rc(t[0], 14, 30, 36, '#fff', GR, 1.2) + tx(t[0] + 15, 62, t[1], 7.5, SL); });
+      s += rc(8, 34, 10, 12, '#E8DFC8') + rc(18, 26, 10, 20, '#8CBA60') + rc(8, 18, 6, 16, '#0F3D2A') + rc(44, 34, 10, 12, '#F4F6F7', GR, 1) + rc(54, 24, 10, 22, '#8A5C9A') + rc(44, 18, 6, 16, '#6E2878');
+      s += arrow(74, 34, 82, 34, INK); [['#C9A66B', 86, 14], ['#9BCB5A', 100, 14], ['#5E8C31', 86, 28], ['#1F5E3A', 100, 28], ['#B5462E', 92, 42]].forEach(b => { s += rc(b[1], b[2], 12, 12, b[0], INK, 1); });
+      return s + tx(97, 66, 'land cover', 7.5, SL);
+    },
     magnify() {
       const r = ML.rng(21); let s = blob(r, 50, 42, 20, 14, 14, '#B4BAC1', 3); return s + `<circle cx="68" cy="36" r="16" fill="rgba(255,255,255,.6)" stroke="${INK}" stroke-width="3"/>` + ln(80, 48, 100, 68, INK, 5);
     }
