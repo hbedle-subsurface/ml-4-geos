@@ -24,8 +24,8 @@ Small samples, spatial autocorrelation, and rare targets, then a short list of t
 
 The lecture is a row of tabs, and every tab has the same two bands:
 
-* **Talk** (top, tinted): the few points the instructor covers, as short cards or one picture, with the minutes in a small tag. Nothing in this band needs to be read to do the activity.
-* **Try it** (below): a one-line hook tied to the talk, the steps on the left, a one to two minute activity with sliders and buttons on the right, and a short **Check yourself** quiz at the bottom.
+* **Concept** (top, tinted): the few points the instructor covers, as short cards or one picture. Nothing in this band needs to be read to do the activity.
+* **Try it Out!** (below): a one-line hook tied to the talk, the steps on the left, a one to two minute activity with sliders and buttons on the right, and a short **Check yourself** quiz at the bottom.
 
 The instructor talks through the top band, the class does the activity, and everyone moves on with the Next button (or the right arrow key). All tabs are open, so students who get ahead can look, and nothing breaks if they do.
 
@@ -55,6 +55,7 @@ js/modules_sam.js   the Segment Anything tab
 js/modules_geo.js   the geophysics demo (five steps)
 js/modules3.js      paleontology, sedimentology, critical minerals, pitfalls, next steps
 js/main.js          builds the tabs, glossary links, pop-outs, opening figure
+js/start.js         the opening activity (k-means and a SOM on the same samples)
 js/tables.js        reads .csv and .xlsx files in the browser (no library)
 js/homework.js      the homework tab
 js/talk.js          the talk band, the hook, the steps, and the quiz for each tab
@@ -69,6 +70,10 @@ Push to a repo named `ml-4-geos` under `hbedle-subsurface`, then in Settings > P
 ## Using it locally
 
 Open `index.html` in a browser. No build step.
+
+## Checking the prose
+
+`tools/prose-scan.py` lists phrases from the LLM-tics checklist (stock openers, importance words, promotional words, em dashes, rhetorical questions, and the words in the voice reference) in the site text. Run `python3 tools/prose-scan.py` from the repo folder. It flags candidates only, and a person decides which ones to change.
 
 ## Images
 

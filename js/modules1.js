@@ -162,7 +162,7 @@
         const box = b.closest('.ref'), it = items[+box.dataset.i]; if (box.classList.contains('done')) return;
         const ok = b.dataset.a === it.a; box.classList.add('done', ok ? 'right' : 'wrong'); done++; if (ok) score++;
         box.querySelector('.res').textContent = (ok ? 'Agreed. ' : 'Most people would say ' + lab[it.a].toLowerCase() + '. ') + it.r;
-        H.q(root, 'f-out').innerHTML = `Answered ${done} of 6, ${score} matching. Several of these have reasonable arguments on both sides, and the reasons matter more than the label.`;
+        H.q(root, 'f-out').innerHTML = `Answered ${done} of 6, ${score} matching. Several of these can be argued both ways, so compare the reasons behind each answer.`;
       });
     }
   });

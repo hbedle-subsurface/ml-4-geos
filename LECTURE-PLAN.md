@@ -2,10 +2,10 @@
 
 Students open the site on their own laptops and the instructor projects the same page. Every tab has the same layout:
 
-* **Talk** (top band): the few points to cover, as cards or one picture, with the minutes in a small tag.
-* **Try it** (below): a one-line hook that ties the activity to what was just said, the steps on the left, the activity on the right, and a short **Check yourself** quiz at the bottom.
+* **Concept** (top band): the few points to cover, as cards or one picture. The site does not show any minutes; the table below is for planning only.
+* **Try it Out!** (below): a one-line hook that ties the activity to what was just said, the steps on the left, the activity on the right, and a short **Check yourself** quiz at the bottom.
 
-Talk through the top, let the class do the activity, then press *Next* (or the right arrow). All tabs are open, so students who get ahead can look, and nothing breaks.
+Talk through the Concept band, let the class do the activity, then press *Next* (or the right arrow). All tabs are open, so students who get ahead can look, and nothing breaks.
 
 | Tab | Talk | Try it | Running | Note |
 |---|---|---|---|---|
@@ -31,7 +31,7 @@ Everything adds up to about 45 minutes. Skipping the two optional tabs (Semi-sup
 
 ## What happens on each tab
 
-* **Start.** Press *Group the samples* to show k-means running, then *Show the rock types*. The legend under the plot changes with each step.
+* **Start.** The Concept band introduces k-means and the self-organizing map. Try it Out!: pick k-means and press *Watch it run* (centers move, samples change color), then switch to the SOM and press *Watch it run* (a grid of neurons stretches over the samples), then turn on *Show the true rock type* and compare the two agreement numbers. The plot on the right shows what each method built (an elbow curve for k-means, the neuron map for the SOM). The quiz asks what defines a k-means group and what the SOM adds.
 * **Vocabulary.** Click the four rings from the outside in. Activity: slide the number of training samples and watch the learned threshold settle while the expert rule stays put.
 * **Types of ML.** The map of machine learning, with eight small drawings (classification, regression, clustering, dimension reduction, anomaly detection, reinforcement learning, ensembles, deep learning). Click a card to open it. The outline follows Vas3k's *Machine Learning for Everyone*, and the drawings are new. Activity: slide the curviness of a regression line and watch the hollow test dots, then the six-question quiz naming the type for each scenario.
 * **When ML fits.** Talk from the good-fit and poor-fit columns. Activity: six situations to sort. Several have arguments both ways, so the reasons matter more than the label.
@@ -62,6 +62,6 @@ Each tab has *Pop out these steps* and *Pop out this panel*. Pop-ups may need to
 * The eight citations in the game: four are real and four were written for the exercise. The answer is shown after each click.
 * The temperature demo uses a toy distribution written for the page and is not output from a real model.
 * Deposit, well, seismic, shell, and geochemistry data are all synthetic.
-* In the seismic model the channel sand attenuates the wavelet by construction, so mean frequency is lower in the channel. This is stated in the mean-frequency card on the page.
+* In the seismic model the channel sand attenuates the wavelet by construction, so mean frequency is lower in the channel. The mean-frequency card on the page says so.
 * In the geochemistry tab the raw-ppm PCA is dominated by the elements with the largest numbers (potassium, magnesium), and points outside the fixed axes are clipped. The log-transformed result still mixes a felsic signal with the pegmatite signal, which is intended.
 * The well order is fixed (seed 8): the first well in the channel is the 11th, so the supervised map has no channel until then.

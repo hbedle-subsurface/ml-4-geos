@@ -17,8 +17,8 @@
   list.forEach(m => {
     const tr = TR[m.id] || {}, steps = tr.steps || m.steps || [], hasEx = steps.length, tk = TK[m.id];
     const cards = tk && tk.cards ? `<div class="tcards">${tk.cards.map(c => `<div class="tc"><h5>${c.h}</h5><p>${c.t}</p></div>`).join('')}</div>` : '';
-    const talk = tk ? `<div class="talk"><h4 class="band">Talk<span class="pill">${tk.pills ? tk.pills[0] : 'about ' + tk.mins[0] + ' min'}</span></h4>${tk.html || ''}${cards}</div>` : '';
-    const tryLab = m.noPanel ? '' : `<h4 class="band">Try it<span class="pill">${tk && tk.pills ? tk.pills[1] : 'about ' + (tk ? tk.mins[1] : 2) + ' min'}</span></h4>${tr.hook ? `<p class="hook">${tr.hook}</p>` : ''}`;
+    const talk = tk ? `<div class="talk"><h4 class="band">Concept</h4>${tk.html || ''}${cards}</div>` : '';
+    const tryLab = m.noPanel ? '' : `<h4 class="band">Try it Out!</h4>${tr.hook ? `<p class="hook">${tr.hook}</p>` : ''}`;
     const sec = document.createElement('section');
     sec.className = 'module lesson' + (hasEx ? '' : ' no-ex') + (soloId ? ' on' : ''); sec.id = 'm-' + m.id;
     sec.innerHTML = `
@@ -143,43 +143,9 @@
     if (e.key === 'ArrowLeft' && !e.altKey && !e.metaKey) show(current - 1);
   });
 
-  /* ---- opening figure ---- */
-  const hc = document.getElementById('hero-c');
-  if (hc) {
-    const hp = new Plot(hc, { aspect: 0.8, xr: [0, 150], yr: [2.0, 2.9], xl: D.VARS[0], yl: D.VARS[1], nx: 6, ny: 6 });
-    const Z = H.Z2, R = H.R; let lab = null, cen = null, rocks = false, timer = null;
-    const toRaw = c => [c[0] * R.sd[0] + R.mean[0], c[1] * R.sd[1] + R.mean[1]];
-    hp.onDraw = p => {
-      p.axes();
-      R.X.forEach((x, i) => p.dot(x[0], x[1], 4, lab ? Plot.hex2rgba(Plot.CLUSTER[lab[i]], 0.85) : 'rgba(92,102,112,0.55)', rocks ? D.LCOL[R.y[i]] : null, 1.8));
-      if (cen) cen.forEach(c => { const q = toRaw(c); p.dot(q[0], q[1], 8, '#fff', Plot.C.INK, 2.4); });
-    };
-    const leg = document.getElementById('h-legend');
-    const setLegend = () => {
-      const sw = (c, ring) => `<i style="background:${c};${ring ? 'box-shadow:0 0 0 2.5px ' + ring + ';' : ''}"></i>`;
-      leg.innerHTML = (lab ? [0, 1, 2].map(k => `<span>${sw(Plot.CLUSTER[k])}Group ${'ABC'[k]}, found by k-means</span>`).join('') + `<span><i class="ctr">×</i>Group center</span>` : `<span>${sw('#8A929A')}One rock sample, no label</span>`) +
-        (rocks ? D.LITH.map((n, k) => `<span>${sw('#fff', D.LCOL[k])}${n} (ring)</span>`).join('') : '');
-    };
-    hp.draw(); setLegend();
-    const cap = document.getElementById('h-cap');
-    const reduce = g.matchMedia && g.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    document.getElementById('h-group').addEventListener('click', () => {
-      clearInterval(timer); const r = ML.rng(Math.floor(Math.random() * 1e6)); cen = ML.kppInit(Z, 3, r); lab = null; let steps = 0;
-      const step = () => {
-        const nl = ML.assign(Z, cen), same = lab && nl.every((v, i) => v === lab[i]); lab = nl;
-        if (same || steps++ > 14) { clearInterval(timer); cap.textContent = 'k-means with k = 3 stopped changing. The groups came from the measurements alone.'; hp.draw(); setLegend(); return; }
-        hp.draw(); setLegend(); cen = ML.update(Z, lab, 3, r);
-        cap.textContent = 'k-means, step ' + steps + ': assign each sample to the nearest center, then move each center to the mean of its samples.';
-        if (reduce) step();
-      };
-      if (reduce) { for (let i = 0; i < 20; i++) { const nl = ML.assign(Z, cen); if (lab && nl.every((v, j) => v === lab[j])) break; lab = nl; cen = ML.update(Z, lab, 3, r); } lab = ML.assign(Z, cen); cap.textContent = 'k-means with k = 3 stopped changing.'; hp.draw(); setLegend(); }
-      else { step(); timer = setInterval(step, 800); }
-    });
-    document.getElementById('h-rocks').addEventListener('click', e => {
-      rocks = !rocks; e.target.textContent = rocks ? 'Hide the rock types' : 'Show the rock types'; hp.draw(); setLegend();
-      if (rocks) cap.textContent = 'The ring colors are the real rock types. The samples had these labels all along, and the method never saw them.';
-    });
-  }
+  /* ---- opening activity ---- */
+  if (g.initStart) g.initStart(document.getElementById('m-start'));
+  document.querySelector('#m-start .panel').insertAdjacentHTML('beforeend', quizHtml('start'));
 
   /* ---- open the tab named in the address, if any ---- */
   const h0 = lessons.findIndex(l => '#' + l.id === g.location.hash);

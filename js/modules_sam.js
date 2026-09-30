@@ -94,7 +94,7 @@
       pB.onDraw = pl => {
         paint(pl, i => { const m = seg.map[i]; return m >= 0 ? [...hue(m), 0.55] : [0, 0, 0, 0.75]; });
         if (H.q(root, 'sm-pts').checked) for (let y = Math.floor(st.spacing / 2); y < HH; y += st.spacing) for (let x = Math.floor(st.spacing / 2); x < W; x += st.spacing) pl.dot(x + 0.5, y + 0.5, 2, '#fff', C.INK, 1);
-        H.q(root, 'sm-out2').innerHTML = `<b>${seg.n}</b> masks for <b>${sec.n}</b> real grains. <b>${ev.merged}</b> grains sit inside a mask that mixes grains, <b>${ev.split}</b> grains are cut into pieces, and <b>${Math.round(ev.covered * 100)}%</b> of the section is covered (black is uncovered).`;
+        H.q(root, 'sm-out2').innerHTML = `<b>${seg.n}</b> masks for <b>${sec.n}</b> real grains. <b>${ev.merged}</b> grains are inside a mask that mixes grains, <b>${ev.split}</b> grains are cut into pieces, and <b>${Math.round(ev.covered * 100)}%</b> of the section is covered (black is uncovered).`;
         H.q(root, 'sm-side2').innerHTML = `<p class="note">Each color is one mask. Low sensitivity cuts twinned and cleaved grains into stripes. High sensitivity lets a mask leak across grain boundaries. A wide click spacing skips small grains.</p>`;
       };
 
