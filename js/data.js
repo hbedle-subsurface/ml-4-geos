@@ -56,6 +56,59 @@
   };
   D.fieldCount = function (range) { return Math.max(8, Math.round(2.5 / (Math.PI * range * range))); };
 
+
+  /* Redbud Basin sandstone: made-up samples, each a mixture of sand from four made-up mountain ranges, plus a
+     few samples from a mega flood that brought sand from a source nobody sampled. Six measurements per sample.
+     y is the range that supplied most of the sand, or 4 for the flood samples. */
+  D.SRC = ['Boomer Mountains', 'Sooner Range', 'Thunder Ridge Mountains', 'Red Dirt Hills', 'Fits none of the ranges'];
+  D.SRCS = ['Boomer', 'Sooner', 'Thunder Ridge', 'Red Dirt', 'Mystery'];
+  D.SCOL = ['#C86F8F', '#3E4A56', '#C9A227', '#B5462E', '#9AA1A8'];
+  D.PVARS = ['K₂O (%)', 'Zr (ppm)', 'Cr (ppm)', 'Ni (ppm)', 'CaO (%)', 'Sr (ppm)'];
+  D.PSHORT = ['K₂O', 'Zr', 'Cr', 'Ni', 'CaO', 'Sr'];
+  D.PEND = [[4.5, 260, 20, 8, 1.8, 220], [0.6, 60, 420, 190, 9.0, 350], [1.2, 90, 45, 22, 24, 620], [1.0, 380, 90, 45, 0.5, 45]];
+  D.PFLOOD = [5.8, 620, 150, 60, 14, 1150];
+  D.provenance = function () {
+    const r = ML.rng(52), END = D.PEND;
+    const gamma = a => {
+      if (a < 1) return gamma(a + 1) * Math.pow(r(), 1 / a);
+      const d = a - 1 / 3, c = 1 / Math.sqrt(9 * d);
+      for (;;) { let x, v; do { x = ML.gauss(r); v = 1 + c * x; } while (v <= 0); v = v * v * v; const u = r(); if (Math.log(u) < 0.5 * x * x + d - d * v + d * Math.log(v)) return d * v; }
+    };
+    const sig = [0.20, 0.22, 0.25, 0.32, 0.20, 0.22], X = [], y = [];
+    const sample = (w, flood) => {
+      const t = w.reduce((a, b) => a + b, 0), sort = Math.exp(0.35 * ML.gauss(r)), cement = -1.4 * Math.log(1 - r());
+      return END[0].map((_, c) => {
+        let mix = w.slice(0, 4).reduce((a, wj, j) => a + wj * END[j][c], 0) + (flood ? w[4] * D.PFLOOD[c] : 0); mix /= t;
+        if (c === 1) mix *= sort; if (c === 4) mix += cement; if (c === 5) mix += 22 * cement;
+        return mix * Math.exp(sig[c] * ML.gauss(r));
+      });
+    };
+    for (let i = 0; i < 360; i++) { const s = i % 4, w = [0, 1, 2, 3].map(j => gamma(j === s ? 6 : 0.7)).concat([0]); y.push(w.indexOf(Math.max(...w))); X.push(sample(w, false)); }
+    for (let i = 0; i < 15; i++) { const w = [0, 1, 2, 3].map(() => gamma(0.9)).concat([gamma(9)]); y.push(4); X.push(sample(w, true)); }
+    const st = ML.standardize(X);
+    return { X, y, Z: st.Z, mean: st.mean, sd: st.sd, n: X.length };
+  };
+  /* field samples: stream sand collected in each range itself. Mostly that range's chemistry, with a little of
+     the natural mixing, sorting and cement that the basin sands also show. 60 per range. */
+  D.fieldBank = function (P) {
+    const r = ML.rng(77), X = [], y = [], sig = [0.20, 0.22, 0.25, 0.32, 0.20, 0.22];
+    const gamma = a => {
+      if (a < 1) return gamma(a + 1) * Math.pow(r(), 1 / a);
+      const d = a - 1 / 3, c = 1 / Math.sqrt(9 * d);
+      for (;;) { let x, v; do { x = ML.gauss(r); v = 1 + c * x; } while (v <= 0); v = v * v * v; const u = r(); if (Math.log(u) < 0.5 * x * x + d - d * v + d * Math.log(v)) return d * v; }
+    };
+    for (let s = 0; s < 4; s++) for (let i = 0; i < 60; i++) {
+      const w = [0, 1, 2, 3].map(j => gamma(j === s ? 24 : 0.35)), t = w.reduce((a, b) => a + b, 0), sort = Math.exp(0.3 * ML.gauss(r)), cement = -1.0 * Math.log(1 - r());
+      X.push(D.PEND[0].map((_, c) => { let mix = w.reduce((a, wj, j) => a + wj * D.PEND[j][c], 0) / t; if (c === 1) mix *= sort; if (c === 4) mix += cement; if (c === 5) mix += 22 * cement; return mix * Math.exp(sig[c] * ML.gauss(r)); })); y.push(s);
+    }
+    return { X, y, Z: X.map(x => x.map((v, c) => (v - P.mean[c]) / P.sd[c])), n: X.length };
+  };
+  D.fieldPick = function (bank, per, seed) {
+    const r = ML.rng(seed), idx = [];
+    for (let s = 0; s < 4; s++) { const pool = bank.y.map((v, i) => (v === s ? i : -1)).filter(i => i >= 0); ML.shuffle(pool.length, r).slice(0, per).forEach(k => idx.push(pool[k])); }
+    return idx;
+  };
+
   g.DATA = D;
   if (typeof module !== 'undefined') module.exports = D;
 })(typeof window !== 'undefined' ? window : globalThis);

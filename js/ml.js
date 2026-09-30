@@ -261,6 +261,46 @@
   };
   ML.polyval = (co, x) => { let s = 0; for (let i = co.length - 1; i >= 0; i--) s = s * x + co[i]; return s; };
 
+  /* decision tree (CART, Gini) and random forest */
+  ML.tree = function (X, y, nc, o) {
+    o = o || {}; const maxDepth = o.maxDepth === undefined ? 6 : o.maxDepth, minLeaf = o.minLeaf || 1, d = X[0].length, mtry = o.mtry || d, rng = o.rng || Math.random;
+    const gini = (c, n) => { if (!n) return 0; let s = 0; for (let k = 0; k < nc; k++) s += (c[k] / n) ** 2; return 1 - s; };
+    function build(idx, depth) {
+      const counts = new Array(nc).fill(0); idx.forEach(i => { counts[y[i]]++; });
+      const n = idx.length, mx = Math.max(...counts);
+      if (depth >= maxDepth || mx === n || n < 2 * minLeaf) return { leaf: true, counts, n };
+      let feats = Array.from({ length: d }, (_, i) => i);
+      if (mtry < d) { for (let i = d - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [feats[i], feats[j]] = [feats[j], feats[i]]; } feats = feats.slice(0, mtry); }
+      let best = null;
+      for (const f of feats) {
+        const ord = idx.slice().sort((a, b) => X[a][f] - X[b][f]), left = new Array(nc).fill(0), right = counts.slice();
+        for (let p = 0; p < n - 1; p++) {
+          const c = y[ord[p]]; left[c]++; right[c]--;
+          const v0 = X[ord[p]][f], v1 = X[ord[p + 1]][f]; if (v0 === v1) continue;
+          const nl = p + 1, nr = n - nl; if (nl < minLeaf || nr < minLeaf) continue;
+          const g = (nl * gini(left, nl) + nr * gini(right, nr)) / n;
+          if (!best || g < best.g - 1e-12) best = { g, f, t: (v0 + v1) / 2 };
+        }
+      }
+      if (!best) return { leaf: true, counts, n };
+      const L = [], Rr = []; idx.forEach(i => { (X[i][best.f] <= best.t ? L : Rr).push(i); });
+      return { leaf: false, f: best.f, t: best.t, counts, n, left: build(L, depth + 1), right: build(Rr, depth + 1) };
+    }
+    return build(X.map((_, i) => i), 0);
+  };
+  ML.treeLeaf = function (node, x) { while (!node.leaf) node = x[node.f] <= node.t ? node.left : node.right; return node; };
+  ML.treeClass = function (node, x) { const c = ML.treeLeaf(node, x).counts; let b = 0; c.forEach((v, i) => { if (v > c[b]) b = i; }); return b; };
+  ML.forest = function (X, y, nc, nTrees, rng, o) {
+    o = o || {}; const n = X.length, d = X[0].length, mtry = o.mtry || Math.max(1, Math.round(Math.sqrt(d))), trees = [];
+    for (let t = 0; t < nTrees; t++) {
+      const idx = Array.from({ length: n }, () => Math.floor(rng() * n)), Xb = idx.map(i => X[i]), yb = idx.map(i => y[i]);
+      trees.push(ML.tree(Xb, yb, nc, { maxDepth: o.maxDepth === undefined ? 6 : o.maxDepth, mtry, rng, minLeaf: 1 }));
+    }
+    return trees;
+  };
+  ML.forestVotes = function (trees, x, nc) { const v = new Array(nc).fill(0); trees.forEach(t => { v[ML.treeClass(t, x)]++; }); return v; };
+  ML.argmax = a => { let b = 0; a.forEach((v, i) => { if (v > a[b]) b = i; }); return b; };
+
   g.ML = ML;
   if (typeof module !== 'undefined') module.exports = ML;
 })(typeof window !== 'undefined' ? window : globalThis);

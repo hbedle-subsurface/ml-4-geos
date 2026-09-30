@@ -9,7 +9,7 @@ Published at `https://hbedle-subsurface.github.io/ml-4-geos/`
 ## Contents of the page
 
 **Part 1. The vocabulary** (about 26 minutes)
-AI / machine learning / deep learning / LLM, a map of the types of machine learning (eight drawings and a naming quiz), when machine learning fits (a six-card sorting activity), dimension reduction (PCA), unsupervised learning (k-means), supervised learning (a hand-drawn boundary, then k-nearest neighbors with a train/test split), semi-supervised learning (label propagation), neural networks (a small playground), convolutional networks (a drawn muffin-or-chihuahua game and a two-layer network with hand-set filters), Segment Anything (click, segment everything, and name the masks on a synthetic thin section), and large language models in research (a next-token demo and a real-or-made-up citation game).
+AI / machine learning / deep learning / LLM, a map of the types of machine learning (eight drawings and a naming quiz), when machine learning fits (a six-card sorting activity), dimension reduction (PCA), unsupervised learning (k-means on six-element sandstone chemistry from four made-up mountain ranges), semi-supervised learning (one field sample per range plus label propagation), supervised learning (decision tree, random forest, and what too few samples does), supervised learning (a hand-drawn boundary, then k-nearest neighbors with a train/test split), semi-supervised learning (label propagation), neural networks (a small playground), convolutional networks (a drawn muffin-or-chihuahua game and a two-layer network with hand-set filters), Segment Anything (click, segment everything, and name the masks on a synthetic thin section), and large language models in research (a next-token demo and a real-or-made-up citation game).
 
 **Part 2. Geophysics, then three more fields** (about 15 minutes)
 Geophysics is a five-step live demo on a synthetic channel system: (1) a seismic section and the wavelet that made it, (2) four attributes measured in a window and a crossplot, (3) a self-organizing map that groups the attributes into facies, (4) which attributes the map relies on (shuffling and refitting without one), (5) wells and a supervised map, including the facies the first wells never cut. Then tabs for sedimentology (facies from four log curves, with choices of curves, core length and core position, and a confusion matrix), geochemistry and critical minerals (PCA on raw, standardized, and log-transformed stream-sediment data, then prospectivity from few known deposits), and paleontology (morphometrics).
@@ -52,6 +52,7 @@ js/cnnlab.js        drawn muffin and chihuahua pictures and the hand-built filte
 js/modules_cnn.js   the CNN tab
 js/samlab.js        synthetic thin section and a region-growing segmenter
 js/modules_sam.js   the Segment Anything tab
+js/modules_prov.js  the Semi-supervised and Supervised tabs (decision tree, random forest)
 js/modules_geo.js   the geophysics demo (five steps)
 js/modules3.js      paleontology, sedimentology, critical minerals, pitfalls, next steps
 js/main.js          builds the tabs, glossary links, pop-outs, opening figure
@@ -81,6 +82,8 @@ Open `index.html` in a browser. No build step.
 The muffin and chihuahua pictures in the game are drawn by the page. The well-known photo grid by @teenybiscuit is not included. To show it in the CNN talk band, add your copy as `img/muffin-or-chihuahua.png` (the figure stays hidden until the file exists).
 
 ## Data
+
+The Redbud Basin sandstones (Boomer Mountains, Sooner Range, Thunder Ridge Mountains, Red Dirt Hills) are invented and used by the Unsupervised, Semi-supervised and Supervised tabs. Each basin sample is a mixture of four end-member chemistries plus heavy-mineral sorting and carbonate cement, and 15 mystery samples come from a mega flood that carried in sand from a fifth, unsampled source. The field samples are stream sand from each range. Everything is generated in `js/data.js`.
 
 All data are synthetic and generated with fixed seeds in `js/data.js` and `js/seismic.js`. In the seismic model the channel sand also attenuates the wavelet (its reflections use a wavelet at 0.7 of the source frequency), which is what gives mean frequency its contrast. The lithology values are shaped like typical log responses and are not measurements from any well. The eight references in the citation game are four real papers (Breiman 2001; Bergen et al. 2019; Hall 2016; Kohonen 1982) and four written for the exercise.
 

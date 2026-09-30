@@ -131,7 +131,16 @@ canvas { display: block; width: 100%; }
 .switch input:checked + .sw { background: var(--red); } .switch input:checked + .sw::after { left: 25px; }
 .switch input:focus-visible + .sw { outline: 3px solid #E0703C; outline-offset: 2px; }
 .st-top { align-items: center; gap: 8px 28px; } .hintline { color: var(--slate); font-size: 14px; }
+.legend .ring { width: 12px; height: 12px; border-radius: 50%; border: 2.5px solid var(--red); background: #fff; display: inline-block; margin-right: 5px; vertical-align: -1px; }
 .legend .dotc { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--ink); background: #fff; display: inline-block; margin-right: 5px; vertical-align: -1px; }
+
+/* look boxes and the spread meter */
+.look { background: #F7F8F9; border: 1px solid var(--grid); border-left: 5px solid var(--acc); border-radius: 4px; padding: 10px 16px; margin: 0 0 14px; }
+.look p { margin: 4px 0; font-size: 16px; } .look b { color: var(--acc); }
+.meter { margin: 12px 0 6px; } .mbar { position: relative; height: 22px; background: var(--grid); border-radius: 11px; overflow: hidden; }
+.mbar i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--red); width: 0; transition: width .08s linear; }
+.mbar b { position: absolute; top: 0; bottom: 0; width: 3px; background: var(--ink); left: 0; }
+.mtxt { font-size: 15px; margin-top: 6px; }
 
 /* homework */
 .drop { border: 2px dashed var(--slate); border-radius: 4px; padding: 22px; text-align: center; background: var(--fill); margin-bottom: 10px; font-size: 16.5px; }

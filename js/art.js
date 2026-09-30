@@ -187,6 +187,44 @@
     tick() {
       return `<circle cx="60" cy="42" r="26" fill="none" stroke="${TEAL}" stroke-width="5"/><path d="M46 42 L56 52 L76 30" fill="none" stroke="${TEAL}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>`;
     },
+    rescale() {
+      let s = ''; [['GR', 14, 58], ['Dens', 34, 6], ['Sonic', 54, 40]].forEach(b => { s += rc(b[1], 66 - b[2], 14, b[2], SL) + tx(b[1] + 7, 78, b[0], 7.5, SL); });
+      s += arrow(72, 42, 84, 42, INK);
+      [0, 1, 2].forEach(i => { s += rc(90 + i * 10 - 3, 66 - 22 - (i === 1 ? 4 : i === 2 ? -3 : 0), 8, 22 + (i === 1 ? 4 : i === 2 ? -3 : 0), RED); });
+      return s + ln(86, 66, 120, 66, GR, 1.2) + tx(101, 78, 'same scale', 7.5, RED);
+    },
+    table6() {
+      let s = rc(4, 6, 112, 72, '#fff', GR, 1.2); const heads = ['K₂O', 'Zr', 'Cr', 'Ni', 'CaO', 'Sr'];
+      heads.forEach((h, i) => { s += tx(12 + i * 18.4, 16, h, 7.5, SL); }); s += ln(4, 20, 116, 20, GR, 1.2);
+      const rows = [['4.1', '240', '25', '9', '2', '210'], ['0.7', '55', '410', '180', '8', '340'], ['1.3', '95', '50', '25', '22', '600'], ['3.6', '210', '60', '30', '4', '260']];
+      rows.forEach((r, j) => r.forEach((v, i) => { s += tx(12 + i * 18.4, 32 + j * 13, v, 7.5, INK, 'middle', 500); }));
+      return s + tx(60, 82, 'which mountains? unknown', 7.5, RED);
+    },
+    provenance() {
+      let s = `<ellipse cx="60" cy="56" rx="26" ry="12" fill="#EFE9DC" stroke="${SL}" stroke-width="1.4"/>` + tx(60, 59, 'Redbud Basin', 7, SL);
+      [[16, 20, '#C86F8F', 'Boomer'], [50, 10, '#3E4A56', 'Sooner'], [86, 10, '#C9A227', 'Thunder Ridge'], [108, 42, '#B5462E', 'Red Dirt']].forEach(m => {
+        s += poly([[m[0] - 11, m[1] + 11], [m[0], m[1] - 5], [m[0] + 11, m[1] + 11]], m[2], INK, 1.2) + tx(m[0], m[1] + 20, m[3], 6.5, INK);
+      });
+      return s + arrow(24, 34, 42, 50, '#C86F8F') + arrow(52, 32, 56, 44, '#3E4A56') + arrow(84, 32, 72, 45, '#C9A227') + arrow(100, 50, 84, 54, '#B5462E');
+    },
+    tree() {
+      let s = rc(40, 6, 40, 16, '#fff', INK, 1.6) + tx(60, 17, 'Cr ≤ 180?', 8.5, INK);
+      s += ln(52, 22, 30, 38, SL, 1.6) + ln(68, 22, 90, 38, SL, 1.6) + tx(36, 32, 'yes', 7, SL) + tx(86, 32, 'no', 7, SL);
+      s += rc(12, 38, 36, 15, '#fff', INK, 1.6) + tx(30, 48.5, 'K₂O ≤ 2?', 8, INK) + rc(72, 38, 36, 15, '#fff', INK, 1.6) + tx(90, 48.5, 'Ni ≤ 90?', 8, INK);
+      [[8, 66, '#C86F8F'], [34, 66, '#B5462E'], [66, 66, '#3E4A56'], [92, 66, '#C9A227']].forEach((l, i) => { s += rc(l[0], l[1], 22, 14, l[2], INK, 1.2); });
+      return s + ln(22, 53, 19, 66, SL, 1.4) + ln(38, 53, 44, 66, SL, 1.4) + ln(82, 53, 77, 66, SL, 1.4) + ln(98, 53, 103, 66, SL, 1.4);
+    },
+    forest() {
+      let s = ''; [[22, '#C86F8F'], [60, '#3E4A56'], [98, '#C86F8F']].forEach((t, k) => {
+        s += ln(t[0], 8, t[0] - 10, 22, SL, 1.6) + ln(t[0], 8, t[0] + 10, 22, SL, 1.6) + dot(t[0], 8, INK, 3.4) + rc(t[0] - 14, 22, 8, 8, k === 1 ? '#3E4A56' : '#C86F8F', INK, 1) + rc(t[0] + 6, 22, 8, 8, k === 1 ? '#3E4A56' : '#C9A227', INK, 1) + ln(t[0], 32, 60, 52, GR, 1.6);
+      });
+      return s + `<circle cx="60" cy="62" r="11" fill="#C86F8F" stroke="${INK}" stroke-width="2"/>` + tx(60, 82, 'majority vote', 7.5, SL);
+    },
+    flood() {
+      let s = `<path d="M0 60 C20 50 30 66 50 58 S90 50 120 60 L120 84 L0 84 Z" fill="#9AA1A8"/>`; const r = ML.rng(31);
+      for (let i = 0; i < 12; i++) s += dot(14 + 92 * r(), 46 + 12 * r(), '#9AA1A8', 2.6);
+      return s + arrow(112, 20, 74, 44, INK) + tx(80, 14, 'far away', 8, SL);
+    },
     magnify() {
       const r = ML.rng(21); let s = blob(r, 50, 42, 20, 14, 14, '#B4BAC1', 3); return s + `<circle cx="68" cy="36" r="16" fill="rgba(255,255,255,.6)" stroke="${INK}" stroke-width="3"/>` + ln(80, 48, 100, 68, INK, 5);
     }

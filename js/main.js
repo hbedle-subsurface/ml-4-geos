@@ -5,7 +5,7 @@
   const params = new URLSearchParams(g.location.search);
   const soloId = params.get('m'), view = params.get('view') === 'ex' ? 'ex' : 'panel';
   const SHORT = { start: 'Start', vocab: 'Vocabulary', types: 'Types of ML', fit: 'When ML fits', pca: 'Dimensions', unsup: 'Unsupervised', sup: 'Supervised', semi: 'Semi-supervised', nn: 'Neural networks', cnn: 'CNN', sam: 'Segment Anything', llm: 'LLMs', geo: 'Geophysics', tracks: 'Other fields', traps: 'Pitfalls', next: 'Next steps', hw: 'Homework' };
-  const ORDER = ['start', 'vocab', 'types', 'fit', 'pca', 'unsup', 'sup', 'semi', 'nn', 'cnn', 'sam', 'llm', 'geo', 'tracks', 'traps', 'next', 'hw'];
+  const ORDER = ['start', 'vocab', 'types', 'fit', 'pca', 'unsup', 'semi', 'sup', 'nn', 'cnn', 'sam', 'llm', 'geo', 'tracks', 'traps', 'next', 'hw'];
   const ACC = { start: '#841617', vocab: '#3B6FB6', types: '#3B6FB6', fit: '#3B6FB6', pca: '#4E9F3D', unsup: '#4E9F3D', sup: '#4E9F3D', semi: '#4E9F3D', nn: '#4E9F3D', cnn: '#B04A9E', sam: '#B04A9E', llm: '#B04A9E', geo: '#D2611F', tracks: '#D2611F', traps: '#C4483F', next: '#1F8A84', hw: '#1F8A84' };
   M.sort((a, b) => (ORDER.indexOf(a.id) < 0 ? 99 : ORDER.indexOf(a.id)) - (ORDER.indexOf(b.id) < 0 ? 99 : ORDER.indexOf(b.id)));
   const main = document.getElementById('modules');
@@ -77,7 +77,7 @@
       if (hit) { out += txt.slice(last).replace(/&/g, '&amp;').replace(/</g, '&lt;'); const span = document.createElement('span'); span.innerHTML = out; n.replaceWith(...span.childNodes); }
     });
   }
-  const linkAll = sec => sec.querySelectorAll('.ex li, .note, .cs p, .lead, .pc li, .hint, .hook, .next li, .closer').forEach(linkTerms);
+  const linkAll = sec => sec.querySelectorAll('.ex li, .note, .cs p, .lead, .pc li, .hint, .hook, .next li, .closer, .look p').forEach(linkTerms);
   const dlg = document.getElementById('gloss');
   document.addEventListener('click', e => {
     const b = e.target.closest('.term'); if (!b) return;
