@@ -24,8 +24,8 @@ Small samples, spatial autocorrelation, and rare targets, then a short list of t
 
 The lecture is a row of tabs, and every tab has the same bands:
 
-* **Concept** (top, tinted): a one-sentence introduction and then numbered steps in the order the ideas are needed, each with its own drawing. Every term is explained where it first appears, for readers who have not used machine learning before.
-* **The rocks and the data** (a box near the top of the Concept band, on every tab): what the rocks are, what each measurement is and its units, and what we ask the computer to do, so the geology is clear before the machine learning starts. The text is in `js/talk.js` (the `SETUP` block).
+* **Concept** (top, tinted): a short introduction in the lecturer's voice that states the main idea and the takeaway, then numbered key ideas in the order they are needed, each with its own drawing. Every term is explained where it first appears, for readers who have not used machine learning before.
+* **The rocks and the data** (a box at the end of the Concept band, after the key ideas, on every tab): what the rocks are, what each measurement is and its units, and what we ask the computer to do, so the geology is clear just before the activity starts. The text is in `js/talk.js` (the `SETUP` block).
 * **Try it Out!** (below): a one-line hook tied to the talk, the steps on the left, a one to two minute activity with sliders and buttons on the right, and a short **Check yourself** quiz at the bottom.
 
 The instructor talks through the top band, the class does the activity, and everyone moves on with the Next button (or the right arrow key). All tabs are open, so students who get ahead can look, and nothing breaks if they do.

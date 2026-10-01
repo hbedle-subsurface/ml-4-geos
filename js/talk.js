@@ -101,7 +101,7 @@
 
   g.TALK = {
     start: {
-      intro: 'Today we teach a computer to sort rocks. First we set up the problem, then we try two ways of solving it.',
+      intro: 'Today let\'s talk about machine learning, and to do so, we will teach a computer to sort and organize rocks. Let\'s get started by quickly looking at two types of clustering: k-means and self-organizing maps.',
       steps: [
         { art: 'table', h: 'A table of samples', t: 'Every row is a rock sample, and the columns are what we measured: gamma ray, density, sonic slowness. A fourth column, the rock type, is hidden from the computer.' },
         { art: 'bunches', h: 'Similar rocks bunch together', t: 'Plot the measurements and samples of the same rock type tend to land near each other. Grouping means finding those bunches without being told what they are.' },
@@ -111,7 +111,7 @@
       ]
     },
     vocab: {
-      intro: 'These four terms get mixed up a lot. Each one is a smaller part of the one before it.',
+      intro: 'OK, so these four terms get mixed up all the time. But really, each one is a subset of the other.',
       pre: `<div class="split">
           <svg id="v-rings" viewBox="0 0 400 400" role="group" aria-label="Nested circles: AI, machine learning, deep learning, LLM"></svg>
           <div id="v-info" class="info" aria-live="polite"></div>
@@ -119,18 +119,18 @@
         <p class="hint">Click the rings from the outside in. Every LLM is deep learning, every deep-learning model is machine learning, and all of machine learning counts as AI.</p>`
     },
     types: {
-      intro: 'One word we need first is label. A label is an answer we already know for a sample, such as a rock type from core. Whether we have labels sorts most of machine learning into a few families.',
+      intro: 'The first word we need is label. A label is an answer we already know for a sample, like a rock type from a core. Whether we have labels or not sorts most of machine learning into a few families, so let\'s take a look at them.',
       pre: `<div class="lab-demo"><div class="cs"><div class="fig">${'{{labels}}'}</div><h5>With labels</h5><p>Each sample comes with its rock type.</p></div><div class="cs"><div class="fig">${'{{fewdots}}'}</div><h5>Without labels</h5><p>The computer sees only the measurements.</p></div></div>`,
       html: mlmap
     },
     fit: {
-      intro: 'Machine learning is not the right tool for every problem. These two lists help us decide before we start.',
+      intro: 'Machine learning is not the right tool for every problem. Let\'s look at these two lists so we can see where it is helpful, and where it is not.',
       html: pair(
         { h: 'Often a good fit', l: ['Hundreds or thousands of samples, some of them with known answers.', 'A pattern that is hard to write as a rule, like telling facies apart from six log curves.', 'The same kind of measurement repeated many times: logs, seismic traces, photos.'] },
         { h: 'Often a poor fit', l: ['Only a handful of samples.', 'A known equation already gives the answer, like travel time through layers of known velocity.', 'The question is far outside the data we trained on.', 'No independent way to check the result, such as core or a well.'] })
     },
     pca: {
-      intro: 'Logs give us several measurements at every depth. PCA is a way to show all of them on one flat plot.',
+      intro: 'Logs give us several measurements at every depth, and that is a lot to look at all at once. PCA, which stands for principal component analysis, squeezes all of them onto one flat plot, and we keep most of the pattern when we do.',
       steps: [
         { art: 'table', h: 'Many measurements per sample', t: 'Gamma ray, density, sonic and neutron porosity make four measurements. That puts each sample at a point in a four-dimensional space, which we cannot draw.' },
         { art: 'rescale', h: 'Put them on the same scale', t: 'Gamma ray is in API units, density in g/cc, sonic in microseconds per foot. Before we compare spread, we rescale each measurement so its average is zero and its typical spread (the standard deviation) is one. Otherwise the measurement with the biggest numbers would win.' },
@@ -140,7 +140,7 @@
       ]
     },
     unsup: {
-      intro: 'In unsupervised learning the computer gets no labels. This time the samples are sandstones, and the question is where their sand came from.',
+      intro: 'In unsupervised learning the computer gets no labels at all. Here we have a lot of sandstone samples from a basin, and we want to know where the sand came from. So we let the computer group the samples first, and then we figure out what the groups mean.',
       steps: [
         { art: 'provenance', h: 'The scenario', t: 'Long ago, rivers carried sand from four mountain ranges into the Redbud Basin. The Boomer Mountains are granite, the Sooner Range is dark volcanic rock, the Thunder Ridge Mountains are limestone and shale, and the Red Dirt Hills are old iron-stained sandstone. All four ranges are made up for this exercise. Each weathers into sand with its own chemistry.' },
         { art: 'table6', h: 'Six measurements per sample', t: 'We analyzed 375 sandstone samples from the basin for six things: potassium (K₂O), zirconium (Zr), chromium (Cr), nickel (Ni), calcium (CaO) and strontium (Sr). Nobody wrote down which mountains each sample came from, and the rivers mixed sand from more than one range.' },
@@ -150,7 +150,7 @@
       ]
     },
     semi: {
-      intro: 'Analyzing a basin sandstone in the lab is quick, but a trip into the mountains takes far longer. Suppose the crew can visit each range once and bring back one sample from it. That gives us only a few labeled samples and a lot of unlabeled sandstone.',
+      intro: 'Sometimes we only have a few labels. Analyzing a sandstone in the lab is quick, but a trip into the mountains takes a lot longer, so suppose the crew can visit each range once and bring back one sample. That gives us just a few labeled samples and a lot of unlabeled sandstone, and semi-supervised learning is a way to use both.',
       pre: '{{strip:semi}}',
       steps: [
         { art: 'fewlabels', h: 'A few labels, lots of samples', t: 'A field sample from the Sooner Range has a known source: that is a label. The 375 basin sandstones still have none. With one label per range we have 4 labeled samples and 375 unlabeled ones.' },
@@ -160,7 +160,7 @@
       ]
     },
     sup: {
-      intro: 'Now the crew has more time. Each field sample is labeled with its range, and the basin sandstones are the test. A random forest is the supervised method we build here.',
+      intro: 'Now the crew has a lot more time, so we have plenty of labeled field samples from every range. That is supervised learning, and the method we will use is a random forest. The main thing to take away is that a model can only answer with the labels it has seen.',
       pre: '{{strip:sup}}',
       steps: [
         { art: 'labels', h: 'Field samples are the training set', t: 'A label is an answer we already know. The labeled field samples are the training set: the computer learns from them. The basin sandstones are the test set, the samples we ask it about afterward.' },
@@ -171,7 +171,7 @@
       ]
     },
     nn: {
-      intro: 'A neural network is a computer program loosely inspired by how brain cells connect. It is built from very simple pieces, and we start with one measurement and one rock type.',
+      intro: 'A neural network is a computer program that is loosely inspired by how brain cells connect. It is built from really simple pieces, and so we will start small, with one measurement and one rock type, and see how those pieces add up.',
       steps: [
         { art: 'neuron', h: 'A neuron is a small calculator', t: 'It multiplies each input by a weight, adds up the results, and passes the total through a simple curve. The weights decide how much each input matters. The curve turns the total into a soft on or off switch.' },
         { art: 'onecut', h: 'One neuron makes one cut', t: 'Take gamma ray alone. A neuron works like a threshold: is gamma ray above 75? Its answer switches smoothly from no to yes across the threshold, with no sharp edge. One cut can only say above or below.' },
@@ -182,9 +182,10 @@
       ]
     },
     cnn: {
-      intro: 'A convolutional neural network (CNN) is a neural network designed for images. Here the image is a LiDAR scene, and the job is to tell bare soil from grass, shrubs, trees and roofs.',
-      pre: `<p class="hint">The muffin and chihuahua grid is a well-known internet image by @teenybiscuit: sixteen photos in which chihuahua faces and blueberry muffins look alike. The <a href="https://www.bbc.com/bbcthree/article/2fa66196-ab28-4610-b494-88607becf5ee" target="_blank" rel="noopener">BBC Three article</a> tells the story.</p>
-        <figure class="meme"><img src="img/muffin-or-chihuahua.png" alt="A grid of sixteen photos: chihuahua faces and blueberry muffins that look alike" onerror="this.parentNode.remove()"><figcaption>Credit: @teenybiscuit. Shown for teaching.</figcaption></figure>`,
+      intro: 'A convolutional neural network, or CNN, is a neural network designed to work with images. It can even be used to tell the difference between a chihuahua and a muffin.',
+      pre: `<figure class="meme"><img src="img/muffin-or-chihuahua.png" alt="A grid of sixteen photos: chihuahua faces and blueberry muffins that look alike" onerror="this.parentNode.remove()"><figcaption>Credit: @teenybiscuit. Shown for teaching.</figcaption></figure>
+        <p class="hint">The muffin and chihuahua grid is a well-known internet image by @teenybiscuit: sixteen photos in which chihuahua faces and blueberry muffins look alike. The <a href="https://www.bbc.com/bbcthree/article/2fa66196-ab28-4610-b494-88607becf5ee" target="_blank" rel="noopener">BBC Three article</a> tells the story.</p>
+        <p class="lead">For us, the image is a LiDAR scene, and the job is to tell bare soil from grass, shrubs, trees and roofs.</p>`,
       steps: [
         { art: 'lidar', h: 'LiDAR gives us heights', t: 'An aircraft fires laser pulses at the ground and times how long each one takes to come back. A pulse can return several times, from the top of a tree, from branches, and from the ground. Gridded up, the heights become a picture with one height per pixel. A second picture holds the average number of returns per pulse.' },
         { art: 'kernel', h: 'A filter slides across the picture', t: 'A filter looks at a small window and gives one number for it. Slide it over the whole picture and the numbers form a new picture called a feature map. One filter takes the typical height in each window, and another averages the returns.' },
@@ -193,7 +194,7 @@
       ]
     },
     sam: {
-      intro: 'A thin section is a picture full of grains. Before we can count minerals, something has to outline each grain.',
+      intro: 'A thin section is a picture full of mineral grains, and to count the minerals we first have to outline every grain. Doing that by hand takes a long time, so let\'s see how a segmentation model like SAM can do a lot of the work.',
       steps: [
         { art: 'mask', h: 'Segmentation outlines things', t: 'Segmentation splits a picture into regions. The outline of one region is called a mask.' },
         { art: 'three', h: 'A click gives several masks', t: 'The Segment Anything Model (SAM) from Meta AI takes a prompt, which is a hint such as a click on a grain. A click could mean a stripe inside the grain, the whole grain, or a group of touching grains, so SAM returns several masks and we pick.' },
@@ -203,7 +204,7 @@
       html: `<p class="hint">This page uses a synthetic thin section and a simple stand-in that grows a region from each click. It stands in for the real model in the ways shown here. The real one is at <a href="https://segment-anything.com/" target="_blank" rel="noopener">segment-anything.com</a> and <a href="https://github.com/facebookresearch/segment-anything" target="_blank" rel="noopener">on GitHub</a>. On real thin sections, the mineral percentages are checked against a point count.</p>`
     },
     llm: {
-      intro: 'A large language model (LLM) is the kind of program behind chat assistants. It is a neural network trained on a very large amount of text, and what it learns are statistics: which pieces of text tend to follow which.',
+      intro: 'A large language model, or LLM, is the kind of program behind chat assistants. It is a neural network trained on a really large amount of text, and so what it learns is statistics: which pieces of text tend to follow which. That one idea explains both what these models do well and where they go wrong.',
       steps: [
         { art: 'corpus', h: 'Start with a lot of text', t: 'The training text is a large collection of books, articles, web pages and computer code, often trillions of words. Nobody labels it. Every word in the text is the right answer for the words before it, so the text supplies its own answers.' },
         { art: 'tokens', h: 'Cut the text into tokens', t: 'A network works with numbers, so the text is cut into tokens, which are whole words or pieces of words, and every token gets an ID number. The list of all the tokens a model knows is its vocabulary, often tens of thousands of tokens long.' },
@@ -217,7 +218,7 @@
         { h: 'Where it can mislead', l: ['A reference has a pattern of authors, year, journal and pages that the model has learned, and it can write that pattern for a paper nobody wrote.', 'A topic with little text, such as one formation in a small basin, gives the model little to base its probabilities on.', 'It knows nothing published after its training text was collected.', 'What we type goes to the company running it, unpublished data included.', 'The same question can get different answers, and the models change over time.'] })
     },
     geo: {
-      intro: 'A single seismic line holds millions of samples, more than anyone can sort by eye. The same methods run on it, and the cards below give the ideas.',
+      intro: 'A single seismic line holds millions of samples, which is a lot more than anyone can sort by eye. The same methods we have been using can be used here too, so let\'s look at the key ideas first, and then we can open an exercise on a real seismic line.',
       steps: [
         { art: 'seismic', h: 'Seismic section', t: 'A seismic line is a picture made from sound waves reflected off rock boundaries. The vertical axis is two-way time, the time for the sound to go down and come back, and it is not depth.' },
         { art: 'attribute', h: 'Attributes', t: 'An attribute is a number measured from the seismic inside a window, such as how strong the reflections are. Every point on the section gets its own numbers.' },
@@ -228,7 +229,7 @@
       ]
     },
     tracks: {
-      intro: 'The same tools work on other kinds of rock data. Each tab below uses made-up data shaped like a real problem.',
+      intro: 'The same tools work on a lot of other kinds of rock data. Each tab below uses made-up data shaped like a real problem, and what we want to see is how the answer changes as the data change.',
       steps: [
         { art: 'core', h: 'Sedimentology', t: 'Predict facies from well logs. The curves we use, and where the core was cut, change the answer.' },
         { art: 'volcano', h: 'Igneous rocks', t: 'Volcanic rocks are named from their chemistry. Silica alone mixes up some of them, and adding a second measurement separates them.' },
@@ -237,9 +238,9 @@
         { art: 'shell', h: 'Paleontology', t: 'Shell size and shell shape can end up on different axes.' }
       ]
     },
-    next: { intro: 'Everything here ran in the browser on made-up data. The same steps run on real data in a few lines of Python.' },
+    next: { intro: 'OK, so everything we did here ran in the browser on made-up data. The same steps run on real data in just a few lines of Python, and so here are some places to start.' },
     traps: {
-      intro: 'A high score does not always mean a good model. These three situations give scores that look better than they should.',
+      intro: 'A high score does not always mean a good model. Let\'s look at three situations where the score looks a lot better than it should, so we know what to watch for.',
       steps: [
         { art: 'fewdots', h: 'Very few samples', t: 'With a small training set, the test score changes a lot from one random draw to the next.' },
         { art: 'neighbors', h: 'Neighbors look alike', t: 'Samples close together on a map have similar values. A random split puts near-copies of each test sample in the training set, so the test is too easy.' },
@@ -247,7 +248,7 @@
       ]
     },
     hw: {
-      intro: 'This last tab is for after class. It runs the same steps on a table of your own.',
+      intro: 'This last tab is for after class, and it is pretty straightforward. We take everything we just did and run it on a table of your own data, which is the best test of all.',
       steps: [
         { art: 'file', h: 'Bring a table', t: 'Any .csv or Excel file with columns of numbers works: logs, geochemistry, counts, measurements. A label column, like a rock type or a yes/no, turns on the prediction step.' },
         { art: 'magnify', h: 'Look, then reduce', t: 'First we look at each column, then run PCA to see the main patterns.' },

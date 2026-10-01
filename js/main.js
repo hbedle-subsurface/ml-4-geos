@@ -23,7 +23,7 @@
   if (soloId) document.body.classList.add('solo', 'solo-' + view);
   list.forEach((m, n) => {
     const tr = TR[m.id] || {}, steps = tr.steps || m.steps || [], hasEx = steps.length, tk = TK[m.id];
-    const talk = tk ? `<div class="talk"><h4 class="band">Concept</h4>${tk.intro ? `<p class="lead">${tk.intro}</p>` : ''}${setupHtml(tk)}${fill(tk.pre)}${stepsHtml(tk)}${fill(tk.html)}</div>` : '';
+    const talk = tk ? `<div class="talk"><h4 class="band">Concept</h4>${tk.intro ? `<p class="lead">${tk.intro}</p>` : ''}${fill(tk.pre)}${stepsHtml(tk)}${fill(tk.html)}${setupHtml(tk)}</div>` : '';
     const tryLab = m.noPanel ? '' : `<h4 class="band">Try it Out!</h4>${tr.hook ? `<p class="hook">${tr.hook}</p>` : ''}`;
     const sec = document.createElement('section');
     sec.className = 'module lesson' + (hasEx ? '' : ' no-ex') + (soloId ? ' on' : ''); sec.id = 'm-' + m.id; sec.style.setProperty('--acc', ACC[m.id] || '#841617');
