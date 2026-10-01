@@ -85,7 +85,7 @@
         const gi = sec.grain[st.y * W + st.x], mi = sec.mineral[gi], garea = sec.grain.filter(v => v === gi).length;
         let inter = 0; for (let i = 0; i < W * HH; i++) if (m.mask[i] && sec.grain[i] === gi) inter++;
         const iou = inter / (m.area + garea - inter);
-        H.q(root, 'sm-out1').innerHTML = `You clicked ${S.MIN[mi].toLowerCase()}. The three masks cover <b>${three.map(t => t.area).join('</b>, <b>')}</b> pixels. The grain itself is ${garea} pixels. The mask now showing matches the true grain with an overlap score of <b>${iou.toFixed(2)}</b> (1 is a perfect match).`;
+        H.q(root, 'sm-out1').innerHTML = `We clicked ${S.MIN[mi].toLowerCase()}. The three masks cover <b>${three.map(t => t.area).join('</b>, <b>')}</b> pixels. The grain itself is ${garea} pixels. The mask now showing matches the true grain with an overlap score of <b>${iou.toFixed(2)}</b> (1 is a perfect match).`;
         H.q(root, 'sm-side1').innerHTML = `<div class="samcards">${three.map((t, i) => `<div class="sc${i === st.lv - 1 ? ' on' : ''}"><b>${['Part', 'Grain', 'Grain and look-alikes'][i]}</b><br>${t.area} px</div>`).join('')}</div>`;
       };
 
@@ -134,7 +134,7 @@
         for (let m = 0; m < 6; m++) { pl.rect(m + 1 - 0.36, 0, m + 1, mine[m], C.RED); pl.rect(m + 1, 0, m + 1 + 0.36, truth[m], C.SLATE); }
         pl.ptext('yours', pl.x(0.6), pl.y(47), { color: C.RED, font: '12px system-ui' }); pl.ptext('true', pl.x(1.5), pl.y(47), { color: C.SLATE, font: '12px system-ui' });
         const diff = mine.reduce((a, v, m) => a + Math.abs(v - truth[m]), 0) / 6;
-        H.q(root, 'sm-out3').innerHTML = `Your mineral percentages are off from the true ones by <b>${diff.toFixed(1)}</b> percentage points per mineral on average. Groups that mix two minerals, or masks that swallowed several grains, push this number up.`;
+        H.q(root, 'sm-out3').innerHTML = `Our mineral percentages are off from the true ones by <b>${diff.toFixed(1)}</b> percentage points per mineral on average. Groups that mix two minerals, or masks that swallowed several grains, push this number up.`;
       };
 
       /* tabs */

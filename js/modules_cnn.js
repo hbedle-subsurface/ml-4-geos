@@ -24,7 +24,7 @@
       </div>
 
       <div class="track" data-s="2">
-        ${H.look('Slide the filter size and the point density and watch the two feature maps. Then set the four thresholds by hand until the land-cover map matches the true one (turn on the reveal switch), and press Auto-tune.', 'Layer 1 makes new pictures from the LiDAR: the typical height in each window and the average number of returns. Layer 2 combines them: about zero is soil, a little above zero is grass, one to a few meters is shrubs, tall with many returns is trees, and tall with about one return is a roof. A small filter is noisy, and a large filter smears the edges of trees and buildings. In a real CNN the computer learns the filters from labeled pictures. Here the filters are fixed and Auto-tune learns the thresholds.')}
+        ${H.look('Slide the filter size and the point density and watch the two feature maps. Then set the four thresholds by hand until the land-cover map matches the true one (turn on the reveal switch), and press Auto-tune.', 'Layer 1 makes new pictures from the LiDAR: the typical height in each window and the average number of returns. Layer 2 combines them with the four thresholds. A small filter is noisy, and a large filter smears the edges of trees and buildings. In a real CNN the computer learns the filters from labeled pictures. Here the filters are fixed and Auto-tune learns the thresholds.')}
         <div class="row4">
           <div><h5>Input: height above ground</h5>${H.cv('c-in', 1)}</div>
           <div><h5>Input: returns per pulse</h5>${H.cv('c-ir', 1)}</div>

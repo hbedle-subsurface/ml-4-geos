@@ -150,7 +150,7 @@
       const items = [
         { t: 'Mapping faults across 3,000 line-km of seismic data (line-km is the total length of the seismic lines) when faults are already interpreted on a few hundred line-km of it.', a: 'good', r: 'Many samples and a set of known answers to learn from. Deep learning gets used on this a lot.' },
         { t: 'Predicting lithology in a new well from its logs, with core and logs from ten nearby wells.', a: 'good', r: 'Labeled examples from the same area and the same measurements. Facies prediction from logs is a standard case.' },
-        { t: 'Dating one ash bed from a single sample.', a: 'poor', r: 'One sample gives nothing to learn from, and radiometric dating already has a physical equation.' },
+        { t: 'Dating one ash bed (a layer of volcanic ash) from a single sample.', a: 'poor', r: 'One sample gives nothing to learn from, and radiometric dating already has a physical equation.' },
         { t: 'Calculating travel time through a layered model with known velocities and thicknesses.', a: 'poor', r: 'The physics gives the exact answer. A learned model would approximate an equation that is already known.' },
         { t: 'Grouping 50,000 stream-sediment samples by geochemical signature with no classes defined yet.', a: 'good', r: 'Many samples and no labels. Clustering and dimension reduction suit this case, and the groups then need a geological interpretation.' },
         { t: 'Predicting where a deposit type occurs in a region with four known deposits.', a: 'depends', r: 'Four examples are very few. The result can still guide a search, and the uncertainty is large.' }
@@ -186,7 +186,7 @@
       </div>
 
       <div class="track on" data-s="1">
-        ${H.look('Turn the cloud with the two sliders until it looks as wide as possible from left to right. The strip under the cloud shows where every sample lands along the left-right direction, and the red bar is the spread.', 'The meter goes up when the cloud stretches out sideways and drops when we look along the long way of the cloud. The view with the most spread is the first principal component, PC1. When you are done, press the button to see what the computer found.')}
+        ${H.look('Turn the cloud with the two sliders until it looks as wide as possible from left to right. The strip under the cloud shows where every sample lands along the left-right direction, and the red bar is the spread.', 'The meter goes up when the cloud stretches out sideways and drops when we look along the long way of the cloud. The view with the most spread is the first principal component, PC1. When we are done, press the button to see what the computer found.')}
         <div class="row-3d"><div>${H.cv('pc-a', 0.8)}</div>
           <div>
             ${H.S('pc-az', 'Turn left and right', 0, 359, 1, 200)}
@@ -355,7 +355,7 @@
         <div><h5>What each group is made of</h5>${H.cv('u-g', 0.8)}</div>
       </div>
       <div class="legend" id="u-legend"></div>
-      <p class="note">Clues from geology: granite sand is rich in potassium (K₂O) and zirconium (Zr). Dark volcanic rock gives sand rich in chromium (Cr) and nickel (Ni). Limestone gives calcium (CaO) and strontium (Sr). Old, recycled sandstone is rich in zircon (Zr) and poor in most other things.</p>
+      <p class="note">Reminder: K₂O and Zr point to granite, Cr and Ni to dark volcanic rock, CaO and Sr to limestone, and Zr alone to old recycled sandstone.</p>
       <div class="readout" id="u-out"></div>`,
     init(root) {
       const PV = D.provenance(), Z = PV.Z, P6 = ML.pca(Z), SC = P6.scores.map(s => s.slice(0, 3)), n = Z.length, q = id => root.querySelector('#' + id);

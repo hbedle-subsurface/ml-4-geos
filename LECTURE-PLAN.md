@@ -3,7 +3,7 @@
 The site is built as a teaching tool first. About 40 minutes of it fits in a live session, and the rest is homework. Students open the site on their own laptops and the instructor projects the same page. Every tab has the same layout:
 
 * **Concept** (top band): the few points to cover, as cards or one picture, in plain language that assumes no background in machine learning.
-* **The rocks and the data** (a box at the top of the Concept band on tabs that use geology data): what the rocks are, what each measurement is and its units, and what we ask the computer to do. It is there so the geology is clear before the machine learning starts, and students who know the geology can skip it.
+* **The rocks and the data** (a box at the top of the Concept band on every tab): what the rocks are, what each measurement is and its units, and what we ask the computer to do. It is there so the geology is clear before the machine learning starts, and students who know the geology can skip it.
 * **Try it Out!** (below): a one-line hook that ties the activity to what was just said, the steps on the left, the activity on the right, and a short **Check yourself** quiz at the bottom. Activities with several steps have tabs, and each step opens with a box that says *What to do* and *What to notice*, so a student working alone knows what to look for.
 
 All tabs are open, so students can go in any order and nothing breaks. The Next and Back buttons (or the arrow keys) move between tabs.

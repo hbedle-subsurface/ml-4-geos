@@ -71,7 +71,7 @@
       return s;
     }
   };
-  const card = (key, name, tag, uses, algs) => `<button type="button" class="mcard" aria-expanded="false"><svg viewBox="0 0 120 84" aria-hidden="true">${icons[key]()}</svg><b>${name}</b><span class="mt">${tag}</span><span class="md"><i>In geoscience</i> ${uses}<br><i>Names you will meet later</i> ${algs}</span></button>`;
+  const card = (key, name, tag, uses, algs) => `<button type="button" class="mcard" aria-expanded="false"><svg viewBox="0 0 120 84" aria-hidden="true">${icons[key]()}</svg><b>${name}</b><span class="mt">${tag}</span><span class="md"><i>In geoscience</i> ${uses}<br><i>Names we will meet later</i> ${algs}</span></button>`;
   const mlmap = `<div class="mlmap">
     <div class="mlgroup gs"><h5>Supervised<small>we know the answer for some samples</small></h5><div class="mcards">
       ${card('classification', 'Classification', 'Put each sample into a category we already have a name for.', 'Calling a log interval sandstone, shale or limestone. Marking seismic samples as fault or not fault.', 'k-nearest neighbors, logistic regression, decision trees')}
@@ -133,7 +133,7 @@
       intro: 'Logs give us several measurements at every depth. PCA is a way to show all of them on one flat plot.',
       steps: [
         { art: 'table', h: 'Many measurements per sample', t: 'Gamma ray, density, sonic and neutron porosity make four measurements. That puts each sample at a point in a four-dimensional space, which we cannot draw.' },
-        { art: 'rescale', h: 'Put them on the same scale', t: 'Gamma ray is in API units, density in g/cc, sonic in microseconds per foot. Before we compare spread, we rescale each measurement so its average is zero and its typical spread is one. Otherwise the measurement with the biggest numbers would win.' },
+        { art: 'rescale', h: 'Put them on the same scale', t: 'Gamma ray is in API units, density in g/cc, sonic in microseconds per foot. Before we compare spread, we rescale each measurement so its average is zero and its typical spread (the standard deviation) is one. Otherwise the measurement with the biggest numbers would win.' },
         { art: 'spread', h: 'Find the direction of most spread', t: 'Principal component analysis (PCA) looks for the line through the cloud of points along which the samples spread out the most. That line is the first principal component, PC1. PC2 is the next best direction, at right angles to PC1. We find both by hand first.' },
         { art: 'flatten', h: 'Flatten the cloud', t: 'Plot every sample using only PC1 and PC2. The whole data set now fits on one page, and we keep as much of the spread as two directions allow.' },
         { art: 'loadings', h: 'Read the components', t: 'A component is a mix of the original measurements, and the loadings say how much of each goes into the mix. What that mix means in the rock, such as clay content, is something we work out afterward by comparing with what we know.' }
@@ -146,7 +146,7 @@
         { art: 'table6', h: 'Six measurements per sample', t: 'We analyzed 375 sandstone samples from the basin for six things: potassium (K₂O), zirconium (Zr), chromium (Cr), nickel (Ni), calcium (CaO) and strontium (Sr). Nobody wrote down which mountains each sample came from, and the rivers mixed sand from more than one range.' },
         { art: 'bunches', h: 'Groups of similar samples', t: 'Sand from the same range has similar chemistry, so those samples land near each other. Finding those bunches is called clustering, and each bunch is a cluster.' },
         { art: 'kmeans', h: 'k-means, one round at a time', t: 'We choose the number of groups, k. The computer drops k centers into the data, joins each sample to its closest center, and moves each center to the middle of its samples. It repeats until no sample changes group. It measures closeness using all six elements at once.' },
-        { art: 'elbow', h: 'Choosing k, and the samples that never fit', t: 'More groups always bring the centers closer to the samples, so we look for where the curve flattens. It is not a sharp bend, so the geology has to help decide. The match score after the reveal does not settle it either. It can be computed only because we know the true sources, and it can rise as groups get smaller, reaching 100% when every sample is its own group. Watch for a small group that fits nowhere. A source like that, which nobody has seen, is a bit of a unicorn.' }
+        { art: 'elbow', h: 'Choosing k, and the samples that never fit', t: 'More groups always bring the centers closer to the samples, so we look for where the curve flattens. It flattens gradually, so the geology has to help decide. The match score after the reveal cannot decide it either, because it needs the true sources and real data do not come with them. Watch for a small group that fits nowhere. A source nobody has seen is a bit of a unicorn.' }
       ]
     },
     semi: {
@@ -166,7 +166,7 @@
         { art: 'labels', h: 'Field samples are the training set', t: 'A label is an answer we already know. The labeled field samples are the training set: the computer learns from them. The basin sandstones are the test set, the samples we ask it about afterward.' },
         { art: 'tree', h: 'A decision tree asks yes or no questions', t: 'A tree splits the samples with a series of questions about one measurement at a time, like "Is chromium above 180 ppm?" Each answer sends a sample down a branch until it reaches a leaf, and the leaf gives the label. The computer picks the questions that separate the ranges best.' },
         { art: 'overfit', h: 'One tree can memorize', t: 'A tree that keeps asking questions until every training sample has its own leaf memorizes the field samples, odd ones included. That is overfitting. A different set of field samples grows a different tree, so one tree is jumpy.' },
-        { art: 'forest', h: 'A random forest is many trees that vote', t: 'Each tree in a forest learns from a random redraw of the field samples, and at each question it may look at only a random few of the measurements. The trees end up different, and each one votes. The most common answer wins, and that answer is steadier than any single tree.' },
+        { art: 'forest', h: 'A random forest is many trees that vote', t: 'Each tree in a forest learns from a random redraw of the field samples (some are drawn twice and some not at all), and at each question it may look at only a random few of the measurements. The trees end up different, and each one votes. The most common answer wins, and that answer is steadier than any single tree.' },
         { art: 'flood', h: 'Only the categories it has seen', t: 'A supervised model can answer only with the labels in its training set. Samples from a source nobody sampled get forced into one of the known categories.' }
       ]
     },
@@ -176,7 +176,7 @@
         { art: 'neuron', h: 'A neuron is a small calculator', t: 'It multiplies each input by a weight, adds up the results, and passes the total through a simple curve. The weights decide how much each input matters. The curve turns the total into a soft on or off switch.' },
         { art: 'onecut', h: 'One neuron makes one cut', t: 'Take gamma ray alone. A neuron works like a threshold: is gamma ray above 75? Its answer switches smoothly from no to yes across the threshold, with no sharp edge. One cut can only say above or below.' },
         { art: 'twocuts', h: 'Some rocks need two cuts', t: 'Siltstone reads in the middle, between sandstone (low gamma ray) and shale (high). To pick out the middle we need two cuts: above 60 and below 90. One neuron cannot do that.' },
-        { art: 'layers', h: 'Hidden neurons combine the cuts', t: 'Each hidden neuron makes one cut, and the output neuron combines them: above the first cut, but not above the second. Layers between the input and the output are called hidden layers. The simple curve in each neuron is what makes this work. Without it, stacking layers would still give only a straight boundary.' },
+        { art: 'layers', h: 'Hidden neurons combine the cuts', t: 'Each hidden neuron makes one cut, and the output neuron combines them: above the first cut, but not above the second. Layers between the input and the output are called hidden layers. Each neuron needs its simple curve for this to work. Without it, stacking layers would still give only a straight boundary.' },
         { art: 'loss', h: 'Training finds the cuts', t: 'The computer starts with random cuts and nudges them over many passes through the data, called epochs. The loss is a number that says how far off the answers are, and training pushes it down.' },
         { art: 'ring', h: 'On a map, the cuts become lines', t: 'With two measurements, each hidden neuron draws one straight edge on the map, and the output combines the edges. Enough edges can enclose a region, such as the shell of ore around a barren core in a porphyry deposit. Cutting out the core takes more edges, or a second layer that builds shapes out of shapes.' }
       ]
@@ -189,18 +189,18 @@
         { art: 'lidar', h: 'LiDAR gives us heights', t: 'An aircraft fires laser pulses at the ground and times how long each one takes to come back. A pulse can return several times, from the top of a tree, from branches, and from the ground. Gridded up, the heights become a picture with one height per pixel. A second picture holds the average number of returns per pulse.' },
         { art: 'kernel', h: 'A filter slides across the picture', t: 'A filter looks at a small window and gives one number for it. Slide it over the whole picture and the numbers form a new picture called a feature map. One filter takes the typical height in each window, and another averages the returns.' },
         { art: 'lidarlayers', h: 'Layers build on each other', t: 'The first layer makes feature maps: typical height and average returns. The next layer combines them. About zero height is soil, a little above zero is grass, one to a few meters is shrubs, tall with many returns is trees, and tall with about one return is a roof.' },
-        { art: 'magnify', h: 'Why not just use the photo?', t: 'Some classes look alike from above, like the chihuahua faces and blueberry muffins in the photo grid above. Dry grass and bare soil have nearly the same color, and shrubs look like small trees. Height and returns add what the photo lacks. A real CNN learns its filters from labeled pictures. Here the filters are fixed and we tune the thresholds.' }
+        { art: 'magnify', h: 'Why not just use the photo?', t: 'Some classes look alike from above, like the chihuahua faces and blueberry muffins in the photo grid above. Dry grass and bare soil have nearly the same color, and shrubs look like small trees. Height and returns add what the photo lacks. A real CNN learns its filters from labeled pictures.' }
       ]
     },
     sam: {
       intro: 'A thin section is a picture full of grains. Before we can count minerals, something has to outline each grain.',
       steps: [
         { art: 'mask', h: 'Segmentation outlines things', t: 'Segmentation splits a picture into regions. The outline of one region is called a mask.' },
-        { art: 'three', h: 'A click gives several masks', t: 'The Segment Anything Model (SAM) from Meta AI takes a prompt, such as a click on a grain. A click could mean a stripe inside the grain, the whole grain, or a group of touching grains, so SAM returns several masks and we pick.' },
+        { art: 'three', h: 'A click gives several masks', t: 'The Segment Anything Model (SAM) from Meta AI takes a prompt, which is a hint such as a click on a grain. A click could mean a stripe inside the grain, the whole grain, or a group of touching grains, so SAM returns several masks and we pick.' },
         { art: 'everything', h: 'Segment everything', t: 'A grid of clicks gives masks for the whole picture, which helps with counting grains.' },
         { art: 'names', h: 'Masks have no names', t: 'SAM does not know which mineral is which. Naming the masks is a second step, done by color and texture or by us.' }
       ],
-      html: `<p class="hint">This page uses a synthetic thin section and a simple stand-in that grows a region from each click. It behaves like the real model in the ways shown here, and it is not the real model. The real one is at <a href="https://segment-anything.com/" target="_blank" rel="noopener">segment-anything.com</a> and <a href="https://github.com/facebookresearch/segment-anything" target="_blank" rel="noopener">on GitHub</a>. On real thin sections, the mineral percentages should still be checked against a point count.</p>`
+      html: `<p class="hint">This page uses a synthetic thin section and a simple stand-in that grows a region from each click. It stands in for the real model in the ways shown here. The real one is at <a href="https://segment-anything.com/" target="_blank" rel="noopener">segment-anything.com</a> and <a href="https://github.com/facebookresearch/segment-anything" target="_blank" rel="noopener">on GitHub</a>. On real thin sections, the mineral percentages are checked against a point count.</p>`
     },
     llm: {
       intro: 'A large language model (LLM) is the kind of program behind chat assistants. It is a neural network trained on a very large amount of text, and what it learns are statistics: which pieces of text tend to follow which.',
@@ -208,7 +208,7 @@
         { art: 'corpus', h: 'Start with a lot of text', t: 'The training text is a large collection of books, articles, web pages and computer code, often trillions of words. Nobody labels it. Every word in the text is the right answer for the words before it, so the text supplies its own answers.' },
         { art: 'tokens', h: 'Cut the text into tokens', t: 'A network works with numbers, so the text is cut into tokens, which are whole words or pieces of words, and every token gets an ID number. The list of all the tokens a model knows is its vocabulary, often tens of thousands of tokens long.' },
         { art: 'trainloop', h: 'Train it to guess the next token', t: 'This is the same kind of network as in the Neural networks tab, only with billions of weights (the numbers that set how much each input matters). It reads the tokens so far and gives a probability for every token in its vocabulary. At the start the weights are random and the guesses are poor. Each guess is compared with the token that really came next, the loss measures the difference, and the weights are nudged to lower it. That repeats over the whole text, many times.' },
-        { art: 'llm', h: 'What it learns is statistics', t: 'After training, the weights hold the patterns in the text: which tokens tend to come next after which others. If most text that reads \"the Cretaceous–Paleogene boundary is dated at about\" goes on with 66, then 66 gets a high probability, and 65 and 67 get smaller ones. The model is a statistical summary of its training text, and it has no list of facts that it looks things up in.' },
+        { art: 'llm', h: 'What it learns is statistics', t: 'After training, the weights hold the patterns in the text: which tokens tend to come next after which others. If most text that reads \"the Cretaceous–Paleogene boundary is dated at about\" goes on with 66, then 66 gets a high probability, and 65 and 67 get smaller ones. The model is a statistical summary of its training text. It does not look facts up in a list.' },
         { art: 'sampling', h: 'It writes one token at a time', t: 'To answer, the model works out the probabilities for the next token, picks one, adds it to the text, and does it again. The pick is random but weighted by probability, so the same question can get different answers. A setting called temperature controls how strongly the pick favors the most likely token.' },
         { art: 'tune', h: 'Then it is trained to chat', t: 'A model trained only on raw text continues whatever text it is given. To make it answer questions, it is trained further on example conversations and on answers that people have rated. It still works with next-token probabilities, and now it follows a chat format.' }
       ],
@@ -217,7 +217,7 @@
         { h: 'Where it can mislead', l: ['A reference has a pattern of authors, year, journal and pages that the model has learned, and it can write that pattern for a paper nobody wrote.', 'A topic with little text, such as one formation in a small basin, gives the model little to base its probabilities on.', 'It knows nothing published after its training text was collected.', 'What we type goes to the company running it, unpublished data included.', 'The same question can get different answers, and the models change over time.'] })
     },
     geo: {
-      intro: 'The same methods run on seismic data. A full guided exercise on a real line opens in a new tab below, and these cards give the ideas it uses.',
+      intro: 'A single seismic line holds millions of samples, more than anyone can sort by eye. The same methods run on it, and the cards below give the ideas.',
       steps: [
         { art: 'seismic', h: 'Seismic section', t: 'A seismic line is a picture made from sound waves reflected off rock boundaries. The vertical axis is two-way time, the time for the sound to go down and come back, and it is not depth.' },
         { art: 'attribute', h: 'Attributes', t: 'An attribute is a number measured from the seismic inside a window, such as how strong the reflections are. Every point on the section gets its own numbers.' },
@@ -237,6 +237,7 @@
         { art: 'shell', h: 'Paleontology', t: 'Shell size and shell shape can end up on different axes.' }
       ]
     },
+    next: { intro: 'Everything here ran in the browser on made-up data. The same steps run on real data in a few lines of Python.' },
     traps: {
       intro: 'A high score does not always mean a good model. These three situations give scores that look better than they should.',
       steps: [
@@ -317,7 +318,7 @@
     nn: [
       { q: 'Siltstone reads between sandstone and shale on gamma ray. Why can a single neuron not pick it out?', o: ['One neuron makes one cut, so it can only say above or below', 'It needs more training data', 'Siltstone has no gamma ray', 'The curve is too smooth'], a: 0, why: 'Picking out the middle takes two cuts, above one value and below another, and that takes at least two hidden neurons.' },
       { q: 'On the map, what does each first-layer neuron contribute?', o: ['One soft straight edge, which the output neuron combines with the others', 'One rock type', 'One sample', 'A copy of the data'], a: 0, why: 'The small maps each show one soft edge. Several edges together can enclose a shape.' },
-      { q: 'Suppose the hidden neurons only added up their inputs, with no simple curve. What boundary would the network draw?', o: ['Still a straight one, because sums of sums are sums', 'A ring', 'A curve', 'No boundary'], a: 0, why: 'The simple curve in each neuron is what lets layers bend the boundary. Without it, the whole network collapses to one straight cut.' },
+      { q: 'Suppose the hidden neurons only added up their inputs, with no simple curve. What boundary would the network draw?', o: ['Still a straight one, because adding up sums gives another sum', 'A ring', 'A curve', 'No boundary'], a: 0, why: 'The simple curve in each neuron is what lets layers bend the boundary. Without it, the whole network collapses to one straight cut.' },
       { q: 'A large network scores higher on training samples than on test samples. What is this called?', o: ['Overfitting', 'Underfitting', 'Convergence', 'Normalization'], a: 0, why: 'The same thing we saw with a deep tree.' }
     ],
     cnn: [
@@ -329,7 +330,7 @@
     sam: [
       { q: 'One click returned three masks of different sizes. Why?', o: ['A click is ambiguous: it could mean a part, the whole grain, or a group', 'The model made a mistake', 'The image is too big', 'Each mask is a different mineral'], a: 0, why: 'A stripe in plagioclase, the grain, and the grain with similar neighbors are all reasonable answers to one click.' },
       { q: 'After segmenting everything, why do we still need a second step?', o: ['The masks are too small', 'The masks carry no mineral names', 'The masks are always wrong', 'We do not'], a: 1, why: 'Segmentation finds the outlines. Naming the minerals takes color, texture, or our own judgment.' },
-      { q: 'Your mineral percentages differ from the true ones. Which is a likely cause?', o: ['A mask that swallowed grains of two minerals', 'The image has too many pixels', 'The legend is wrong', 'Quartz is not a mineral'], a: 0, why: 'A mixed mask gets a single name, so part of the section is counted as the wrong mineral.' }
+      { q: 'Our mineral percentages differ from the true ones. Which is a likely cause?', o: ['A mask that swallowed grains of two minerals', 'The image has too many pixels', 'The legend is wrong', 'Quartz is not a mineral'], a: 0, why: 'A mixed mask gets a single name, so part of the section is counted as the wrong mineral.' }
     ],
     llm: [
       { q: 'What is a large language model trained to do?', o: ['Look facts up in a database', 'Guess the next token in text', 'Sort rocks into groups', 'Check answers against sources'], a: 1, why: 'The training text supplies the right answer for every position, which is the token that came next.' },
@@ -357,8 +358,48 @@
   /* ---------- the geology behind each activity: the rocks, what was measured, and what we ask of the computer ---------- */
   const LOGS = `A well log is a set of measurements made by lowering instruments down a borehole, with a reading at every depth. Gamma ray is the natural radioactivity of the rock, in API units. Clay minerals hold radioactive potassium and thorium, so clay-rich shale reads high, and clean sandstone and limestone read low. Density is how heavy the rock is for its volume, in grams per cubic centimeter (g/cc). Sonic slowness is the time sound takes to cross one foot of rock, in microseconds per foot, and it is longer in softer, more porous rock.`;
   const SETUP = {
+    vocab: {
+      h: 'The rule and the data',
+      rows: [
+        ['The data', 'The same 300 made-up well-log samples as the Start tab, with only gamma ray used here. Gamma ray is the natural radioactivity of the rock in API units, and it is high in shale. Each sample is shale or another rock, and a log interval is a stretch of depth in a well.'],
+        ['Two rules', 'An expert wrote a rule for another basin: call a sample shale when gamma ray is above 90 API. A rule of the same form can also be learned from our own samples, by finding the cutoff that separates them best.'],
+        ['What we ask', 'Whether the rule learned from our samples does better than the expert rule, and how many samples it takes.']
+      ]
+    },
+    types: {
+      h: 'The question comes first',
+      rows: [
+        ['Why it matters', 'Different questions need different methods. We might want a category (a rock type), a number (porosity), groups that nobody has named, or a way to plot many measurements at once.'],
+        ['The data', 'The line plot uses made-up porosity measurements against depth, the way porosity falls as rock is buried and compacted. Porosity is the share of the rock that is pore space, here as a fraction from 0 to 0.4. Filled dots are the samples the line is drawn from, and hollow dots are samples held back to test it.'],
+        ['What we ask', 'How curvy a line can be before it stops predicting the held-back samples, and then which family fits each of six problems.']
+      ]
+    },
+    fit: {
+      h: 'Why we ask first',
+      rows: [
+        ['Why ask first', 'A machine learning method learns from examples. Some geoscience problems have too few examples, or already have an equation, and a quick check beforehand avoids choosing a method that cannot work.'],
+        ['Words in the situations', 'Lithology is the rock type. Stream sediment is sand and silt from a stream bed. An ash bed is a layer of volcanic ash that can be dated. A line-km is one kilometer of seismic line.'],
+        ['What we ask', 'For each of six situations, decide whether machine learning fits (Good fit, Depends or Poor fit), then compare with the reasons given.']
+      ]
+    },
+    llm: {
+      h: 'Why this comes up',
+      rows: [
+        ['Where we meet them', 'Chat assistants are now used to write code that reads logs, to explain methods and to edit text. Knowing how a language model is built explains what it does well and where it can be wrong.'],
+        ['The example', 'The statistics card uses the age of the Cretaceous–Paleogene boundary, the layer in the rock record that marks the end of the Cretaceous, about 66 million years (Ma) ago. Many texts state the age, so a model trained on them has seen it many times.'],
+        ['What we ask', 'How a model is built, why the same question can get different answers, and what that means for using one in research.']
+      ]
+    },
+    next: {
+      h: 'Where this goes',
+      rows: [
+        ['Beyond the browser', 'Every activity ran in the browser on made-up data. A real project reads files from disk with a script, so the steps can be repeated and checked.'],
+        ['The words below', 'Python is the programming language most geoscience machine learning uses. A notebook is a document that mixes code, results and notes. Cross-validation splits the data into parts and trains on some while testing on the others, in turn.']
+      ]
+    },
     start: {
       rows: [
+        ['Why group rocks', 'A well has thousands of depths and a basin has many wells. Sorting them by hand takes a long time, and two people can sort them differently.'],
         ['The rocks', 'Three common sedimentary rocks. Sandstone is sand grains cemented together. Shale is hardened mud, made of clay and very fine silt. Limestone is mostly calcite, the mineral that shells and reefs are made of.'],
         ['What we measured', LOGS + ' Each sample here is one depth in a well, described by these three readings.'],
         ['What we ask', 'Nobody tells the computer which rock each sample is. We ask it to group samples with similar readings, and afterward we check the groups against the rock types we know.']
@@ -382,7 +423,7 @@
     },
     semi: {
       rows: [
-        ['The samples', 'The same 375 Redbud Basin sandstones and the same six measurements as the Unsupervised tab: K₂O, Zr, Cr, Ni, CaO and Sr. The red and blue cells in a chemistry table mean above and below the average of all samples.'],
+        ['The samples', 'The same 375 Redbud Basin sandstones and the same six measurements as the Unsupervised tab: K₂O, Zr, Cr, Ni, CaO and Sr.'],
         ['A field sample', 'A field sample is stream sand collected inside one mountain range. Its source is certain, so it carries a label, and it takes a trip into the mountains to get.'],
         ['What we ask', 'With one labeled sample per range, name the source range of every basin sandstone.']
       ]
@@ -405,8 +446,8 @@
     },
     cnn: {
       rows: [
-        ['The scene', 'A made-up patch of land, 96 by 96 cells, each cell 1 m across, seen from above. Every cell is one of five land-cover types: bare soil, grass, shrubs, trees or roofs. Geologists map land cover because plants and buildings hide the soil and rock underneath, and bare soil shows where the ground is open.'],
-        ['Two kinds of data', 'An aerial photo records color. LiDAR (light detection and ranging) measures heights. An aircraft fires laser pulses and times each return, and a pulse that hits a tree can return several times, from the leaves, the branches and the ground. The LiDAR points per square meter tell us how densely the pulses landed.'],
+        ['The scene', 'A made-up patch of land, 96 by 96 cells, each cell 1 m across, seen from above. Every cell is one of five land-cover types: bare soil, grass, shrubs, trees or roofs. Geologists map land cover because plants and buildings hide the soil and rock underneath, and bare ground is where we can see them.'],
+        ['Two kinds of data', 'An aerial photo records color. LiDAR (light detection and ranging) measures heights with laser pulses fired from an aircraft. The points per square meter say how densely the pulses landed.'],
         ['What we ask', 'Name the land cover of each cell, first by eye from the photo and then from the heights, and then let a small network do it for every cell.']
       ]
     },
@@ -431,8 +472,8 @@
       rows: [
         ['Sedimentology', 'One well drilled through beds of sandstone, shale and limestone, with the four logs described in the Dimensions tab. A core is a cylinder of rock cut from part of the well, so the rock type is known only inside the cored interval. The computer learns from the core and predicts the rest. Sandstone and limestone both have little clay, so both read low on gamma ray.'],
         ['Igneous rocks', 'Volcanic rocks form when lava cools at the surface, and they are named from their chemistry. Silica (SiO₂) is the main ingredient of most rocks. The alkalis (Na₂O plus K₂O) are the sodium and potassium oxides, and MgO and CaO are the magnesium and calcium oxides. Basalt has the least silica of the five rock types and rhyolite the most, and trachyte has a lot of alkalis for its silica. There are 300 made-up analyses in percent by weight, 60 of each rock type, and the computer learns from a few that are labeled and names the rest.'],
-        ['Geochemistry', 'Stream sediment is sand and silt taken from the bed of a stream, and its chemistry reflects the rocks in the catchment, the area of land that drains to that point. There are 400 made-up samples with eight elements in ppm. Pegmatites are very coarse-grained igneous rocks that can hold lithium (Li), cesium (Cs) and tantalum (Ta), which are called critical minerals.'],
-        ['Critical minerals', 'A made-up 40 by 40 map of cells, with three layers of evidence for each cell: distance to a fault, a magnetic measurement, and lithium in stream sediment. A fault is a fracture where rock has moved, and it can carry mineral-bearing fluid. The magnetic measurement changes with rock type. A few cells hold known deposits.'],
+        ['Geochemistry', 'Stream sediment is sand and silt taken from the bed of a stream, and its chemistry reflects the rocks in the catchment, the area of land that drains to that point. There are 400 made-up samples with eight elements in ppm. Pegmatites are very coarse-grained igneous rocks that can hold lithium (Li), cesium (Cs) and tantalum (Ta), elements often called critical minerals.'],
+        ['Critical minerals', 'A made-up 40 by 40 map of cells, with three layers of evidence for each cell: distance to a fault, a magnetic measurement, and lithium in stream sediment. A fault is a fracture where rock has moved, and it can carry mineral-bearing fluid. The magnetic measurement is how strongly the rock disturbs the magnetic field of the Earth, and it changes with rock type. A few cells hold known deposits. A prospectivity map ranks the cells by how likely each one is to hold a deposit.'],
         ['Paleontology', 'Brachiopods are sea animals with two shells. The data are four shell measurements (length, width, thickness and hinge width) on made-up shells of three species, at different growth stages.']
       ]
     },

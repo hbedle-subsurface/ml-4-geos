@@ -241,7 +241,7 @@ body.solo-panel .ex, body.solo-panel .tools { display: none; } body.solo-panel .
   main, #hero { padding-left: 14px; padding-right: 14px; }
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .lesson.on { animation: none; } }
-body.printing .lesson { display: block !important; }
+body.printing .lesson, body.printing .track { display: block !important; }
 @media print { * { -webkit-print-color-adjust: exact; print-color-adjust: exact; } #nav, .tools, .btn { display: none; } .lesson { display: block !important; break-before: page; } .track { display: block !important; margin-bottom: 14px; } .steps > .cs { break-inside: avoid; } .qo .btn { display: inline-block !important; } }
 
 /* the setting box: what the rocks are and what was measured */
@@ -261,3 +261,12 @@ body.printing .lesson { display: block !important; }
 .open-out h4 { margin-top: 0; }
 .open-out p { max-width: 52em; }
 .open-out .btn { text-decoration: none; display: inline-block; }
+
+/* print: keep cards, boxes and quiz questions whole */
+@media print {
+  .cs, .setup, .qz, .readout, .look, .mcard, .open-out { break-inside: avoid; }
+  .steps { display: block; }
+  .steps > .cs { display: inline-block; vertical-align: top; width: 30%; max-width: none; margin: 0 2.5% 18px 0; box-sizing: border-box; }
+  .steps > .cs::before, .steps > .cs::after { display: none; }
+  h4, h5 { break-after: avoid; }
+}

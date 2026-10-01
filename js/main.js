@@ -137,14 +137,17 @@
     if (e.key === 'ArrowRight' && !e.altKey && !e.metaKey) show(current + 1);
     if (e.key === 'ArrowLeft' && !e.altKey && !e.metaKey) show(current - 1);
   });
-  /* printing: build every tab and draw every sub-tab first, so the printout shows all the plots */
+  /* printing: build every tab, step through every sub-tab so each one computes its plots, then show every sub-tab and redraw
+     everything at once. The plots have to be drawn while all of them are visible, because a hidden canvas has no width. */
+  let printTabs = [];
   g.addEventListener('beforeprint', () => {
     document.body.classList.add('printing');
     lessons.forEach((l, i) => { const sec = secOf(i); if (!inited.has(l.id)) { inited.add(l.id); l.init(sec); linkAll(sec); } });
-    lessons.forEach((l, i) => secOf(i).querySelectorAll('.tabs').forEach(tb => { const btns = [...tb.querySelectorAll('.tab')], act = btns.find(b => b.classList.contains('on')); btns.forEach(b => b.click()); if (act) act.click(); }));
+    printTabs = [];
+    lessons.forEach((l, i) => secOf(i).querySelectorAll('.tabs').forEach(tb => { const btns = [...tb.querySelectorAll('.tab')], act = btns.find(b => b.classList.contains('on')); if (act) printTabs.push(act); btns.forEach(b => b.click()); }));
     Plot.refit();
   });
-  g.addEventListener('afterprint', () => document.body.classList.remove('printing'));
+  g.addEventListener('afterprint', () => { document.body.classList.remove('printing'); printTabs.forEach(b => b.click()); printTabs = []; Plot.refit(); });
   const h0 = lessons.findIndex(l => '#' + l.id === g.location.hash);
   show(h0 > 0 ? h0 : 0, true);
 

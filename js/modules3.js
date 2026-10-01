@@ -296,7 +296,7 @@
       <div class="ctlrow">${H.S('t-r', 'How far the pattern extends across the map', 0.03, 0.3, 0.01, 0.1)}${H.btn('t-new', 'New map')}</div>
       <div class="readout" id="t-out2"></div>
       <h4>Rare targets</h4>
-      ${H.look('Slide the share of positive samples down toward 1%, and compare accuracy with recall. Then turn on Weight classes equally.', 'Suppose only a few samples are the thing we are looking for, such as a rare mineral. A model that says no to everything is right almost every time, so its accuracy looks great, and it finds nothing. Recall asks the better question: of the real positives, how many did we find? Weighting the classes equally tells the model that missing a rare positive matters as much as a mistake on a common sample.')}
+      ${H.look('Slide the share of positive samples down toward 1%, and compare accuracy with recall. Then turn on Weight classes equally.', 'Suppose only a few samples are the thing we are looking for, such as a rare mineral. A model that says no to everything is right almost every time, so its accuracy looks great, and it finds nothing. Recall is the share of the real positives that we found. Weighting the classes equally tells the model that missing a rare positive matters as much as a mistake on a common sample.')}
       <div class="row2"><div>${H.cv('t-d', 0.95)}</div><div>${H.cv('t-e', 0.95)}</div></div>
       <div class="ctlrow">${H.S('t-f', 'Share of positive samples', 1, 50, 1, 20)}${H.chk('t-w', 'Weight classes equally (count a rare positive as much as a common negative)', false)}</div>
       <div class="readout" id="t-out3"></div>`,
