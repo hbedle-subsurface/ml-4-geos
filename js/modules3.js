@@ -11,10 +11,11 @@
 
   /* ---------- 8. in your discipline ---------- */
   M.push({
-    id: 'tracks', part: 2, title: 'Sedimentology, minerals, and paleontology',
+    id: 'tracks', part: 2, title: 'Sedimentology, igneous rocks, minerals, and paleontology',
     lede: 'Each tab uses synthetic data shaped like a problem from one field, with sliders that change what the method can see.',
     steps: [
       'Sedimentology: with only gamma ray checked, find where sandstone and limestone are confused. Add density, then sonic and neutron porosity. Move the start of the core and see which facies the core has to contain.',
+      'Igneous rocks: check only SiO₂ and see which rock types are confused, then add the alkalis. Slide the number of labeled samples per rock type.',
       'Geochemistry: run PCA on raw ppm, then rescaled ppm, then log10 rescaled. Follow the largest loading each time, then color the pegmatite-influenced catchments.',
       'Prospectivity: raise the number of known deposits and count how many of the others land in the top 10% of the map.',
       'Paleontology: raise the range of growth stages and watch which axis separates the species.'
@@ -22,8 +23,19 @@
     html: () => `
       <div class="tabs" role="tablist">
         <button type="button" class="tab on" data-t="sed" role="tab">Sedimentology</button>
+        <button type="button" class="tab" data-t="ign" role="tab">Igneous rocks</button>
         <button type="button" class="tab" data-t="min" role="tab">Geochemistry and critical minerals</button>
         <button type="button" class="tab" data-t="pal" role="tab">Paleontology</button>
+      </div>
+
+      <div class="track" data-t="ign">
+        ${H.look('Check only SiO₂ (silica) and read the right-hand plot, where a dark ring marks a wrong answer. Then add the alkalis. Then slide the number of labeled samples per rock type.', 'Silica alone separates basalt from rhyolite and mixes up rocks with about the same silica. A trachyte has about the silica of an andesite or a dacite and far more alkalis, so it needs the second measurement. Geologists draw this split on a total alkali versus silica (TAS) diagram, and here the computer learns the boundaries from labeled examples. MgO and CaO fall as silica rises, so they add little once silica and the alkalis are in.')}
+        <p class="note">A made-up set of 300 volcanic rock analyses, 60 of each of five rock types. Each dot is one lava sample, analyzed for four oxides in percent by weight. In the left plot, dots with a black outline are the labeled samples the computer learns from.</p>
+        <div class="row2"><div><h5>The true rock types</h5>${H.cv('ig-a', 0.8)}</div><div><h5>What the computer calls them</h5>${H.cv('ig-b', 0.8)}</div></div>
+        <div class="ctlrow">${H.S('ig-m', 'Labeled samples per rock type', 1, 30, 1, 8)}</div>
+        <div class="ctlrow" id="ig-curves">${['SiO₂', 'Na₂O + K₂O', 'MgO', 'CaO'].map((n, i) => H.chk('ig-c' + i, n, i === 0)).join('')}</div>
+        ${H.legend(['Basalt', 'Andesite', 'Dacite', 'Rhyolite', 'Trachyte'], ['#3E4A56', '#1F8A84', '#D9A21B', '#C86F8F', '#841617'])}
+        <div class="row2"><div><h5>True rock type (rows) and what the computer called it (columns)</h5>${H.cv('ig-m2', 0.7)}</div><div class="readout" id="ig-out"></div></div>
       </div>
 
       <div class="track" data-t="pal">
@@ -66,6 +78,54 @@
         root.querySelectorAll('.track').forEach(x => x.classList.toggle('on', x.dataset.t === b.dataset.t));
         Plot.refit();
       }));
+
+      /* igneous rocks */
+      (function () {
+        const NM = ['Basalt', 'Andesite', 'Dacite', 'Rhyolite', 'Trachyte'], AB = ['Bas', 'And', 'Dac', 'Rhy', 'Tra'], COL = ['#3E4A56', '#1F8A84', '#D9A21B', '#C86F8F', '#841617'];
+        const VN = ['SiO₂', 'Na₂O + K₂O', 'MgO', 'CaO'], SC = [10, 3, 3, 3];
+        const MU = [[49, 3.6, 8, 10.5], [58.5, 5.0, 3.5, 6.8], [66, 6.2, 1.6, 3.6], [73, 8.0, 0.4, 1.0], [62, 11.0, 1.0, 2.6]];
+        const SD = [[2.0, 0.9, 2.0, 1.2], [2.2, 1.0, 1.0, 1.0], [2.0, 1.0, 0.6, 0.8], [2.2, 1.0, 0.25, 0.5], [2.0, 1.3, 0.5, 0.7]];
+        const r = ML.rng(31), X = [], y = [], ord = [];
+        for (let c = 0; c < 5; c++) { const o = ML.shuffle(60, r); for (let i = 0; i < 60; i++) { X.push(MU[c].map((m, j) => Math.max(0.05, m + SD[c][j] * ML.gauss(r)))); y.push(c); } ord.push(o.map(i => c * 60 + i)); }
+        const pa = H.plot(root, 'ig-a', { xr: [40, 80], yr: [0, 16], xl: 'SiO₂ (wt%)', yl: 'Na₂O + K₂O (wt%)', nx: 4, ny: 4 });
+        const pb = H.plot(root, 'ig-b', { xr: [40, 80], yr: [0, 16], xl: 'SiO₂ (wt%)', yl: 'Na₂O + K₂O (wt%)', nx: 4, ny: 4 });
+        const pm = H.plot(root, 'ig-m2', { xr: [0, 5], yr: [0, 5], invY: true, noAxes: true, m: { l: 40, r: 6, t: 26, b: 4 }, aspect: 0.7 });
+        const used = () => { const u = [0, 1, 2, 3].filter(i => H.q(root, 'ig-c' + i).checked); return u.length ? u : [0]; };
+        let pred, tr, conf, ok, ntest, cols;
+        const calc = () => {
+          cols = used(); const m = mm.get(); tr = []; ord.forEach(o => o.slice(0, m).forEach(i => tr.push(i)));
+          const F = X.map(x => cols.map(c => x[c] / SC[c]));
+          pred = ML.knnPredict(tr.map(i => F[i]), tr.map(i => y[i]), F, Math.min(3, tr.length), 5);
+          const isTr = new Set(tr); conf = Array.from({ length: 5 }, () => new Array(5).fill(0)); ok = 0; ntest = 0;
+          X.forEach((_, i) => { if (isTr.has(i)) return; ntest++; conf[y[i]][pred[i]]++; if (pred[i] === y[i]) ok++; });
+        };
+        const mm = H.bind(root, 'ig-m', () => { calc(); draw(); }, v => v);
+        root.querySelectorAll('#ig-curves input').forEach(cb => cb.addEventListener('change', () => { calc(); draw(); }));
+        const draw = () => { pa.draw(); pb.draw(); pm.draw(); };
+        pa.onDraw = p => {
+          p.axes(); const isTr = new Set(tr);
+          X.forEach((x, i) => { if (!isTr.has(i)) p.dot(x[0], x[1], 3.4, Plot.hex2rgba(COL[y[i]], 0.75)); });
+          X.forEach((x, i) => { if (isTr.has(i)) p.dot(x[0], x[1], 4.6, COL[y[i]], C.INK, 1.8); });
+        };
+        pb.onDraw = p => {
+          p.axes(); const isTr = new Set(tr);
+          X.forEach((x, i) => { p.dot(x[0], x[1], 3.4, Plot.hex2rgba(COL[pred[i]], 0.75)); if (!isTr.has(i) && pred[i] !== y[i]) p.dot(x[0], x[1], 6.2, null, C.INK, 1.4); });
+          const worst = (() => { let b = [0, 0, 0]; for (let i = 0; i < 5; i++) for (let j = 0; j < 5; j++) if (i !== j && conf[i][j] > b[2]) b = [i, j, conf[i][j]]; return b; })();
+          H.q(root, 'ig-out').innerHTML = `Measurements used: <b>${cols.map(k => VN[k]).join(', ')}</b>. With <b>${mm.get()}</b> labeled sample${mm.get() === 1 ? '' : 's'} of each rock type, the computer names <b>${ok}</b> of the other ${ntest} samples correctly (<b>${H.pct(ok / ntest)}</b>).` + (worst[2] ? ` The most common mistake is calling ${NM[worst[0]].toLowerCase()} ${NM[worst[1]].toLowerCase()}, ${worst[2]} times.` : ' It makes no mistakes.');
+        };
+        pm.onDraw = p => {
+          const c = p.ctx, cw = (p.W - 46) / 5, ch = (p.H - 30) / 5;
+          for (let i = 0; i < 5; i++) {
+            const tot = conf[i].reduce((a, b) => a + b, 0);
+            p.ptext(AB[i], 36, 26 + (i + 0.5) * ch, { align: 'right', font: '11px system-ui' }); p.ptext(AB[i], 40 + (i + 0.5) * cw, 16, { align: 'center', font: '11px system-ui' });
+            for (let j = 0; j < 5; j++) {
+              const v = tot ? conf[i][j] / tot : 0; c.fillStyle = ramp(v); c.fillRect(40 + j * cw + 1, 26 + i * ch + 1, cw - 2, ch - 2);
+              p.ptext(tot ? Math.round(v * 100) + '%' : '-', 40 + (j + 0.5) * cw, 26 + (i + 0.5) * ch, { align: 'center', font: 'bold 11.5px system-ui', color: v > 0.55 ? '#fff' : C.INK });
+            }
+          }
+        };
+        calc(); draw();
+      })();
 
       /* paleontology */
       (function () {
@@ -360,5 +420,19 @@
       </div>
       <p class="closer">I always like to end by asking for one thing. Take a table of measurements from your own project, run PCA on it this week, and see what shows up. Then go and try a method you haven't used before.</p>`,
     init() {}
+  });
+
+  /* ---------- geophysics: a pointer to the full guided exercise ---------- */
+  M.push({
+    id: 'geo', part: 2, title: 'Geophysics: attributes, a SOM and SHAP on a real seismic line', noPanel: true,
+    lede: '', steps: [],
+    html: () => `
+      <div class="open-out">
+        <h4>The full exercise is on its own page</h4>
+        <p>It uses SCAN029, an open 2D seismic line from the geothermal exploration program in the Netherlands, and the geothermal wells at Californië. The steps are to pick the target, compute attributes along the pick, build a self-organizing map, read SHAP values, build a second map with a different set of attributes, and then compare everything with a well that stays hidden until the last step. It runs in the browser, and it opens in a new tab so this page stays where it is.</p>
+        <p><a class="btn primary" href="https://hbedle-subsurface.github.io/scan-lecture/" target="_blank" rel="noopener">Open the SCAN029 exercise in a new tab</a></p>
+        <p class="note">For a SEG-Y line of our own, <a href="https://hbedle-subsurface.github.io/analyze-2d/" target="_blank" rel="noopener">Analyze 2D</a> runs the same workflow.</p>
+      </div>`,
+    init() { /* concept band, link and quiz only */ }
   });
 })(window);

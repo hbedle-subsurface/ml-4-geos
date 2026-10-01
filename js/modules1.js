@@ -148,7 +148,7 @@
     html: () => `<div id="f-list"></div><div class="readout" id="f-out">Answered 0 of 6.</div>`,
     init(root) {
       const items = [
-        { t: 'Picking faults on 3,000 line-km of seismic when a few hundred line-km are already interpreted.', a: 'good', r: 'Many samples and a set of known answers to learn from. Deep learning gets used on this a lot.' },
+        { t: 'Mapping faults across 3,000 line-km of seismic data (line-km is the total length of the seismic lines) when faults are already interpreted on a few hundred line-km of it.', a: 'good', r: 'Many samples and a set of known answers to learn from. Deep learning gets used on this a lot.' },
         { t: 'Predicting lithology in a new well from its logs, with core and logs from ten nearby wells.', a: 'good', r: 'Labeled examples from the same area and the same measurements. Facies prediction from logs is a standard case.' },
         { t: 'Dating one ash bed from a single sample.', a: 'poor', r: 'One sample gives nothing to learn from, and radiometric dating already has a physical equation.' },
         { t: 'Calculating travel time through a layered model with known velocities and thicknesses.', a: 'poor', r: 'The physics gives the exact answer. A learned model would approximate an equation that is already known.' },

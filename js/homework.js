@@ -86,7 +86,8 @@
         <div class="track" data-h="5">
           <div class="readout" id="hw-res"></div>
           <div class="ctlrow">${H.btn('hw-dl', 'Download my results')}${H.btn('hw-dlt', 'Download the cleaned table')}</div>
-          <h4>Questions for your write-up</h4>
+          <h4>Things to look at in your results</h4>
+          <p class="note">These are optional prompts. Nothing here is submitted or graded.</p>
           <ol class="hw-q">
             <li>How many rows and columns did you use, and how many rows were dropped for missing values?</li>
             <li>Which version of the data did you use (raw, rescaled, or log), and what changed when you tried another?</li>

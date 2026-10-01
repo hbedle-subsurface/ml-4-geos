@@ -15,6 +15,7 @@
   /* ---- pieces of a tab ---- */
   const fill = html => (html || '').replace(/\{\{strip:(\w+)\}\}/g, (_, k) => g.learnStrip(k)).replace(/\{\{(\w+)\}\}/g, (_, k) => (ART.names.includes(k) ? ART.fig(k) : ''));
   const quizHtml = id => (QZ[id] ? `<div class="check"><h5>Check yourself</h5>${QZ[id].map((q, i) => `<div class="qz" data-q="${id}:${i}"><p>${q.q}</p><div class="qo">${q.o.map((o, k) => `<button type="button" class="btn sm" data-k="${k}">${o}</button>`).join('')}</div><p class="qw" hidden></p></div>`).join('')}</div>` : '');
+  const setupHtml = tk => (tk.setup ? `<div class="setup"><h5>${tk.setup.h || 'The rocks and the data'}</h5><dl>${tk.setup.rows.map(r => `<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join('')}</dl></div>` : '');
   const stepsHtml = tk => (tk.steps ? `<div class="steps">${tk.steps.map((s, i) => `<div class="cs"><span class="num">${i + 1}</span><div class="fig">${ART.fig(s.art)}</div><h5>${s.h}</h5><p>${s.t}</p></div>`).join('')}</div>` : '');
 
   /* ---- build the sections ---- */
@@ -22,7 +23,7 @@
   if (soloId) document.body.classList.add('solo', 'solo-' + view);
   list.forEach((m, n) => {
     const tr = TR[m.id] || {}, steps = tr.steps || m.steps || [], hasEx = steps.length, tk = TK[m.id];
-    const talk = tk ? `<div class="talk"><h4 class="band">Concept</h4>${tk.intro ? `<p class="lead">${tk.intro}</p>` : ''}${fill(tk.pre)}${stepsHtml(tk)}${fill(tk.html)}</div>` : '';
+    const talk = tk ? `<div class="talk"><h4 class="band">Concept</h4>${tk.intro ? `<p class="lead">${tk.intro}</p>` : ''}${setupHtml(tk)}${fill(tk.pre)}${stepsHtml(tk)}${fill(tk.html)}</div>` : '';
     const tryLab = m.noPanel ? '' : `<h4 class="band">Try it Out!</h4>${tr.hook ? `<p class="hook">${tr.hook}</p>` : ''}`;
     const sec = document.createElement('section');
     sec.className = 'module lesson' + (hasEx ? '' : ' no-ex') + (soloId ? ' on' : ''); sec.id = 'm-' + m.id; sec.style.setProperty('--acc', ACC[m.id] || '#841617');
@@ -62,7 +63,7 @@
   function linkTerms(scope) {
     const seen = new Set();
     const walker = document.createTreeWalker(scope, NodeFilter.SHOW_TEXT, {
-      acceptNode: n => (n.parentElement.closest('a,button,label,option,select,canvas,svg,output,summary,h3,h4,h5,.readout,.legend,.term,.qz,.mcard') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT)
+      acceptNode: n => (n.parentElement.closest('a,button,label,option,select,canvas,svg,output,summary,h3,h4,h5,dt,.readout,.legend,.term,.qz,.mcard') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT)
     });
     const nodes = []; while (walker.nextNode()) nodes.push(walker.currentNode);
     nodes.forEach(n => {
@@ -70,6 +71,7 @@
       while ((mt = re.exec(txt))) {
         const raw = mt[1], e = lookup.get(raw.toLowerCase());
         if (!e || seen.has(e.t)) continue;
+        if (e.t === 'decision tree' && scope.closest && scope.closest('#m-cnn')) continue;
         if (raw === raw.toUpperCase() && raw.length > 1 && !e.a.includes(raw) && raw !== e.t) continue;
         seen.add(e.t); hit = true;
         out += txt.slice(last, mt.index).replace(/&/g, '&amp;').replace(/</g, '&lt;') + `<button type="button" class="term" data-t="${e.t}">${raw}</button>`; last = mt.index + raw.length;
@@ -77,7 +79,7 @@
       if (hit) { out += txt.slice(last).replace(/&/g, '&amp;').replace(/</g, '&lt;'); const span = document.createElement('span'); span.innerHTML = out; n.replaceWith(...span.childNodes); }
     });
   }
-  const linkAll = sec => sec.querySelectorAll('.ex li, .note, .cs p, .lead, .pc li, .hint, .hook, .next li, .closer, .look p').forEach(linkTerms);
+  const linkAll = sec => { sec.querySelectorAll('.setup').forEach(linkTerms); sec.querySelectorAll('.ex li, .note, .cs p, .lead, .pc li, .hint, .hook, .next li, .closer, .look p').forEach(linkTerms); };
   const dlg = document.getElementById('gloss');
   document.addEventListener('click', e => {
     const b = e.target.closest('.term'); if (!b) return;

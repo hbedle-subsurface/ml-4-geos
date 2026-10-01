@@ -148,6 +148,51 @@
       let s = ''; const cells = [[4, 4, 50, 34, '#E4A9A0'], [54, 4, 62, 34, '#A9C4E4'], [4, 38, 40, 42, '#B9E4A9'], [44, 38, 72, 42, '#E4D7A9']]; cells.forEach(c => { s += rc(c[0], c[1], c[2], c[3], c[4], '#fff', 2) + tx(c[0] + c[2] / 2, c[1] + c[3] / 2 + 6, '?', 18, INK, 'middle', 800); });
       return s;
     },
+    corpus() {
+      let s = '';
+      [[8, 10, 'books'], [42, 4, 'web'], [76, 10, 'code']].forEach(([x, y, n], k) => {
+        s += rc(x, y, 34, 50, '#fff', SL, 1.4);
+        for (let i = 0; i < 6; i++) s += ln(x + 5, y + 9 + i * 6.5, x + 29 - (i % 3) * 5, y + 9 + i * 6.5, k === 2 && i % 2 ? RED : GR, 2);
+        s += tx(x + 17, 70, n, 7.5, SL);
+      });
+      return s;
+    },
+    tokens() {
+      let s = tx(60, 14, 'The Cretaceous rock', 8.5, SL, 'middle', 500);
+      [['The', 4, 22], ['Cret', 28, 26], ['aceous', 56, 36], ['rock', 94, 22]].forEach(([w, x, wd], k) => {
+        s += rc(x, 24, wd, 18, k % 2 ? '#F4F6F7' : '#fff', SL, 1.4) + tx(x + wd / 2, 36, w, 7.5, INK, 'middle', 600) + tx(x + wd / 2, 56, ['17', '8301', '442', '906'][k], 7.5, RED);
+      });
+      return s + tx(60, 74, 'each piece gets an ID number', 7.5, SL, 'middle', 500);
+    },
+    trainloop() {
+      let s = rc(4, 12, 28, 30, '#fff', SL, 1.4) + tx(18, 25, 'words', 7, INK) + tx(18, 35, 'so far', 7, INK);
+      s += arrow(33, 27, 44, 27, SL);
+      [[52, 18], [52, 27], [52, 36], [66, 14], [66, 23], [66, 32], [66, 41]].forEach(p => { s += dot(p[0], p[1], '#fff', 3.6, INK); });
+      s += arrow(72, 27, 82, 27, SL);
+      [[0.6, 0], [0.2, 1], [0.1, 2], [0.06, 3]].forEach(([v, i]) => { const h = v * 34; s += rc(86 + i * 8, 44 - h, 6, h, i === 0 ? RED : '#8A929A'); });
+      s += tx(102, 54, 'guess', 7, SL);
+      s += `<path d="M100 60 C100 74 20 74 18 46" fill="none" stroke="${RED}" stroke-width="1.8" stroke-dasharray="4 3"/>` + head(18, 46, -90, RED);
+      return s + tx(60, 82, 'compare, then adjust', 7.5, RED, 'middle', 600);
+    },
+    sampling() {
+      let s = '';
+      [['about', 4, 30], ['66', 43, 22], ['million', 74, 36]].forEach(([w, x, wd], k) => {
+        s += rc(x, 22, wd, 18, k === 1 ? '#F3E3E3' : '#fff', k === 1 ? RED : SL, 1.4) + tx(x + wd / 2, 34.5, w, 7.5, INK);
+      });
+      s += arrow(35, 31, 42, 31, SL) + arrow(66, 31, 73, 31, SL) + arrow(111, 31, 118, 31, SL);
+      return s + tx(60, 58, 'pick one, add it, repeat', 7.5, SL, 'middle', 500) + tx(60, 70, 'random, weighted by probability', 7, SL, 'middle', 500);
+    },
+    tune() {
+      let s = `<path d="M8 8 h52 a4 4 0 0 1 4 4 v16 a4 4 0 0 1 -4 4 h-40 l-8 7 v-7 h-4 a4 4 0 0 1 -4 -4 v-16 a4 4 0 0 1 4 -4z" fill="#fff" stroke="${SL}" stroke-width="1.4"/>` + tx(36, 25, 'question', 8, INK);
+      s += `<path d="M56 44 h52 a4 4 0 0 1 4 4 v16 a4 4 0 0 1 -4 4 h-4 v7 l-8 -7 h-40 a4 4 0 0 1 -4 -4 v-16 a4 4 0 0 1 4 -4z" fill="#F4F6F7" stroke="${SL}" stroke-width="1.4"/>` + tx(82, 61, 'answer', 8, INK);
+      return s + [0, 1, 2].map(i => dot(18 + i * 8, 58, i < 2 ? RED : GR, 2.8)).join('') + tx(26, 72, 'rated', 7, SL);
+    },
+    volcano() {
+      let s = poly([[18, 70], [50, 22], [58, 22], [92, 70]], '#F4F6F7', SL, 1.6) + poly([[50, 22], [58, 22], [54, 30]], RED, RED, 1);
+      [[46, 12, 3], [56, 8, 2.4], [64, 14, 2.2], [50, 4, 1.8]].forEach(d => { s += dot(d[0], d[1], RED, d[2]); });
+      s += `<path d="M54 30 C52 44 58 52 54 70" fill="none" stroke="${RED}" stroke-width="2.4"/>`;
+      return s + ln(8, 70, 112, 70, SL, 1.6);
+    },
     llm() {
       let s = tx(60, 12, 'next word: ___', 9, INK); [['66', 0.7], ['65', 0.16], ['67', 0.08], ['64', 0.04]].forEach((b, i) => { const h = b[1] * 46; s += rc(18 + i * 22, 66 - h, 16, h, i === 0 ? RED : '#8A929A') + tx(26 + i * 22, 78, b[0], 8, SL); });
       return s;

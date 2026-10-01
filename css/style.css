@@ -243,3 +243,21 @@ body.solo-panel .ex, body.solo-panel .tools { display: none; } body.solo-panel .
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .lesson.on { animation: none; } }
 body.printing .lesson { display: block !important; }
 @media print { * { -webkit-print-color-adjust: exact; print-color-adjust: exact; } #nav, .tools, .btn { display: none; } .lesson { display: block !important; break-before: page; } .track { display: block !important; margin-bottom: 14px; } .steps > .cs { break-inside: avoid; } .qo .btn { display: inline-block !important; } }
+
+/* the setting box: what the rocks are and what was measured */
+.setup { background: #fff; border: 1px solid var(--grid, #C9CDD2); border-left: 6px solid var(--acc, #841617); border-radius: 3px; padding: 12px 18px 14px; margin: 0 0 18px; max-width: 62em; }
+.setup h5 { margin: 0 0 8px; font: 700 13px/1.2 system-ui, sans-serif; letter-spacing: .12em; text-transform: uppercase; color: var(--acc, #841617); }
+.setup dl { margin: 0; display: grid; grid-template-columns: 11em 1fr; gap: 8px 16px; }
+.setup dt { font: 700 15.5px/1.45 system-ui, sans-serif; color: var(--ink, #16191C); }
+.setup dd { margin: 0; font: 400 16.5px/1.5 var(--serif, Georgia, serif); color: var(--ink, #16191C); }
+@media (max-width: 720px) { .setup dl { grid-template-columns: 1fr; gap: 2px 0; } .setup dd { margin-bottom: 8px; } }
+@media print { .setup { break-inside: avoid; } }
+
+/* short labels such as Noise no longer leave a wide gap before the slider */
+.ctlrow > .ctl { grid-template-columns: fit-content(200px) minmax(100px, 1fr) 62px; }
+@media (max-width: 720px) { .ctlrow > .ctl { grid-template-columns: 1fr 50px; } }
+
+/* pointer to an exercise on another page */
+.open-out h4 { margin-top: 0; }
+.open-out p { max-width: 52em; }
+.open-out .btn { text-decoration: none; display: inline-block; }

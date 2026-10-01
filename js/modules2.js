@@ -25,6 +25,7 @@
       </div>
 
       <div class="track on" data-s="1">
+        <p class="note">Each dot is one depth in a well, placed by its gamma ray reading (natural radioactivity, higher in clay-rich rock). There are 100 readings each from sandstone, siltstone and shale, and the colors show the true rock.</p>
         ${H.look('First, set two cuts by hand (step A) so the window covers the red dots and leaves out the others. Then, in step B, set Hidden neurons to 0 and press Train. Try 1, then 2, then 4.', 'Siltstone reads in the middle on gamma ray, between sandstone and shale. One cut can only say above or below, so it cannot pick out the middle. Each hidden neuron makes one cut, and the output neuron combines them. A window takes two cuts, so it takes at least two hidden neurons. With 0 or 1, the network does no better than calling every sample not siltstone.')}
         <h4>A. Set the cuts by hand</h4>
         ${H.cv('nn1-a', 0.42)}
@@ -38,6 +39,7 @@
       </div>
 
       <div class="track" data-s="2">
+        <p class="note">On the ore shell map, each dot is a sample location on a made-up 10 by 10 km map. Red means the rock there holds copper-bearing minerals, and gray means it does not. The network sees only the two coordinates.</p>
         ${H.look('Choose the ore shell data, set 0 hidden layers and press Train. Then add neurons and train again. Look at the small maps: each one is a single first-layer neuron.', 'Each first-layer neuron draws one soft straight edge, and the output combines the edges. Three edges can enclose a triangle, and six to eight make a rounder blob. Cutting the barren core out of the middle takes more edges still, or a second layer that builds shapes out of the first layer\'s shapes. Move the cursor over the map to see which neurons switch on. The lithology data needs no hidden layer, because straight lines already do a decent job of separating three rock types.')}
         <div class="row2"><div>${H.cv('n-a', 0.95)}</div><div>${H.cv('n-b', 0.95)}</div></div>
         <div class="ctlrow"><div class="ctl"><label for="n-data">Data</label><select id="n-data"><option value="ring">Map: an ore shell around a barren core</option><option value="lith">Logs: three lithologies</option></select></div></div>
@@ -180,64 +182,12 @@
     }
   });
 
-  /* ---------- 7. LLMs in research ---------- */
+  /* ---------- 7. LLMs in research: explanation only, no activity ---------- */
   M.push({
-    id: 'llm', part: 1, title: 'Large language models in research',
-    lede: 'A language model writes the continuation that is likely given its training text. The slider shows what that looks like for a number, and the game shows what it looks like for a reference.',
-    steps: [
-      'Go through the eight references and mark each one real or made up. Four are real and four were written for this page.',
-      'If there is time, set the temperature low and press Sample 20 answers. Raise the temperature and sample again.'
-    ],
-    html: () => `
-      <h4>Real or made up?</h4>
-      ${H.look('Mark each of the eight references Real or Made up. Four are real and four were written for this page.', 'All eight are formatted the same way, with authors, year, journal, volume and pages. A reference that looks complete tells us nothing about whether the paper exists. We have to look it up in the journal or a database.')}
-      <div id="l-game"></div>
-      <h4>If there is time: how a language model picks its next word</h4>
-      ${H.look('The bars show how likely each possible next number is, after the words "The Cretaceous–Paleogene boundary is dated at about ___ million years ago". Slide Randomness, then press Sample 20 answers.', 'At low randomness the model picks 66 almost every time. At high randomness it spreads its picks around, so the same question gets different answers. The model picks likely-sounding numbers. It does not look the age up. These probabilities are a toy example written for this page, not output from a real model.')}
-      ${H.cv('l-a', 0.5)}
-      <div class="ctlrow">${H.S('l-t', 'Randomness (temperature)', 0.1, 2, 0.05, 0.5)}${H.btn('l-go', 'Sample 20 answers')}</div>
-      <div class="readout" id="l-out"></div>
-`,
-    init(root) {
-      const toks = ['66', '65', '67', '64', '70', '56'], logit = [4.0, 3.0, 2.4, 1.6, 1.0, 0.8];
-      const pl = H.plot(root, 'l-a', { xr: [0.5, 6.5], yr: [0, 1], xl: 'Next token (million years)', yl: 'Probability', nx: 6, ny: 5, fmtx: v => (Number.isInteger(v) ? toks[v - 1] : '') });
-      let counts = null;
-      const probs = t => { const e = logit.map(l => Math.exp(l / t)), s = e.reduce((a, b) => a + b, 0); return e.map(v => v / s); };
-      const tt = H.bind(root, 'l-t', () => { counts = null; pl.draw(); }, v => v.toFixed(2));
-      H.on(root, 'l-go', 'click', () => {
-        const p = probs(tt.get()), r = ML.rng(Math.floor(Math.random() * 1e9)); counts = new Array(6).fill(0);
-        for (let i = 0; i < 20; i++) { let u = r(), k = 0; while (k < 5 && u > p[k]) { u -= p[k]; k++; } counts[k]++; }
-        pl.draw();
-      });
-      pl.onDraw = c => {
-        c.axes(); const p = probs(tt.get());
-        p.forEach((v, i) => { c.rect(i + 1 - 0.33, 0, i + 1 + 0.33, v, i === 0 ? C.RED : 'rgba(92,102,112,0.5)'); c.text(v.toFixed(2), i + 1, Math.min(v + 0.05, 0.97), { align: 'center', font: '11px system-ui' }); });
-        if (counts) counts.forEach((n, i) => { if (n) c.dot(i + 1, n / 20, 6, '#fff', C.INK, 2); });
-        const o = H.q(root, 'l-out');
-        o.innerHTML = counts ? `20 samples: ${toks.map((t, i) => (counts[i] ? `<b>${t}</b> × ${counts[i]}` : '')).filter(Boolean).join(', ')}. The accepted age is about 66 Ma; the model has no step that checks a value against a source.` : `At randomness ${tt.get().toFixed(2)} the most likely answer, 66, has a probability of <b>${p[0].toFixed(2)}</b>.`;
-      };
-      pl.draw();
-
-      // citation game
-      const refs = [
-        { t: 'Breiman, L., 2001, Random forests: Machine Learning, v. 45, no. 1, p. 5–32.', real: true },
-        { t: 'Marlowe, D. T., and Kessinger, A. R., 2019, Deep convolutional networks for automatic fault throw estimation from seismic amplitudes: Geophysics, v. 84, no. 5, p. IM31–IM47.', real: false },
-        { t: 'Bergen, K. J., Johnson, P. A., de Hoop, M. V., and Beroza, G. C., 2019, Machine learning for data-driven discovery in solid Earth geoscience: Science, v. 363, eaau0323.', real: true },
-        { t: 'Adeyemi, O. K., Lindqvist, S., and Rao, P. V., 2020, Random forest prediction of porosity from core photographs in carbonate reservoirs: AAPG Bulletin, v. 104, no. 8, p. 1723–1745.', real: false },
-        { t: 'Hall, B., 2016, Facies classification using machine learning: The Leading Edge, v. 35, no. 10, p. 906–909.', real: true },
-        { t: 'Vasquez-Tran, M., and Holloway, E. J., 2018, Unsupervised classification of geochemical anomalies for porphyry exploration in the Andean belt: Economic Geology, v. 113, no. 6, p. 1301–1322.', real: false },
-        { t: 'Kohonen, T., 1982, Self-organized formation of topologically correct feature maps: Biological Cybernetics, v. 43, p. 59–69.', real: true },
-        { t: 'Brennan, C. L., Osei, F., and Nakamura, H., 2021, Neural network estimation of paleotemperature from foraminifera assemblages: Paleoceanography and Paleoclimatology, v. 36, no. 2.', real: false }
-      ];
-      const game = H.q(root, 'l-game'); let score = 0, done = 0;
-      game.innerHTML = refs.map((r, i) => `<div class="ref" data-i="${i}"><p>${r.t}</p><div class="ref-b"><button type="button" class="btn sm" data-a="1">Real</button><button type="button" class="btn sm" data-a="0">Made up</button><span class="res"></span></div></div>`).join('') + `<div class="readout" id="l-score">Answered 0 of 8.</div>`;
-      game.addEventListener('click', e => {
-        const b = e.target.closest('button[data-a]'); if (!b) return;
-        const box = b.closest('.ref'), r = refs[+box.dataset.i]; if (box.classList.contains('done')) return;
-        const ok = (b.dataset.a === '1') === r.real; box.classList.add('done', ok ? 'right' : 'wrong'); done++; if (ok) score++;
-        box.querySelector('.res').textContent = (ok ? 'Correct. ' : 'Not quite. ') + (r.real ? 'This reference is real.' : 'This reference was written for this page and does not correspond to a real paper.');
-        H.q(root, 'l-score').innerHTML = `Answered ${done} of 8, ${score} correct. ${done === 8 ? 'Every reference here is formatted the same way, so the format alone did not separate the two groups. A reference from an assistant is checked against the journal or a database before it is cited.' : ''}`;
-      });
-    }
+    id: 'llm', part: 1, title: 'Large language models in research', noPanel: true,
+    lede: 'A large language model is a neural network trained to predict the next piece of text, so what it holds is the statistics of its training text.',
+    steps: [],
+    html: () => '',
+    init() { /* concept band and quiz only */ }
   });
 })(window);

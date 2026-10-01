@@ -1,7 +1,7 @@
 /* start.js - the opening tab. The same 300 rock samples, described by three measurements, are grouped
    two ways (k-means and a self-organizing map). A second cloud shows the true rock types once revealed. */
 (function (g) {
-  const { ML, DATA: D, Plot, H, MODULES: M, SEIS: S } = g;
+  const { ML, DATA: D, Plot, H, MODULES: M, SOM: S } = g;
   const C = Plot.C;
 
   M.push({

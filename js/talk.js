@@ -146,11 +146,11 @@
         { art: 'table6', h: 'Six measurements per sample', t: 'We analyzed 375 sandstone samples from the basin for six things: potassium (K₂O), zirconium (Zr), chromium (Cr), nickel (Ni), calcium (CaO) and strontium (Sr). Nobody wrote down which mountains each sample came from, and the rivers mixed sand from more than one range.' },
         { art: 'bunches', h: 'Groups of similar samples', t: 'Sand from the same range has similar chemistry, so those samples land near each other. Finding those bunches is called clustering, and each bunch is a cluster.' },
         { art: 'kmeans', h: 'k-means, one round at a time', t: 'We choose the number of groups, k. The computer drops k centers into the data, joins each sample to its closest center, and moves each center to the middle of its samples. It repeats until no sample changes group. It measures closeness using all six elements at once.' },
-        { art: 'elbow', h: 'Choosing k, and the samples that never fit', t: 'More groups always bring the centers closer to the samples, so we look for where the curve flattens. It is not a sharp bend, so the geology has to help decide. Watch for a small group that fits nowhere. A source like that, which nobody has seen, is a bit of a unicorn.' }
+        { art: 'elbow', h: 'Choosing k, and the samples that never fit', t: 'More groups always bring the centers closer to the samples, so we look for where the curve flattens. It is not a sharp bend, so the geology has to help decide. The match score after the reveal does not settle it either. It can be computed only because we know the true sources, and it can rise as groups get smaller, reaching 100% when every sample is its own group. Watch for a small group that fits nowhere. A source like that, which nobody has seen, is a bit of a unicorn.' }
       ]
     },
     semi: {
-      intro: 'Analyzing sandstone from the basin is quick, and a trip into the mountains takes far longer. Suppose the crew can visit each range once and bring back a single sample. That is a few labels and a lot of unlabeled sandstone.',
+      intro: 'Analyzing a basin sandstone in the lab is quick, but a trip into the mountains takes far longer. Suppose the crew can visit each range once and bring back one sample from it. That gives us only a few labeled samples and a lot of unlabeled sandstone.',
       pre: '{{strip:semi}}',
       steps: [
         { art: 'fewlabels', h: 'A few labels, lots of samples', t: 'A field sample from the Sooner Range has a known source: that is a label. The 375 basin sandstones still have none. With one label per range we have 4 labeled samples and 375 unlabeled ones.' },
@@ -183,14 +183,14 @@
     },
     cnn: {
       intro: 'A convolutional neural network (CNN) is a neural network designed for images. Here the image is a LiDAR scene, and the job is to tell bare soil from grass, shrubs, trees and roofs.',
+      pre: `<p class="hint">The muffin and chihuahua grid is a well-known internet image by @teenybiscuit: sixteen photos in which chihuahua faces and blueberry muffins look alike. The <a href="https://www.bbc.com/bbcthree/article/2fa66196-ab28-4610-b494-88607becf5ee" target="_blank" rel="noopener">BBC Three article</a> tells the story.</p>
+        <figure class="meme"><img src="img/muffin-or-chihuahua.png" alt="A grid of sixteen photos: chihuahua faces and blueberry muffins that look alike" onerror="this.parentNode.remove()"><figcaption>Credit: @teenybiscuit. Shown for teaching.</figcaption></figure>`,
       steps: [
         { art: 'lidar', h: 'LiDAR gives us heights', t: 'An aircraft fires laser pulses at the ground and times how long each one takes to come back. A pulse can return several times, from the top of a tree, from branches, and from the ground. Gridded up, the heights become a picture with one height per pixel. A second picture holds the average number of returns per pulse.' },
         { art: 'kernel', h: 'A filter slides across the picture', t: 'A filter looks at a small window and gives one number for it. Slide it over the whole picture and the numbers form a new picture called a feature map. One filter takes the typical height in each window, and another averages the returns.' },
         { art: 'lidarlayers', h: 'Layers build on each other', t: 'The first layer makes feature maps: typical height and average returns. The next layer combines them. About zero height is soil, a little above zero is grass, one to a few meters is shrubs, tall with many returns is trees, and tall with about one return is a roof.' },
-        { art: 'magnify', h: 'Why not just use the photo?', t: 'Some classes look alike from above, like the muffin and the chihuahua. Dry grass and bare soil have nearly the same color, and shrubs look like small trees. Height and returns add what the photo lacks. A real CNN learns its filters from labeled pictures. Here the filters are fixed and we tune the thresholds.' }
-      ],
-      html: `<p class="hint">The famous photo grid is by @teenybiscuit. The <a href="https://www.bbc.com/bbcthree/article/2fa66196-ab28-4610-b494-88607becf5ee" target="_blank" rel="noopener">BBC Three article</a> tells the story.</p>
-        <figure class="meme"><img src="img/muffin-or-chihuahua.png" alt="A grid of sixteen photos: chihuahua faces and blueberry muffins that look alike" onerror="this.parentNode.remove()"><figcaption>Credit: @teenybiscuit. Shown for teaching.</figcaption></figure>`
+        { art: 'magnify', h: 'Why not just use the photo?', t: 'Some classes look alike from above, like the chihuahua faces and blueberry muffins in the photo grid above. Dry grass and bare soil have nearly the same color, and shrubs look like small trees. Height and returns add what the photo lacks. A real CNN learns its filters from labeled pictures. Here the filters are fixed and we tune the thresholds.' }
+      ]
     },
     sam: {
       intro: 'A thin section is a picture full of grains. Before we can count minerals, something has to outline each grain.',
@@ -203,28 +203,35 @@
       html: `<p class="hint">This page uses a synthetic thin section and a simple stand-in that grows a region from each click. It behaves like the real model in the ways shown here, and it is not the real model. The real one is at <a href="https://segment-anything.com/" target="_blank" rel="noopener">segment-anything.com</a> and <a href="https://github.com/facebookresearch/segment-anything" target="_blank" rel="noopener">on GitHub</a>. On real thin sections, the mineral percentages should still be checked against a point count.</p>`
     },
     llm: {
-      intro: 'A large language model (LLM) is the kind of program behind chat assistants.',
+      intro: 'A large language model (LLM) is the kind of program behind chat assistants. It is a neural network trained on a very large amount of text, and what it learns are statistics: which pieces of text tend to follow which.',
       steps: [
-        { art: 'llm', h: 'It predicts the next word', t: 'An LLM has read a huge amount of text. Given some words, it picks a likely next piece of text (a token), then the next, and so on. It writes what sounds likely. It does not look facts up.' }
+        { art: 'corpus', h: 'Start with a lot of text', t: 'The training text is a large collection of books, articles, web pages and computer code, often trillions of words. Nobody labels it. Every word in the text is the right answer for the words before it, so the text supplies its own answers.' },
+        { art: 'tokens', h: 'Cut the text into tokens', t: 'A network works with numbers, so the text is cut into tokens, which are whole words or pieces of words, and every token gets an ID number. The list of all the tokens a model knows is its vocabulary, often tens of thousands of tokens long.' },
+        { art: 'trainloop', h: 'Train it to guess the next token', t: 'This is the same kind of network as in the Neural networks tab, only with billions of weights (the numbers that set how much each input matters). It reads the tokens so far and gives a probability for every token in its vocabulary. At the start the weights are random and the guesses are poor. Each guess is compared with the token that really came next, the loss measures the difference, and the weights are nudged to lower it. That repeats over the whole text, many times.' },
+        { art: 'llm', h: 'What it learns is statistics', t: 'After training, the weights hold the patterns in the text: which tokens tend to come next after which others. If most text that reads \"the Cretaceous–Paleogene boundary is dated at about\" goes on with 66, then 66 gets a high probability, and 65 and 67 get smaller ones. The model is a statistical summary of its training text, and it has no list of facts that it looks things up in.' },
+        { art: 'sampling', h: 'It writes one token at a time', t: 'To answer, the model works out the probabilities for the next token, picks one, adds it to the text, and does it again. The pick is random but weighted by probability, so the same question can get different answers. A setting called temperature controls how strongly the pick favors the most likely token.' },
+        { art: 'tune', h: 'Then it is trained to chat', t: 'A model trained only on raw text continues whatever text it is given. To make it answer questions, it is trained further on example conversations and on answers that people have rated. It still works with next-token probabilities, and now it follows a chat format.' }
       ],
       html: pair(
         { h: 'Where it helps in research', l: ['Writing and fixing short scripts that read files and make plots.', 'Explaining a method we have not met yet, in plain words.', 'Rewording, editing and translating text.', 'Suggesting methods and terms to look up.'] },
-        { h: 'Where it can mislead', l: ['It can invent references and numbers that look real.', 'It knows nothing published after its training.', 'What we type goes to the company running it, unpublished data included.', 'The same question can get different answers, and the models change over time.'] })
+        { h: 'Where it can mislead', l: ['A reference has a pattern of authors, year, journal and pages that the model has learned, and it can write that pattern for a paper nobody wrote.', 'A topic with little text, such as one formation in a small basin, gives the model little to base its probabilities on.', 'It knows nothing published after its training text was collected.', 'What we type goes to the company running it, unpublished data included.', 'The same question can get different answers, and the models change over time.'] })
     },
     geo: {
-      intro: 'Here we build a fake channel system, so the right answer is known. The path goes from a seismic line to a map of rock types.',
+      intro: 'The same methods run on seismic data. A full guided exercise on a real line opens in a new tab below, and these cards give the ideas it uses.',
       steps: [
-        { art: 'seismic', h: 'Seismic section', t: 'A seismic line is a picture made from sound waves reflected off rock boundaries. Sand and shale reflect differently.' },
-        { art: 'attribute', h: 'Attributes', t: 'An attribute is a number measured from the seismic inside a window, such as how strong the reflections are. Every trace gets its own numbers.' },
-        { art: 'facies', h: 'Facies', t: 'A facies is a body of rock with its own character. In this made-up example: floodplain shale, channel sand and levee.' },
-        { art: 'som', h: 'Grouping with a SOM', t: 'A self-organizing map groups the traces by their attributes, without being told about facies. Then we check which attributes the groups depended on.' },
-        { art: 'wells', h: 'Wells give labels', t: 'A well tells us the facies at one spot. A few wells let a supervised method label the whole map, but only for the facies the wells cut.' }
+        { art: 'seismic', h: 'Seismic section', t: 'A seismic line is a picture made from sound waves reflected off rock boundaries. The vertical axis is two-way time, the time for the sound to go down and come back, and it is not depth.' },
+        { art: 'attribute', h: 'Attributes', t: 'An attribute is a number measured from the seismic inside a window, such as how strong the reflections are. Every point on the section gets its own numbers.' },
+        { art: 'facies', h: 'Seismic facies', t: 'A seismic facies is a zone where the reflections share a character, such as their strength or how continuous they are.' },
+        { art: 'som', h: 'Grouping with a SOM', t: 'A self-organizing map groups the points by their attributes without being told any rock types. Afterward we keep the groups that match the target.' },
+        { art: 'loadings', h: 'SHAP values', t: 'SHAP values score how much each attribute pushed a sample into its group, so we can see which attributes the groups rest on.' },
+        { art: 'wells', h: 'Wells give the check', t: 'A well tells us the formation at one spot. A well held back until the end lets us compare the result with what is really there.' }
       ]
     },
     tracks: {
       intro: 'The same tools work on other kinds of rock data. Each tab below uses made-up data shaped like a real problem.',
       steps: [
         { art: 'core', h: 'Sedimentology', t: 'Predict facies from well logs. The curves we use, and where the core was cut, change the answer.' },
+        { art: 'volcano', h: 'Igneous rocks', t: 'Volcanic rocks are named from their chemistry. Silica alone mixes up some of them, and adding a second measurement separates them.' },
         { art: 'elements', h: 'Geochemistry', t: 'PCA on element concentrations depends on how the numbers are scaled first.' },
         { art: 'depmap', h: 'Critical minerals', t: 'A few known deposits are scattered among a lot of empty map cells, and the model still has to rank the cells.' },
         { art: 'shell', h: 'Paleontology', t: 'Shell size and shell shape can end up on different axes.' }
@@ -255,18 +262,16 @@
     vocab: { hook: 'An expert wrote a rule for another basin. Move the slider to see whether a rule learned from our own samples does better.', steps: ['Slide the number of training samples (the examples the computer learns from) from 2 up to 100 and watch the red line.', 'Find the number of samples where the learned line stops moving much.', 'Compare its accuracy with the expert rule.'] },
     types: { hook: 'Naming the kind of problem comes before choosing a method. Draw a line through the dots, then name six problems.', steps: ['Slide the curviness from 1 to 10 and watch the line follow the filled dots.', 'Watch the hollow test dots and the two error numbers.', 'Answer the six questions below.'] },
     fit: { hook: 'Six situations, three answers each. Decide whether machine learning fits.', steps: ['Read each situation and pick Good fit, Depends or Poor fit.', 'Finish all six and read the score.'] },
-    pca: { hook: 'Four log curves have to fit on one page. First we hunt for the direction of most spread by hand, and then the computer does it for us.', steps: ['Step 1: turn the cloud with the two sliders until it looks as wide as possible from left to right. Watch the meter.', 'Press Show the computer\'s answer and compare it with your best.', 'Step 2: find the second direction, at right angles to the first, and check the computer\'s answer.', 'Step 3: slide Flatten and turn on the rock-type colors.', 'Step 4: slide Components kept from 1 to 4 and read the bars.'] },
-    unsup: { hook: 'Six measurements are too many to plot, so the clouds show their three main directions (from PCA). Group the samples first, and then reveal which mountains the sand really came from.', steps: ['Press Watch it run and follow the centers.', 'Read the table on the right. A red cell means the group is higher than average in that element, and a blue cell means lower. Which mountain range would each group be?', 'Raise k one step at a time and see where the curve flattens.', 'Try k = 5 and look for a small group that fits nowhere.', 'Turn on Reveal the true source of each sample and compare.'] },
+    pca: { hook: 'Four log curves have to fit on one page. First we look by hand for the direction along which the samples spread out the most (the most variability), and then the computer finds it for us.', steps: ['Step 1: turn the cloud with the two sliders until it looks as wide as possible from left to right. Watch the meter.', 'Press Show the computer\'s answer and compare it with your best.', 'Step 2: find the second direction, at right angles to the first, and check the computer\'s answer.', 'Step 3: slide Flatten and turn on the rock-type colors.', 'Step 4: slide Components kept from 1 to 4 and read the bars.'] },
+    unsup: { hook: 'Six measurements are too many to plot, so the clouds show their three main directions (from PCA). Group the samples first, and then reveal which mountains the sand really came from.', steps: ['Press Watch it run and follow the centers.', 'Read the table on the right. A red cell means the group is higher than average in that element, and a blue cell means lower. Which mountain range would each group be?', 'Raise k one step at a time and see where the curve flattens.', 'Try k = 5 and look for a small group that fits nowhere.', 'Turn on Reveal the true source of each sample and compare.', 'Try every k from 1 to 8 with the reveal on. The score cannot pick k for us, because real data come with no revealed sources, so the curve and the geology make the choice.'] },
     sup: { hook: 'Now the crew has time for more field samples. Grow a tree, then a forest, and see what too few samples does.', steps: ['Step 1: set 5 field samples per range and slide the tree depth from 1 to 6. Compare the two scores.', 'Step 2: slide the number of trees from 1 to 100 and click a sample to see how the trees voted.', 'Step 3: slide the samples per range from 1 to 30 and watch the dots for the tree and the forest.', 'Step 4: reveal the true sources and look at the ringed mystery samples.'] },
-    semi: { hook: 'One field sample per range is all the crew could bring back. See how far four labels go when 375 unlabeled samples help.', steps: ['Start with one field sample per range and compare the two clouds.', 'Raise the number of field samples per range one at a time.', 'Press New field trip a few times and read the 20-trip average.', 'Look at where the red rings bunch up: which samples are hard?'] },
+    semi: { hook: 'The crew could bring back only one field sample from each range, so we have four labels and 375 unlabeled sandstones. See what those four labels can do with the unlabeled samples helping.', steps: ['Start with one field sample per range and compare the two clouds.', 'Raise the number of field samples per range one at a time.', 'Press New field trip a few times and read the 20-trip average.', 'Look at where the red rings bunch up: which samples are hard?'] },
     nn: { hook: 'Siltstone reads in the middle on gamma ray, and one cut cannot pick out the middle. Set two cuts by hand, then see how many neurons a network needs to find them.', steps: ['Step 1A: slide the two cuts until the window covers the red dots and leaves out the rest. Note your score.', 'Step 1B: set Hidden neurons to 0 and press Train. Then try 1, 2 and 4, pressing Reset each time.', 'Step 2: on the map tab, choose the ore shell data, set 0 hidden layers and press Train. Then add neurons and layers.', 'Look at the small maps, one per first-layer neuron. Move the cursor over the big map and watch the network light up.', 'Switch to the lithology data. Does it need any hidden layers?'] },
-    cnn: { hook: 'From above, dry grass looks like bare soil and shrubs look like small trees, the same trap as the muffin and the chihuahua. Try the photo, then the LiDAR heights, and then tune a tiny network that reads the heights.', steps: ['Step 1: with the view on Aerial photo, label the eight patches. Then switch to LiDAR heights and label the same eight again.', 'Slide the LiDAR points per m² down toward 1 and try again.', 'Step 2: on the network tab, slide the filter size and the point density and watch the two feature maps.', 'Set the four thresholds by hand until the land-cover map looks right, then press Auto-tune.', 'Turn on the reveal switch and read the mistakes in the table.'] },
-    sam: { hook: 'Counting 300 grains by hand takes a while. See how far a grid of clicks gets us toward the mineral percentages.', steps: ['Click a grain and slide the mask size from part to grain to look-alikes.', 'Segment everything and move the color sensitivity. Compare the mask count with the real grain count.', 'Group the masks, name each group, and compare your mineral percentages with the true ones.'] },
-    llm: { hook: 'Eight references, all formatted the same way, and only four exist. Pick out the four that do.', steps: ['Mark each of the eight references real or made up.', 'If there is time, lower the randomness and press Sample 20 answers, then raise it and sample again.'] },
-    geo: { hook: 'Start from one seismic line and end with a map of rock types, then find out which attributes carried the answer.', steps: ['Press Play the line across the map and follow the channel on the section.', 'Change the window length and compare the four attribute maps.', 'Press Watch the map train and turn on the true facies.', 'Shuffle one attribute and read the refit chart.', 'Add wells and see which facies the first wells never cut.'] },
-    tracks: { hook: 'Same tools, different rocks. See what changes when the data come from a core, a stream, or a shell.', steps: ['Sedimentology: check only gamma ray, then add curves, and move the start of the core.', 'Geochemistry: try raw, standardized and log10, and color the pegmatite catchments.', 'Prospectivity: raise the known deposits and count the hits in the top 10%.', 'Paleontology: raise the range of growth stages.'] },
+    cnn: { hook: 'From above, dry grass looks like bare soil and shrubs look like small trees, the same trap as the well-known muffin and chihuahua photo grid, where the two look alike. Try the photo, then the LiDAR heights, and then tune a tiny network that reads the heights.', steps: ['Step 1: with the view on Aerial photo, label the eight patches. Then switch to LiDAR heights and label the same eight again.', 'Slide the LiDAR points per m² down toward 1 and try again.', 'Step 2: on the network tab, slide the filter size and the point density and watch the two feature maps.', 'Set the four thresholds by hand until the land-cover map looks right, then press Auto-tune.', 'Turn on the reveal switch and read the mistakes in the table.'] },
+    sam: { hook: 'Counting the grains of each mineral by hand takes a long time. See how far a grid of clicks gets us toward the mineral percentages.', steps: ['Step 1: click one grain, then slide the mask size from 1 to 3 to see the three masks that one click gives.', 'Step 2: no clicking needed. Slide the color sensitivity and compare the number of masks with the 70 real grains.', 'Step 3: slide the number of groups, choose a mineral name for each group, then turn on the true minerals and compare the percentages.'] },
+    tracks: { hook: 'Same tools, different rocks. See what changes when the data come from a core, a lava flow, a stream, or a shell.', steps: ['Sedimentology: check only gamma ray, then add curves, and move the start of the core.', 'Igneous rocks: use only SiO₂, then add the alkalis, and raise the labeled samples.', 'Geochemistry: try raw, standardized and log10, and color the pegmatite catchments.', 'Prospectivity: raise the known deposits and count the hits in the top 10%.', 'Paleontology: raise the range of growth stages.'] },
     traps: { hook: 'Three ways a test score can look better than it should. Move each slider and watch the score.', steps: ['Small samples: lower the training samples and read the spread of the dots.', 'Spatial: raise how far the pattern extends and compare the two splits.', 'Rare targets: lower the share of positives, compare accuracy with recall, then weight the classes.'] },
-    hw: { hook: 'Your own data are the best test. Load a table and see what the tools from class find.', steps: ['Load your file, or start with one of the sample tables.', 'Tick the numeric columns to use as features, and pick a label column if you have one.', 'Walk through Look, PCA, Clusters and Predict.', 'Open Results, download your summary, and answer the questions.'] }
+    hw: { hook: 'Your own data are the best test. Load a table and see what the tools from class find.', steps: ['Load your file, or start with one of the sample tables.', 'Tick the numeric columns to use as features, and pick a label column if you have one.', 'Walk through Look, PCA, Clusters and Predict.', 'Open Results and download your summary. The questions there are optional prompts for what to look at.'] }
   };
 
   /* ---------- check yourself: q, o (options), a (index of the right one), why ---------- */
@@ -327,12 +332,13 @@
       { q: 'Your mineral percentages differ from the true ones. Which is a likely cause?', o: ['A mask that swallowed grains of two minerals', 'The image has too many pixels', 'The legend is wrong', 'Quartz is not a mineral'], a: 0, why: 'A mixed mask gets a single name, so part of the section is counted as the wrong mineral.' }
     ],
     llm: [
-      { q: 'A model gives a full citation with journal, volume and page numbers. What does that tell us about whether the paper exists?', o: ['It exists', 'It does not exist', 'Nothing on its own, so we look it up', 'It exists if it is recent'], a: 2, why: 'A citation can look complete and still be made up. We check the journal or a database.' },
-      { q: 'Which use needs the least worry?', o: ['An age for a stratigraphic boundary', 'A reference list for a paper', 'A plotting script that we then test on a case with a known answer', 'A summary of a paper we have not read'], a: 2, why: 'We can run and test a script. The other three need a check against a source.' }
+      { q: 'What is a large language model trained to do?', o: ['Look facts up in a database', 'Guess the next token in text', 'Sort rocks into groups', 'Check answers against sources'], a: 1, why: 'The training text supplies the right answer for every position, which is the token that came next.' },
+      { q: 'Why can the same question get different answers?', o: ['It looks in a different place each time', 'It is tired', 'The next token is picked at random, weighted by probability', 'It learns between questions'], a: 2, why: 'Several tokens have a fair probability, and the pick is weighted by those probabilities, so it varies from one try to the next.' },
+      { q: 'A model gives a full citation with journal, volume and page numbers. What does that tell us about whether the paper exists?', o: ['It exists', 'It does not exist', 'Nothing on its own, so we look it up', 'It exists if it is recent'], a: 2, why: 'A citation has a pattern the model has learned, and it can write that pattern for a paper nobody wrote. The journal or a database can confirm it.' }
     ],
     geo: [
-      { q: 'Why did mean frequency help separate the channel from the levee?', o: ['In this model the channel sand weakens the high frequencies, so its frequency is lower', 'Frequency always separates channels', 'The levee is thicker', 'It did not help'], a: 0, why: 'We built that into the made-up data. With real data we would check whether the same tie holds.' },
-      { q: 'With six wells, the supervised map had no channel. Why?', o: ['The noise was too high', 'No well had cut the channel, so the method had never seen it', 'k was too small', 'The SOM was too big'], a: 1, why: 'A supervised method can only predict the classes that its wells contain.' }
+      { q: 'A SOM is given attributes and no rock types. What kind of learning is that?', o: ['Supervised', 'Unsupervised', 'Semi-supervised', 'Reinforcement'], a: 1, why: 'There are no labels, so the map groups the samples by how similar their attributes are.' },
+      { q: 'A supervised model is trained on wells that only cut two formations. What can it predict for the rest of the section?', o: ['Every formation', 'Only those two formations', 'Only the deepest formation', 'Nothing'], a: 1, why: 'A supervised method can answer only with the labels it was trained on.' }
     ],
     tracks: [
       { q: 'Gamma ray alone confuses which two lithologies?', o: ['Sandstone and limestone, which both read low', 'Shale and sandstone', 'Shale and limestone', 'None of them'], a: 0, why: 'Density or sonic separates them.' },
@@ -347,6 +353,106 @@
       { q: 'Random-split accuracy is 95% and blocked-split accuracy is 60%. What does that suggest?', o: ['The model is excellent everywhere', 'Nearby samples resemble each other, so the model may not carry to a new area', 'The blocked split has a bug', 'We need a bigger k'], a: 1, why: 'The random split lets near-copies of each test sample into the training set. The blocked split is closer to predicting somewhere new.' }
     ]
   };
+
+  /* ---------- the geology behind each activity: the rocks, what was measured, and what we ask of the computer ---------- */
+  const LOGS = `A well log is a set of measurements made by lowering instruments down a borehole, with a reading at every depth. Gamma ray is the natural radioactivity of the rock, in API units. Clay minerals hold radioactive potassium and thorium, so clay-rich shale reads high, and clean sandstone and limestone read low. Density is how heavy the rock is for its volume, in grams per cubic centimeter (g/cc). Sonic slowness is the time sound takes to cross one foot of rock, in microseconds per foot, and it is longer in softer, more porous rock.`;
+  const SETUP = {
+    start: {
+      rows: [
+        ['The rocks', 'Three common sedimentary rocks. Sandstone is sand grains cemented together. Shale is hardened mud, made of clay and very fine silt. Limestone is mostly calcite, the mineral that shells and reefs are made of.'],
+        ['What we measured', LOGS + ' Each sample here is one depth in a well, described by these three readings.'],
+        ['What we ask', 'Nobody tells the computer which rock each sample is. We ask it to group samples with similar readings, and afterward we check the groups against the rock types we know.']
+      ]
+    },
+    pca: {
+      rows: [
+        ['The data', 'The same 300 well-log samples as the Start tab: 100 sandstone, 100 shale and 100 limestone. ' + LOGS],
+        ['A fourth reading', 'Neutron porosity is an estimate of the share of the rock that is pore space, the small openings between grains. The tool gets it from the amount of hydrogen it detects, which is mostly in the water or oil filling the pores.'],
+        ['What we ask', 'Four readings per sample give a four-dimensional cloud, which we cannot draw. Steps 1 to 3 use gamma ray, density and sonic so we can turn the cloud in 3D, and step 4 uses all four. The computer never sees the rock types. We show them afterward as colors.']
+      ]
+    },
+    unsup: {
+      h: 'What the chemistry tells us',
+      rows: [
+        ['Sand and its source', 'Sandstone is made of grains weathered out of older rock and carried by rivers. The chemistry of the grains keeps a fingerprint of the source rock, and working out where sand came from is called provenance.'],
+        ['The six measurements', 'Each one is the amount of an element in the sandstone. K₂O (potassium oxide) and CaO (calcium oxide) are in percent by weight. Zr (zirconium), Cr (chromium), Ni (nickel) and Sr (strontium) are in parts per million (ppm).'],
+        ['Reading the fingerprint', 'Potassium is high in granite, which is rich in potassium feldspar and mica. Zirconium is high where the very durable mineral zircon collects, in granite and in old recycled sandstone. Chromium and nickel are high in dark volcanic rock. Calcium is high in limestone, and strontium is high there too because it fits into the same minerals as calcium.'],
+        ['What we ask', 'Nobody recorded which range each sample came from, so we group the samples first and then match each group to a range by reading its chemistry.']
+      ]
+    },
+    semi: {
+      rows: [
+        ['The samples', 'The same 375 Redbud Basin sandstones and the same six measurements as the Unsupervised tab: K₂O, Zr, Cr, Ni, CaO and Sr. The red and blue cells in a chemistry table mean above and below the average of all samples.'],
+        ['A field sample', 'A field sample is stream sand collected inside one mountain range. Its source is certain, so it carries a label, and it takes a trip into the mountains to get.'],
+        ['What we ask', 'With one labeled sample per range, name the source range of every basin sandstone.']
+      ]
+    },
+    sup: {
+      rows: [
+        ['The samples', 'The Redbud Basin again: 375 sandstones with six measurements (K₂O, Zr, Cr, Ni, CaO, Sr), and field samples of stream sand collected inside each of the four ranges. The field samples have known sources, and the basin sandstones are the ones we ask about.'],
+        ['The mystery samples', 'A mega flood is a rare, enormous flood. One of them washed sand from a fifth range into the basin, and nobody has sampled that range. Fifteen basin samples came from it.'],
+        ['What we ask', 'Name the source range of each basin sandstone from its chemistry, then see what the model does with the 15 samples from a range it never saw.']
+      ]
+    },
+    nn: {
+      rows: [
+        ['Step 1, the rocks', 'Sandstone is sand grains cemented together and shale is hardened mud. Siltstone is between them, made of grains finer than sand and coarser than clay.'],
+        ['Step 1, the measurement', 'A gamma ray log records the natural radioactivity of the rock at each depth, in API units. Clay minerals hold radioactive potassium and thorium, so the more clay in the rock, the higher the reading. In these made-up data sandstone reads near 40, siltstone near 75 and shale near 110. Each dot is one depth in a well, with 100 of each rock.'],
+        ['Step 1, what we ask', 'Decide for each reading whether the rock is siltstone or not. Siltstone reads in the middle of the range, so the answer has to be yes for readings between two cutoffs and no outside them.'],
+        ['Step 2, the map', 'A porphyry copper deposit forms where hot water from a cooling body of magma moves through the rock above it and leaves copper-bearing minerals behind. The copper often ends up in a ring, called a shell, around a core that has little of it. The map here is made up and covers 10 by 10 km. Each dot is a sample location, red where the rock holds copper-bearing minerals and gray where it does not.'],
+        ['Step 2, what we ask', 'The network sees only the easting and northing of each dot (distance east and north, in km) and learns which parts of the map are shell. The other data choice uses gamma ray and density from the well logs to name sandstone, shale and limestone.']
+      ]
+    },
+    cnn: {
+      rows: [
+        ['The scene', 'A made-up patch of land, 96 by 96 cells, each cell 1 m across, seen from above. Every cell is one of five land-cover types: bare soil, grass, shrubs, trees or roofs. Geologists map land cover because plants and buildings hide the soil and rock underneath, and bare soil shows where the ground is open.'],
+        ['Two kinds of data', 'An aerial photo records color. LiDAR (light detection and ranging) measures heights. An aircraft fires laser pulses and times each return, and a pulse that hits a tree can return several times, from the leaves, the branches and the ground. The LiDAR points per square meter tell us how densely the pulses landed.'],
+        ['What we ask', 'Name the land cover of each cell, first by eye from the photo and then from the heights, and then let a small network do it for every cell.']
+      ]
+    },
+    sam: {
+      rows: [
+        ['The rock', 'The picture is made up. The rock holds six kinds of mineral: quartz, plagioclase, K-feldspar, biotite, amphibole and opaque minerals (minerals that block light, such as magnetite).'],
+        ['The thin section', 'A thin section is a slice of rock ground so thin, about 30 micrometers, that light passes through it under a microscope. Each mineral shows its own colors and shapes. Geologists count the grains of each mineral to get the modal percentages, the share of the rock that each mineral makes up.'],
+        ['Step 1: Click', 'One click on one grain, to see what the model gives back. We are not labeling anything. We slide between the masks that the click produces.'],
+        ['Step 2: Segment everything', 'No clicking by us. A grid of clicks is laid over the whole picture automatically, and each click makes a mask. We move the sliders and watch how many masks come out.'],
+        ['Step 3: Name the masks', 'The masks are grouped by color and texture, and we choose a mineral name for each group. Then we compare our mineral percentages with the true ones.']
+      ]
+    },
+    geo: {
+      rows: [
+        ['The setting', 'A seismic line about 48 km long across the southeastern Netherlands, from the Someren area in the west to the Californië geothermal wells near Venlo in the east. At Californië, warm water is produced from a fractured and dissolved (karstified) limestone, the Zeeland Formation. The data are real and open.'],
+        ['The seismic data', 'Seismic data are made by sending sound waves into the ground and recording echoes from boundaries between rock layers. A recording at one spot is a trace, and traces side by side make a seismic section. The sound goes down and comes back, so the vertical axis is two-way time in seconds and not depth.'],
+        ['What we ask', 'Find where the Houthem Formation, or the deeper Zeeland Formation, lies under the Someren license, starting from the wells at Californië. We compute attributes, group them with a SOM, and use SHAP values to see which attributes the groups rest on. The well inside the license stays hidden until the last step.']
+      ]
+    },
+    tracks: {
+      h: 'The rocks and the data in each sub-tab',
+      rows: [
+        ['Sedimentology', 'One well drilled through beds of sandstone, shale and limestone, with the four logs described in the Dimensions tab. A core is a cylinder of rock cut from part of the well, so the rock type is known only inside the cored interval. The computer learns from the core and predicts the rest. Sandstone and limestone both have little clay, so both read low on gamma ray.'],
+        ['Igneous rocks', 'Volcanic rocks form when lava cools at the surface, and they are named from their chemistry. Silica (SiO₂) is the main ingredient of most rocks. The alkalis (Na₂O plus K₂O) are the sodium and potassium oxides, and MgO and CaO are the magnesium and calcium oxides. Basalt has the least silica of the five rock types and rhyolite the most, and trachyte has a lot of alkalis for its silica. There are 300 made-up analyses in percent by weight, 60 of each rock type, and the computer learns from a few that are labeled and names the rest.'],
+        ['Geochemistry', 'Stream sediment is sand and silt taken from the bed of a stream, and its chemistry reflects the rocks in the catchment, the area of land that drains to that point. There are 400 made-up samples with eight elements in ppm. Pegmatites are very coarse-grained igneous rocks that can hold lithium (Li), cesium (Cs) and tantalum (Ta), which are called critical minerals.'],
+        ['Critical minerals', 'A made-up 40 by 40 map of cells, with three layers of evidence for each cell: distance to a fault, a magnetic measurement, and lithium in stream sediment. A fault is a fracture where rock has moved, and it can carry mineral-bearing fluid. The magnetic measurement changes with rock type. A few cells hold known deposits.'],
+        ['Paleontology', 'Brachiopods are sea animals with two shells. The data are four shell measurements (length, width, thickness and hinge width) on made-up shells of three species, at different growth stages.']
+      ]
+    },
+    hw: {
+      h: 'The sample tables, and what a table of your own needs',
+      rows: [
+        ['Your own table', 'A .csv or .xlsx file with one row for each sample (a rock sample, a depth in a well, a stream sample) and one column for each measurement. A column of names, such as a rock type, can be the label.'],
+        ['Sample stream sediments', 'Stream sediment is sand and silt from the bed of a stream, and its chemistry reflects the rocks in the catchment, the area that drains to that spot. There are 320 made-up samples, each with its easting and northing in km and eight elements in ppm: lithium (Li), cesium (Cs), rubidium (Rb), tantalum (Ta), tin (Sn), potassium (K), magnesium (Mg) and nickel (Ni). The catchment column says pegmatite where the catchment drains a pegmatite and background where it does not. A few tantalum values are left blank on purpose.'],
+        ['Sample well logs', 'A well log is a set of measurements made down a borehole, and each row is one depth. There are 300 made-up samples with gamma ray in API units (GR_API), density in g/cc (RHOB_gcc), sonic slowness in microseconds per foot (DT_usft) and neutron porosity as a fraction of the rock volume (NPHI_vv). The lithology column names the rock as sandstone, shale or limestone. A few DT values read -999.25, a common code for no reading, and the page treats them as missing.']
+      ]
+    },
+    traps: {
+      rows: [
+        ['Small samples', 'Three hundred made-up rock samples described by log readings and labeled with rock type. The test repeats the training 40 times, each with a different random draw of samples.'],
+        ['Neighbors', 'Three hundred sample locations on a map, each with three measurements and a yes or no label. The label depends on the measurements only through location, so any skill above chance comes from neighbors resembling each other.'],
+        ['Rare targets', 'Samples that either contain a rare mineral or do not. The share that contain it is the slider, from 1% to 50%.']
+      ]
+    }
+  };
+  Object.keys(SETUP).forEach(k => { if (g.TALK[k]) g.TALK[k].setup = SETUP[k]; });
 
   g.learnStrip = learnStrip;
 })(window);
