@@ -270,3 +270,7 @@ body.printing .lesson, body.printing .track { display: block !important; }
   .steps > .cs::before, .steps > .cs::after { display: none; }
   h4, h5 { break-after: avoid; }
 }
+
+/* captions under charts */
+.cap { margin: 6px 0 14px; font: italic 400 15px/1.45 var(--serif, Georgia, serif); color: var(--slate, #5C6670); max-width: 44em; }
+@media print { .cap { break-inside: avoid; } }

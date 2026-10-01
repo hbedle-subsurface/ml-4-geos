@@ -403,7 +403,6 @@
           <ul>
             <li><a href="https://scikit-learn.org" target="_blank" rel="noopener">scikit-learn</a> for PCA, k-means, random forests and the other methods from class, plus tools for checking a model on data it has not seen (cross-validation).</li>
             <li><a href="https://colab.research.google.com" target="_blank" rel="noopener">Google Colab</a> for running notebooks in a browser with no installation.</li>
-            <li><a href="https://github.com/seg/2016-ml-contest" target="_blank" rel="noopener">SEG 2016 machine learning contest</a>: well-log facies classification with open data and many worked solutions.</li>
             <li><a href="https://softwareunderground.org" target="_blank" rel="noopener">Software Underground</a>: an open community of geoscientists who write code.</li>
           </ul>
         </div>

@@ -46,6 +46,7 @@ js/ml.js            PCA, k-means, k-nearest neighbors, logistic regression, labe
 js/data.js          synthetic datasets (fixed seeds)
 js/plot.js          canvas plotting with fixed axes
 js/glossary.js      clickable term definitions
+js/captions.js      one or two sentences under each chart, keyed by canvas id
 js/modules1.js      vocabulary, dimension reduction, unsupervised
 js/modules2.js      supervised, semi-supervised, neural network, LLMs
 js/som.js           the self-organizing map used by the Start tab

@@ -36,6 +36,7 @@
         <div class="panel">${m.html()}${quizHtml(m.id)}${m.noPanel ? '' : '<div class="tools"><button type="button" class="link" data-pop="panel">Pop out this panel</button></div>'}</div>
       </div></div>
       ${soloId ? '' : '<div class="lesson-nav"><button type="button" class="btn" data-go="prev"></button><button type="button" class="btn primary" data-go="next"></button></div>'}`;
+    sec.querySelectorAll('canvas[id]').forEach(cv => { const t = (g.CAPTIONS || {})[cv.id]; if (t) { const p = document.createElement('p'); p.className = 'cap'; p.textContent = t; cv.insertAdjacentElement('afterend', p); } });
     main.appendChild(sec);
   });
 
