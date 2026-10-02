@@ -1,6 +1,6 @@
 # ml-4-geos
 
-**Machine learning in the geosciences**: an interactive lecture for incoming graduate students, School of Geosciences, University of Oklahoma.
+**Machine learning in the geosciences**: an interactive lecture
 
 The whole lecture and its homework are one static site with no slides. About 40 minutes of it fits in a live session, and the rest is homework (see LECTURE-PLAN.md). It runs as a row of tabs, each with talking points on top and a short activity below. Every panel runs in the browser on synthetic data, so the page works on a projector and on student laptops without a server, an account, or a network connection (apart from the visit counter on the published site).
 
