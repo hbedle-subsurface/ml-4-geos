@@ -6,7 +6,7 @@
 
   M.push({
     id: 'start', part: 0, title: 'Machine learning in the geosciences',
-    sub: 'An interactive lecture for incoming graduate students, School of Geosciences, University of Oklahoma',
+    sub: 'An interactive lecture for students',
     steps: [],
     html: () => `
       <div class="row2">
